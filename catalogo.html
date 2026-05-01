@@ -1133,17 +1133,30 @@
                 bloquePrecio = `<div class="vd-precio-container"><span class="vd-precio-actual">${formatoCop.format(p.precio)}</span></div>`;
             }
 
+            let imagenesValidas = [p.imagen];
+            if (p.imagen2 && p.imagen2.trim() !== "") imagenesValidas.push(p.imagen2);
+            if (p.imagen3 && p.imagen3.trim() !== "") imagenesValidas.push(p.imagen3);
+            if (p.imagen4 && p.imagen4.trim() !== "") imagenesValidas.push(p.imagen4);
+
             let galleryHTML = '';
-            if(p.imagen2 && p.imagen2.trim() !== "") {
+            if(imagenesValidas.length > 1) {
+                let thumbnailsHTML = '';
+                imagenesValidas.forEach((imgSrc, index) => {
+                    let num = index + 1;
+                    let activeClass = num === 1 ? 'active' : '';
+                    thumbnailsHTML += `<img src="${imgSrc}" id="thumb-${num}" class="vd-thumb ${activeClass}" onclick="seleccionarImagenDetalle(${num})" onerror="this.onerror=null; this.src='${imgPlaceholder}';">`;
+                });
+
+                let dataAttrs = imagenesValidas.map((src, i) => `data-img${i+1}="${src}"`).join(' ');
+
                 galleryHTML = `
                 <div class="vd-thumbnails">
-                    <img src="${p.imagen}" id="thumb-1" class="vd-thumb active" onclick="seleccionarImagenDetalle(1)" onerror="this.onerror=null; this.src='${imgPlaceholder}';">
-                    <img src="${p.imagen2}" id="thumb-2" class="vd-thumb" onclick="seleccionarImagenDetalle(2)" onerror="this.onerror=null; this.src='${imgPlaceholder}';">
+                    ${thumbnailsHTML}
                 </div>
                 <div class="vd-main-img-wrapper" id="swipe-container-vd" onmousemove="zoomImage(event)" onmouseleave="resetZoom(event)">
-                    <img src="${p.imagen}" id="imagen-principal-detalle" class="vd-main-img" data-current="1" data-img1="${p.imagen}" data-img2="${p.imagen2}" onerror="this.onerror=null; this.src='${imgPlaceholder}';">
-                    <button class="arrow-btn arrow-prev" onclick="toggleImagenDetalle()"><i class="ph-light ph-caret-left"></i></button>
-                    <button class="arrow-btn arrow-next" onclick="toggleImagenDetalle()"><i class="ph-light ph-caret-right"></i></button>
+                    <img src="${imagenesValidas[0]}" id="imagen-principal-detalle" class="vd-main-img" data-current="1" data-total="${imagenesValidas.length}" ${dataAttrs} onerror="this.onerror=null; this.src='${imgPlaceholder}';">
+                    <button class="arrow-btn arrow-prev" onclick="toggleImagenDetalle(-1)"><i class="ph-light ph-caret-left"></i></button>
+                    <button class="arrow-btn arrow-next" onclick="toggleImagenDetalle(1)"><i class="ph-light ph-caret-right"></i></button>
                 </div>`;
             } else {
                 galleryHTML = `
@@ -1205,14 +1218,14 @@
             window.scrollTo(0, 0);
 
             const swipeContainer = document.getElementById('swipe-container-vd');
-            if(swipeContainer && p.imagen2 && p.imagen2.trim() !== "") {
+            if(swipeContainer && imagenesValidas.length > 1) {
                 let startX = 0; let endX = 0;
                 swipeContainer.addEventListener('touchstart', function(e) { startX = e.changedTouches[0].screenX; }, {passive: true});
                 swipeContainer.addEventListener('touchend', function(e) { endX = e.changedTouches[0].screenX; handleSwipe(); }, {passive: true});
                 function handleSwipe() {
                     const threshold = 40;
-                    if (startX - endX > threshold) seleccionarImagenDetalle(2); 
-                    else if (endX - startX > threshold) seleccionarImagenDetalle(1); 
+                    if (startX - endX > threshold) window.toggleImagenDetalle(1); 
+                    else if (endX - startX > threshold) window.toggleImagenDetalle(-1); 
                 }
             }
         };
@@ -1238,32 +1251,37 @@
             }
         };
 
-        window.toggleImagenDetalle = function() {
+        window.toggleImagenDetalle = function(direccion = 1) {
             const mainImg = document.getElementById('imagen-principal-detalle');
             if(!mainImg) return;
-            let current = mainImg.getAttribute('data-current');
-            if(current === '1') seleccionarImagenDetalle(2);
-            else seleccionarImagenDetalle(1);
+            
+            let current = parseInt(mainImg.getAttribute('data-current'));
+            let total = parseInt(mainImg.getAttribute('data-total'));
+            
+            let nextNum = current + direccion;
+            if (nextNum > total) nextNum = 1;
+            if (nextNum < 1) nextNum = total;
+            
+            seleccionarImagenDetalle(nextNum);
         };
 
         window.seleccionarImagenDetalle = function(num) {
             const mainImg = document.getElementById('imagen-principal-detalle');
             if(!mainImg) return;
-            const img1 = mainImg.getAttribute('data-img1');
-            const img2 = mainImg.getAttribute('data-img2');
-            const thumb1 = document.getElementById('thumb-1');
-            const thumb2 = document.getElementById('thumb-2');
+            
+            const targetImgSrc = mainImg.getAttribute(`data-img${num}`);
+            if (!targetImgSrc) return;
 
-            if(num === 1) {
-                mainImg.src = img1;
-                mainImg.setAttribute('data-current', '1');
-                if(thumb1) thumb1.classList.add('active');
-                if(thumb2) thumb2.classList.remove('active');
-            } else {
-                mainImg.src = img2;
-                mainImg.setAttribute('data-current', '2');
-                if(thumb1) thumb1.classList.remove('active');
-                if(thumb2) thumb2.classList.add('active');
+            mainImg.src = targetImgSrc;
+            mainImg.setAttribute('data-current', num);
+
+            const total = parseInt(mainImg.getAttribute('data-total') || 1);
+            for(let i = 1; i <= total; i++) {
+                const thumb = document.getElementById(`thumb-${i}`);
+                if(thumb) {
+                    if(i === num) thumb.classList.add('active');
+                    else thumb.classList.remove('active');
+                }
             }
         };
 
@@ -1293,7 +1311,6 @@
                 abrirCarrito();
             } else {
                 mostrarToast();
-                // Animar el icono de PC y Móvil
                 cartIconNav.style.transform = 'scale(1.3)';
                 setTimeout(() => cartIconNav.style.transform = 'scale(1)', 300);
             }
@@ -1328,13 +1345,11 @@
                 cartFooter.style.display = 'none'; 
                 btnVaciarCarrito.style.display = 'none';
                 
-                // Ocultar badges
                 cartCountNav.style.display = 'none'; 
             } else {
                 cartFooter.style.display = 'block'; 
                 btnVaciarCarrito.style.display = 'inline-block';
                 
-                // Mostrar badges
                 cartCountNav.style.display = 'flex'; 
             }
             
@@ -1350,7 +1365,6 @@
                 cartItemsContainer.appendChild(div);
             });
             
-            // Actualizar contador
             cartCountNav.textContent = cant;
             
             cartTotalPrice.textContent = formatoCop.format(total);
@@ -1359,7 +1373,6 @@
         function abrirCarrito() { cartSidebar.classList.add('open'); cartOverlay.classList.add('active'); }
         window.cerrarCarrito = function() { cartSidebar.classList.remove('open'); cartOverlay.classList.remove('active'); }
 
-        // Agregar eventos al botón de carrito en el nav
         cartIconNav.addEventListener('click', abrirCarrito);
         
         closeCartBtn.addEventListener('click', window.cerrarCarrito);
@@ -1435,7 +1448,6 @@
             const closeInfoBtn = document.getElementById('close-info-modal');
             const understandBtn = document.getElementById('btn-understand');
 
-            // Solo muestra el modal si no se ha visto en esta sesión
             if (!sessionStorage.getItem('modalVisto')) {
                 setTimeout(() => { modalInfo.classList.add('active'); }, 500); 
                 sessionStorage.setItem('modalVisto', 'true');
