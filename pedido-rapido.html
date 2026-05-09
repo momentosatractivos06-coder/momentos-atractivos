@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacer Pedido | Momentos Atractivos</title>
+    <link rel="icon" href="imagenes/favicon.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        :root {
+            --rose-accent: #b8737f;
+            --rose-hover: #a0606b;
+            --bg-blush: #ffeef2;
+            --text-dark: #2a2a2a;
+            --text-light: #666666;
+            --gold: #D4AF37;
+            --pattern-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250' viewBox='0 0 250 250' stroke='%23b8737f' stroke-width='1.2' fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.15'%3E%3Crect x='0' y='0' width='24' height='24' rx='2'/%3E%3Cline x1='12' y1='0' x2='12' y2='24'/%3E%3Cline x1='0' y1='12' x2='24' y2='12'/%3E%3Cpath d='M12 0 C4 -8, 4 4, 12 0 C20 -8, 20 4, 12 0'/%3E%3C/g%3E%3Cpath d='M120 40 Q130 30 140 40 T160 40'/%3E%3C/svg%3E");
+        }
+
+        body {
+            font-family: 'Jost', sans-serif;
+            background-color: var(--bg-blush);
+            background-image: var(--pattern-url);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .order-card {
+            background: white;
+            width: 100%;
+            max-width: 550px;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(184, 115, 127, 0.15);
+            border: 1px solid rgba(184, 115, 127, 0.1);
+            margin: 20px 0;
+        }
+
+        .logo-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-header img {
+            max-height: 80px;
+        }
+
+        h1 {
+            font-family: 'Marcellus', serif;
+            color: var(--rose-accent);
+            text-align: center;
+            font-size: 2.2rem;
+            margin: 0 0 5px 0;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 35px;
+            font-size: 1.05rem;
+        }
+
+        .form-section {
+            background: #fafafa;
+            border: 1px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 25px 20px;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--rose-hover);
+            border-bottom: 2px solid var(--bg-blush);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            font-size: 1.4rem;
+            color: var(--gold);
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+            position: relative;
+            width: 100%;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+        
+        input,
+        select,
+        textarea {
+            width: 100%;
+            height: 50px;
+            padding: 0 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 1rem;
+            background: white;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        textarea {
+            height: auto;
+            padding: 15px;
+            resize: vertical;
+        }
+        
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--rose-accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(184, 115, 127, 0.1);
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .dinamico {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .producto-row {
+            background: #fff;
+            border: 1px solid #eee;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .btn-remove-prod {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-weight: bold;
+        }
+
+        .grid-producto-cantidad {
+            display: grid;
+            grid-template-columns: 75px 1fr;
+            gap: 15px;
+            align-items: start;
+        }
+
+        .btn-secundario {
+            background: transparent;
+            color: var(--rose-accent);
+            border: 2px dashed var(--rose-accent);
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 25px;
+        }
+
+        .btn-secundario:hover {
+            background: var(--bg-blush);
+        }
+
+        button.btn-submit {
+            width: 100%;
+            padding: 18px;
+            background: var(--rose-accent);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        button.btn-submit:disabled {
+            opacity: 0.75;
+            cursor: not-allowed;
+        }
+
+        input[type="date"],
+        input[type="time"] {
+            cursor: pointer;
+            color: var(--rose-hover);
+        }
+
+        @media (max-width: 600px) {
+            .row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .order-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="order-card">
+    <div class="logo-header">
+        <img src="imagenes/logo.png" alt="Momentos Atractivos">
+    </div>
+    
+    <h1>¡Armemos tu sorpresa! 🎁</h1>
+    <p class="subtitle">Completa los datos para agendar tu pedido</p>
+
+    <form id="fastOrderForm">
+        <div class="form-section">
+            <div class="section-title">
+                <i class="ph-light ph-user"></i> Tus Datos (Quien envía)
+            </div>
+
+            <div class="input-group">
+                <label>Tu Nombre Completo *</label>
+                <input type="text" id="cliente_nombre" required placeholder="Ej: Juan Pérez">
+            </div>
+
+            <div class="input-group">
+                <label>Tu Teléfono *</label>
+                <input type="tel" id="cliente_whatsapp" required placeholder="Ej: 300 123 4567">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">
+                <i class="ph-light ph-truck"></i> Entrega
+            </div>
+
+            <div class="input-group">
+                <label>¿Cómo recibirá el detalle? *</label>
+                <select id="metodo_entrega" required>
+                    <option value="" disabled selected>Selecciona...</option>
+                    <option value="Domicilio">Envío a Domicilio</option>
+                    <option value="Recogida">Recoger en Tienda</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Nombre de quien recibe *</label>
+                <input type="text" id="recibe_nombre" required placeholder="Ej: María Gómez">
+            </div>
+
+            <div class="input-group">
+                <label>Teléfono de quien recibe *</label>
+                <input type="tel" id="recibe_whatsapp" required placeholder="Ej: 300 123 4567">
+            </div>
+
+            <div id="contenedor-domicilio" class="dinamico">
+                <div class="row">
+                    <div class="input-group">
+                        <label>Ciudad *</label>
+                        <select id="ciudad">
+                            <option value="Sincelejo" selected>Sincelejo</option>
+                            <option value="Corozal">Corozal</option>
+                            <option value="Otro">Otra ciudad...</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Barrio *</label>
+                        <input type="text" id="barrio" placeholder="Barrio">
+                    </div>
+                </div>
+
+                <div id="contenedor-ciudad-otra" class="dinamico">
+                    <input type="text" id="ciudad_otra" placeholder="Escribe la ciudad" style="margin-top:-10px; margin-bottom:15px;">
+                </div>
+
+                <div class="input-group">
+                    <label>Dirección Exacta *</label>
+                    <input type="text" id="direccion" placeholder="Ej: Calle 20 #15-30">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">
+                <i class="ph-light ph-gift"></i> Productos
+            </div>
+            
+            <div id="contenedor-productos"></div>
+
+            <button type="button" id="btn-add-producto" class="btn-secundario">
+                <i class="ph-bold ph-plus"></i> Añadir otro producto diferente
+            </button>
+
+            <div class="row">
+                <div class="input-group">
+                    <label>Fecha *</label>
+                    <input type="date" id="fecha_entrega" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Hora *</label>
+                    <input type="time" id="hora_entrega" required>
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
+            
+            <div class="row">
+                <div class="input-group">
+                    <label>De: (Remitente) *</label>
+                    <input type="text" id="tarjeta_de" required placeholder="Ej: De tu amor">
+                </div>
+
+                <div class="input-group">
+                    <label>Para: (Destinatario) *</label>
+                    <input type="text" id="tarjeta_para" required placeholder="Ej: Para mi princesa">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Mensaje para la Tarjeta (Opcional)</label>
+                <textarea id="mensaje" rows="3" placeholder="Tu mensaje aquí..."></textarea>
+            </div>
+        </div>
+
+        <button type="submit" id="btnEnviar" class="btn-submit">
+            Confirmar mi Pedido
+        </button>
+    </form>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCcWZhxgEX-2us4ZabD8QGx5-GpTOTxDhE",
+        authDomain: "momentos-atractivos.firebaseapp.com",
+        projectId: "momentos-atractivos",
+        storageBucket: "momentos-atractivos.firebasestorage.app",
+        messagingSenderId: "70547248657",
+        appId: "1:70547248657:web:6c0d466cb532a71b9f43b0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Calendario nativo del navegador: más simple y estable.
+    const inputFechaEntrega = document.getElementById('fecha_entrega');
+    const hoy = new Date();
+    const yyyy = hoy.getFullYear();
+    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dd = String(hoy.getDate()).padStart(2, '0');
+    inputFechaEntrega.min = `${yyyy}-${mm}-${dd}`;
+
+    const metodoEntrega = document.getElementById('metodo_entrega');
+    const contenedorDomicilio = document.getElementById('contenedor-domicilio');
+    const selectCiudad = document.getElementById('ciudad');
+    const contenedorCiudadOtra = document.getElementById('contenedor-ciudad-otra');
+
+    metodoEntrega.addEventListener('change', () => {
+        const esDomicilio = metodoEntrega.value === 'Domicilio';
+
+        contenedorDomicilio.style.display = esDomicilio ? 'block' : 'none';
+
+        document.getElementById('direccion').required = esDomicilio;
+        document.getElementById('barrio').required = esDomicilio;
+
+        if (!esDomicilio) {
+            document.getElementById('direccion').value = '';
+            document.getElementById('barrio').value = '';
+            document.getElementById('ciudad_otra').value = '';
+            document.getElementById('ciudad_otra').required = false;
+            contenedorCiudadOtra.style.display = 'none';
+        }
+    });
+
+    selectCiudad.addEventListener('change', () => {
+        const esOtraCiudad = selectCiudad.value === 'Otro';
+
+        contenedorCiudadOtra.style.display = esOtraCiudad ? 'block' : 'none';
+        document.getElementById('ciudad_otra').required = esOtraCiudad;
+
+        if (!esOtraCiudad) {
+            document.getElementById('ciudad_otra').value = '';
+        }
+    });
+
+    // =====================================================
+    // PRODUCTOS ESCRITOS MANUALMENTE
+    // Cada producto se escribe directamente para evitar
+    // depender de listas desplegables o del catálogo.
+    // =====================================================
+
+    function addFila() {
+        const id = Date.now() + Math.floor(Math.random() * 1000);
+        const div = document.createElement('div');
+
+        div.className = 'producto-row';
+        div.id = `row-${id}`;
+
+        const existeOtraFila = document.querySelectorAll('.producto-row').length > 0;
+
+        const btnEliminarHtml = existeOtraFila
+            ? `<button type="button" class="btn-remove-prod" onclick="if(confirm('¿Seguro que deseas quitar este detalle de tu pedido?')) document.getElementById('row-${id}').remove()">×</button>`
+            : '';
+
+        div.innerHTML = `
+            ${btnEliminarHtml}
+
+            <div class="grid-producto-cantidad">
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label>Cant.</label>
+                    <input type="number" class="inp-cant" value="1" min="1" required style="text-align: center; padding: 0;">
+                </div>
+
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label>Producto *</label>
+                    <input type="text" class="inp-prod" required placeholder="Ej: Desayuno sabanero, mug corazón, detalle personalizado...">
+                </div>
+            </div>
+        `;
+
+        document.getElementById('contenedor-productos').appendChild(div);
+    }
+
+    document.getElementById('btn-add-producto').addEventListener('click', addFila);
+    addFila();
+
+    // =====================================================
+    // RESPALDO POR WHATSAPP
+    // Guarda primero el pedido en Firebase y luego abre
+    // WhatsApp con toda la información lista para enviar
+    // al número de Momentos Atractivos.
+    // =====================================================
+
+    const WHATSAPP_MOMENTOS = "573028442505";
+
+    function formatearFechaLegible(fechaISO) {
+        if (!fechaISO) return "No indicada";
+        const partes = fechaISO.split("-");
+        if (partes.length !== 3) return fechaISO;
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+
+    function formatearHoraAMPM(hora24) {
+        if (!hora24) return "No indicada";
+
+        const [horaTexto, minutoTexto] = hora24.split(":");
+        let hora = parseInt(horaTexto, 10);
+        const minutos = minutoTexto || "00";
+        const periodo = hora >= 12 ? "PM" : "AM";
+
+        hora = hora % 12;
+        if (hora === 0) hora = 12;
+
+        return `${String(hora).padStart(2, "0")}:${minutos} ${periodo}`;
+    }
+
+    function construirMensajeWhatsApp(datos, referencia = "") {
+        let mensaje = "🎁 *NUEVO PEDIDO AGENDADO - MOMENTOS ATRACTIVOS*\n\n";
+
+        if (referencia) {
+            mensaje += `*Referencia:* ${referencia}\n\n`;
+        }
+
+        mensaje += `*DATOS DE QUIEN ENVÍA*\n`;
+        mensaje += `• Nombre: ${datos.cliente}\n`;
+        mensaje += `• Teléfono: ${datos.whatsapp_cliente}\n\n`;
+
+        mensaje += `*DATOS DE ENTREGA*\n`;
+        mensaje += `• Método: ${datos.metodo_entrega}\n`;
+        mensaje += `• Recibe: ${datos.destinatario}\n`;
+        mensaje += `• Teléfono recibe: ${datos.whatsapp_destinatario}\n`;
+
+        if (datos.metodo_entrega === "Domicilio") {
+            mensaje += `• Ciudad: ${datos.ciudad}\n`;
+            mensaje += `• Barrio: ${datos.barrio}\n`;
+            mensaje += `• Dirección: ${datos.direccion}\n`;
+        } else {
+            mensaje += `• Recogida: En tienda\n`;
+        }
+
+        mensaje += `\n*PEDIDO*\n`;
+        mensaje += `• Detalle(s): ${datos.producto}\n`;
+        mensaje += `• Fecha de entrega: ${formatearFechaLegible(datos.fecha_entrega)}\n`;
+        mensaje += `• Hora de entrega: ${formatearHoraAMPM(datos.hora_entrega)}\n\n`;
+
+        mensaje += `*TARJETA*\n`;
+        mensaje += `• De: ${datos.tarjeta_de}\n`;
+        mensaje += `• Para: ${datos.tarjeta_para}\n`;
+
+        if (datos.mensaje && datos.mensaje.trim() !== "") {
+            mensaje += `• Mensaje: ${datos.mensaje}\n`;
+        } else {
+            mensaje += `• Mensaje: Sin mensaje\n`;
+        }
+
+        mensaje += `\n_Enviado como respaldo del pedido agendado desde el formulario web._`;
+
+        return mensaje;
+    }
+
+    function abrirWhatsAppConRespaldo(mensaje) {
+        const url = `https://wa.me/${WHATSAPP_MOMENTOS}?text=${encodeURIComponent(mensaje)}`;
+        window.location.href = url;
+    }
+
+    document.getElementById('fastOrderForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const btn = document.getElementById('btnEnviar');
+
+        btn.disabled = true;
+        btn.innerText = "Agendando...";
+
+        let ciudadFinal = selectCiudad.value === 'Otro'
+            ? document.getElementById('ciudad_otra').value
+            : selectCiudad.value;
+
+        if (metodoEntrega.value === 'Recogida') {
+            ciudadFinal = "N/A";
+        }
+
+        let prodsList = [];
+
+        document.querySelectorAll('.producto-row').forEach(row => {
+            const cant = row.querySelector('.inp-cant').value;
+            const nombreProd = row.querySelector('.inp-prod').value.trim();
+            prodsList.push(`${cant}x ${nombreProd}`);
+        });
+
+        const datosPedido = {
+            origen: "Redes Sociales",
+
+            metodo_entrega: metodoEntrega.value,
+            ciudad: ciudadFinal,
+
+            cliente: document.getElementById('cliente_nombre').value,
+            whatsapp_cliente: document.getElementById('cliente_whatsapp').value,
+
+            destinatario: document.getElementById('recibe_nombre').value,
+            whatsapp_destinatario: document.getElementById('recibe_whatsapp').value,
+
+            direccion: document.getElementById('direccion').value || "Recoge en Tienda",
+            barrio: document.getElementById('barrio').value || "N/A",
+
+            producto: prodsList.join(" + "),
+
+            fecha_entrega: document.getElementById('fecha_entrega').value,
+            hora_entrega: document.getElementById('hora_entrega').value,
+
+            tarjeta_de: document.getElementById('tarjeta_de').value,
+            tarjeta_para: document.getElementById('tarjeta_para').value,
+            mensaje: document.getElementById('mensaje').value,
+
+            estado: "Pendiente",
+            timestamp: serverTimestamp()
+        };
+
+        try {
+            const docRef = await addDoc(collection(db, "pedidos"), datosPedido);
+            const referenciaPedido = docRef.id ? docRef.id.slice(0, 8).toUpperCase() : "";
+            const mensajeWhatsApp = construirMensajeWhatsApp(datosPedido, referenciaPedido);
+
+            alert(
+                "¡Pedido agendado correctamente!\n\n" +
+                "Ahora se abrirá WhatsApp con una copia del pedido lista para enviarse a Momentos Atractivos como respaldo."
+            );
+
+            abrirWhatsAppConRespaldo(mensajeWhatsApp);
+
+        } catch (err) {
+            console.error("Error al guardar el pedido en Firebase:", err);
+
+            const mensajeWhatsApp = construirMensajeWhatsApp(datosPedido);
+
+            alert(
+                "No se pudo guardar el pedido en la base de datos.\n\n" +
+                "Pero para no perder la información, ahora se abrirá WhatsApp con todos los datos listos para enviarse a Momentos Atractivos.\n\n" +
+                "Código: " + (err.code || "Sin código")
+            );
+
+            abrirWhatsAppConRespaldo(mensajeWhatsApp);
+        }
+    });
+</script>
+
+</body>
+</html>
