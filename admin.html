@@ -993,13 +993,9 @@ Esta acción no se puede deshacer.`);
         }
 
         window.copiarLinkPedidos = function() {
-            const link = "https://momentosatractivos.com/pedido-rapido.html";
+            const link = window.location.origin + "/pedido-rapido.html";
             navigator.clipboard.writeText(link).then(() => {
                 alert("¡Link copiado al portapapeles! Listo para pegarlo en redes.");
-            }).catch((error) => {
-                console.error("No se pudo copiar el link de pedidos:", error);
-                alert("No se pudo copiar automáticamente. Copia este enlace manualmente:
-" + link);
             });
         };
 
