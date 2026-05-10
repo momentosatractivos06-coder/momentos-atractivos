@@ -479,6 +479,8 @@
         .cart-total-valor { font-size: 1.5rem; font-weight: 600; color: var(--rose-hover); }
 
         .seccion-form { margin-bottom: 15px; text-align: left; }
+        .cart-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .cart-ayuda-info { background: var(--bg-blush); border: 1px solid rgba(184, 115, 127, 0.18); color: var(--text-dark); border-radius: 8px; padding: 12px; font-size: 0.92rem; line-height: 1.45; margin-bottom: 15px; }
         .seccion-titulo { font-size: 1.1rem; font-weight: 600; color: var(--rose-hover); margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px; display: flex; align-items: center; gap: 8px;}
         .seccion-titulo i { font-size: 1.3rem; }
         .input-label { display: block; font-size: 0.95rem; color: var(--text-dark); font-weight: 500; margin-bottom: 5px; }
@@ -758,15 +760,58 @@
                     </select>
                 </div>
 
-                <div class="seccion-titulo"><i class="ph-light ph-user"></i> Datos de Contacto</div>
+                <div class="seccion-titulo"><i class="ph-light ph-user"></i> Datos de quien realiza el pedido</div>
                 <div class="seccion-form">
-                    <label class="input-label" for="nombre-recibe">Nombre de quien recibe <span style="color:red;">*</span></label>
-                    <input type="text" id="nombre-recibe" class="input-campo" placeholder="Ej: María Pérez">
-                    <label class="input-label" for="telefono-recibe">Teléfono de contacto <span style="color:red;">*</span></label>
-                    <input type="tel" id="telefono-recibe" class="input-campo" placeholder="Ej: 3001234567">
-                    <div id="contenedor-direccion" style="display: none;">
+                    <label class="input-label" for="nombre-cliente">Tu nombre completo <span style="color:red;">*</span></label>
+                    <input type="text" id="nombre-cliente" class="input-campo" placeholder="Ej: Juan Pérez">
+                    <label class="input-label" for="telefono-cliente">Tu teléfono <span style="color:red;">*</span></label>
+                    <input type="tel" id="telefono-cliente" class="input-campo" placeholder="Ej: 3001234567">
+                </div>
+
+                <div class="seccion-titulo"><i class="ph-light ph-calendar-blank"></i> Fecha y hora de entrega</div>
+                <div class="seccion-form">
+                    <div class="cart-form-row">
+                        <div>
+                            <label class="input-label" for="fecha-entrega-cart">Fecha de entrega <span style="color:red;">*</span></label>
+                            <input type="date" id="fecha-entrega-cart" class="input-campo">
+                        </div>
+                        <div>
+                            <label class="input-label" for="hora-entrega-cart">Hora de entrega <span style="color:red;">*</span></label>
+                            <input type="time" id="hora-entrega-cart" class="input-campo">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="seccion-titulo"><i class="ph-light ph-map-pin"></i> Datos de entrega</div>
+                <div class="seccion-form">
+                    <div id="contenedor-datos-domicilio" style="display: none;">
+                        <label class="input-label" for="nombre-recibe">Nombre de quien recibe <span style="color:red;">*</span></label>
+                        <input type="text" id="nombre-recibe" class="input-campo" placeholder="Ej: María Pérez">
+                        <label class="input-label" for="telefono-recibe">Teléfono de quien recibe <span style="color:red;">*</span></label>
+                        <input type="tel" id="telefono-recibe" class="input-campo" placeholder="Ej: 3001234567">
+                        <div class="cart-form-row">
+                            <div>
+                                <label class="input-label" for="ciudad-recibe">Ciudad <span style="color:red;">*</span></label>
+                                <select id="ciudad-recibe" class="selector-form">
+                                    <option value="Sincelejo" selected>Sincelejo</option>
+                                    <option value="Corozal">Corozal</option>
+                                    <option value="Otro">Otra ciudad...</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="input-label" for="barrio-recibe">Barrio <span style="color:red;">*</span></label>
+                                <input type="text" id="barrio-recibe" class="input-campo" placeholder="Ej: La Ford">
+                            </div>
+                        </div>
+                        <div id="contenedor-ciudad-otra-cart" style="display:none;">
+                            <label class="input-label" for="ciudad-otra-cart">Otra ciudad <span style="color:red;">*</span></label>
+                            <input type="text" id="ciudad-otra-cart" class="input-campo" placeholder="Escribe la ciudad">
+                        </div>
                         <label class="input-label" for="direccion-recibe">Dirección de entrega <span style="color:red;">*</span></label>
-                        <input type="text" id="direccion-recibe" class="input-campo" placeholder="Ej: Barrio La Ford, Calle 12 #34-56 (Sincelejo)">
+                        <input type="text" id="direccion-recibe" class="input-campo" placeholder="Ej: Calle 12 #34-56">
+                    </div>
+                    <div id="contenedor-recogida-info" class="cart-ayuda-info" style="display:none;">
+                        Para recogida en tienda usaremos el nombre y teléfono de quien realiza el pedido como datos de contacto.
                     </div>
                 </div>
 
@@ -774,6 +819,16 @@
                 <div class="seccion-form">
                     <label class="input-label" for="preferencia-pedido">Color o detalles adicionales (Opcional):</label>
                     <textarea id="preferencia-pedido" class="input-campo input-area" rows="2" placeholder="Ej: Merienda Love en caja dorada, Jugo de naranja..."></textarea>
+                    <div class="cart-form-row">
+                        <div>
+                            <label class="input-label" for="tarjeta-de-cart">De: <span style="color:red;">*</span></label>
+                            <input type="text" id="tarjeta-de-cart" class="input-campo" placeholder="Ej: De tu amor">
+                        </div>
+                        <div>
+                            <label class="input-label" for="tarjeta-para-cart">Para: <span style="color:red;">*</span></label>
+                            <input type="text" id="tarjeta-para-cart" class="input-campo" placeholder="Ej: Para mi princesa">
+                        </div>
+                    </div>
                     <label class="input-label" for="mensaje-tarjeta">Mensaje para la tarjeta (Opcional):</label>
                     <textarea id="mensaje-tarjeta" class="input-campo input-area" rows="3" placeholder="Ej: Feliz cumpleaños mi amor, que cumplas muchos más..."></textarea>
                 </div>
@@ -812,7 +867,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyCcWZhxgEX-2us4ZabD8QGx5-GpTOTxDhE",
@@ -846,7 +901,11 @@
         const cartFooter = document.getElementById('cart-footer');
         const btnVaciarCarrito = document.getElementById('btn-vaciar-carrito');
         const metodoEntrega = document.getElementById('metodo-entrega');
-        const contenedorDireccion = document.getElementById('contenedor-direccion');
+        const contenedorDatosDomicilio = document.getElementById('contenedor-datos-domicilio');
+        const contenedorRecogidaInfo = document.getElementById('contenedor-recogida-info');
+        const selectCiudadRecibe = document.getElementById('ciudad-recibe');
+        const contenedorCiudadOtraCart = document.getElementById('contenedor-ciudad-otra-cart');
+        const inputFechaEntregaCart = document.getElementById('fecha-entrega-cart');
         const notaDomicilio = document.getElementById('nota-domicilio');
         const selectorPago = document.getElementById('metodo-pago');
         
@@ -1017,14 +1076,38 @@
             }
         }
 
+        // Limita el calendario a fechas desde hoy.
+        if (inputFechaEntregaCart) {
+            const hoy = new Date();
+            const hoyLocal = new Date(hoy.getTime() - (hoy.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+            inputFechaEntregaCart.min = hoyLocal;
+        }
+
         metodoEntrega.addEventListener('change', function() {
-            if (this.value === 'Domicilio') {
-                contenedorDireccion.style.display = 'block';
-                notaDomicilio.style.display = 'block'; 
-            } else {
-                contenedorDireccion.style.display = 'none';
-                notaDomicilio.style.display = 'none'; 
+            const esDomicilio = this.value === 'Domicilio';
+            const esRecogida = this.value === 'Recogida';
+
+            contenedorDatosDomicilio.style.display = esDomicilio ? 'block' : 'none';
+            contenedorRecogidaInfo.style.display = esRecogida ? 'block' : 'none';
+            notaDomicilio.style.display = esDomicilio ? 'block' : 'none';
+
+            document.getElementById('nombre-recibe').required = esDomicilio;
+            document.getElementById('telefono-recibe').required = esDomicilio;
+            document.getElementById('direccion-recibe').required = esDomicilio;
+            document.getElementById('barrio-recibe').required = esDomicilio;
+            selectCiudadRecibe.required = esDomicilio;
+            document.getElementById('ciudad-otra-cart').required = esDomicilio && selectCiudadRecibe.value === 'Otro';
+
+            if (!esDomicilio) {
+                contenedorCiudadOtraCart.style.display = 'none';
+                document.getElementById('ciudad-otra-cart').required = false;
             }
+        });
+
+        selectCiudadRecibe.addEventListener('change', function() {
+            const esOtraCiudad = this.value === 'Otro';
+            contenedorCiudadOtraCart.style.display = esOtraCiudad ? 'block' : 'none';
+            document.getElementById('ciudad-otra-cart').required = metodoEntrega.value === 'Domicilio' && esOtraCiudad;
         });
 
         const botonesCategoria = document.querySelectorAll('.tab-btn');
@@ -1378,42 +1461,143 @@
         closeCartBtn.addEventListener('click', window.cerrarCarrito);
         cartOverlay.addEventListener('click', window.cerrarCarrito);
 
-        btnCheckout.addEventListener('click', () => {
+        btnCheckout.addEventListener('click', async () => {
             const entrega = metodoEntrega.value;
-            const nombre = document.getElementById('nombre-recibe').value.trim();
-            const tel = document.getElementById('telefono-recibe').value.trim();
-            const dir = document.getElementById('direccion-recibe').value.trim();
+            const cliente = document.getElementById('nombre-cliente').value.trim();
+            const telCliente = document.getElementById('telefono-cliente').value.trim();
+            const fechaEntrega = document.getElementById('fecha-entrega-cart').value;
+            const horaEntrega = document.getElementById('hora-entrega-cart').value;
             const pago = document.getElementById('metodo-pago').value;
+            const pref = document.getElementById('preferencia-pedido').value.trim();
+            const tarjetaDe = document.getElementById('tarjeta-de-cart').value.trim();
+            const tarjetaPara = document.getElementById('tarjeta-para-cart').value.trim();
+            const card = document.getElementById('mensaje-tarjeta').value.trim();
 
-            if (!entrega || !nombre || !tel || (entrega === 'Domicilio' && !dir) || !pago) {
-                alert("Por favor completa todos los campos obligatorios (*)."); return;
+            const esDomicilio = entrega === 'Domicilio';
+            const destinatario = esDomicilio
+                ? document.getElementById('nombre-recibe').value.trim()
+                : cliente;
+            const telDestinatario = esDomicilio
+                ? document.getElementById('telefono-recibe').value.trim()
+                : telCliente;
+            const ciudadSeleccionada = document.getElementById('ciudad-recibe').value;
+            const ciudadOtra = document.getElementById('ciudad-otra-cart').value.trim();
+            const ciudadFinal = esDomicilio
+                ? (ciudadSeleccionada === 'Otro' ? ciudadOtra : ciudadSeleccionada)
+                : 'N/A';
+            const barrio = esDomicilio
+                ? document.getElementById('barrio-recibe').value.trim()
+                : 'N/A';
+            const direccion = esDomicilio
+                ? document.getElementById('direccion-recibe').value.trim()
+                : 'Recoge en Tienda';
+
+            if (!entrega || !cliente || !telCliente || !fechaEntrega || !horaEntrega || !tarjetaDe || !tarjetaPara || !pago) {
+                alert("Por favor completa todos los campos obligatorios (*).");
+                return;
             }
 
-            let msg = "\u00A1Hola, Momentos Atractivos! Quiero realizar este encargo:\n\n";
+            if (
+                esDomicilio &&
+                (!destinatario || !telDestinatario || !ciudadFinal || !barrio || !direccion)
+            ) {
+                alert("Por favor completa todos los datos de entrega para domicilio.");
+                return;
+            }
+
+            if (!carrito.length) {
+                alert("Tu carrito está vacío.");
+                return;
+            }
+
             let total = 0;
-            carrito.forEach(item => {
-                msg += `\u25AA\uFE0F ${item.cantidad}x ${item.nombre} - ${formatoCop.format(item.precioFinalCalculado * item.cantidad)}\n`;
+            const productosTexto = carrito.map(item => {
                 total += item.precioFinalCalculado * item.cantidad;
+                return `${item.cantidad}x ${item.nombre}`;
+            }).join(" + ");
+
+            const productosDetalle = carrito.map(item => ({
+                nombre: item.nombre,
+                cantidad: item.cantidad,
+                precio_unitario: item.precioFinalCalculado,
+                subtotal: item.precioFinalCalculado * item.cantidad
+            }));
+
+            let msg = "¡Hola, Momentos Atractivos! Quiero realizar este encargo:\n\n";
+            carrito.forEach(item => {
+                msg += `▪️ ${item.cantidad}x ${item.nombre} - ${formatoCop.format(item.precioFinalCalculado * item.cantidad)}\n`;
             });
             msg += `\n*TOTAL PRODUCTOS: ${formatoCop.format(total)}*\n`;
-            if (entrega === 'Domicilio') msg += `_*(A\u00FAn falta sumar el valor del domicilio)*_\n`;
-            msg += `\n*DATOS DE RECEPCI\u00D3N:*\n\u25AA\uFE0F M\u00E9todo: ${entrega}\n\u25AA\uFE0F Nombre: ${nombre}\n\u25AA\uFE0F Tel: ${tel}\n`;
-            if (entrega === 'Domicilio') msg += `\u25AA\uFE0F Dir: ${dir}\n`;
-            
-            const pref = document.getElementById('preferencia-pedido').value;
-            if (pref.trim()) msg += `\n*Detalles:* \n"${pref}"\n`;
-            const card = document.getElementById('mensaje-tarjeta').value;
-            if (card.trim()) msg += `\n*Mensaje Tarjeta:* \n"${card}"\n`;
+            if (esDomicilio) msg += `_*(Aún falta sumar el valor del domicilio)*_\n`;
 
-            if (entrega === 'Domicilio') {
-                if (pago === 'Efectivo') msg += `\nPor favor conf\u00EDrmame el costo del envío a mi ubicación para tener el efectivo listo. ¡Gracias!`;
-                else msg += `\nPor favor conf\u00EDrmame el costo del envío y disponibilidad para pagar por ${pago}. ¡Gracias!`;
+            msg += `\n*DATOS DE QUIEN REALIZA EL PEDIDO:*\n`;
+            msg += `▪️ Nombre: ${cliente}\n`;
+            msg += `▪️ Tel: ${telCliente}\n`;
+
+            msg += `\n*DATOS DE ENTREGA:*\n`;
+            msg += `▪️ Método: ${entrega}\n`;
+            msg += `▪️ Fecha: ${fechaEntrega}\n`;
+            msg += `▪️ Hora: ${horaEntrega}\n`;
+
+            if (esDomicilio) {
+                msg += `▪️ Recibe: ${destinatario}\n`;
+                msg += `▪️ Tel recibe: ${telDestinatario}\n`;
+                msg += `▪️ Ciudad: ${ciudadFinal}\n`;
+                msg += `▪️ Barrio: ${barrio}\n`;
+                msg += `▪️ Dirección: ${direccion}\n`;
             } else {
-                if (pago === 'Efectivo') msg += `\nPasar\u00E9 a recoger mi pedido. Conf\u00EDrmame la direcci\u00F3n de recogida y disponibilidad para pagar en efectivo. ¡Gracias!`;
-                else msg += `\nPasar\u00E9 a recoger mi pedido. Conf\u00EDrmame la direcci\u00F3n de recogida y disponibilidad para pagar por ${pago}. ¡Gracias!`;
+                msg += `▪️ Recoge: ${cliente}\n`;
             }
 
-            window.open(`https://wa.me/573028442505?text=${encodeURIComponent(msg)}`, '_blank');
+            if (pref) msg += `\n*Detalles adicionales:* \n"${pref}"\n`;
+            if (card) msg += `\n*Mensaje Tarjeta:* \n"${card}"\n`;
+
+            msg += `\n*Método de pago:* ${pago}\n`;
+
+            if (esDomicilio) {
+                if (pago === 'Efectivo') msg += `\nPor favor confírmame el costo del envío a mi ubicación para tener el efectivo listo. ¡Gracias!`;
+                else msg += `\nPor favor confírmame el costo del envío y disponibilidad para pagar por ${pago}. ¡Gracias!`;
+            } else {
+                if (pago === 'Efectivo') msg += `\nPasaré a recoger mi pedido. Confírmame la dirección de recogida y disponibilidad para pagar en efectivo. ¡Gracias!`;
+                else msg += `\nPasaré a recoger mi pedido. Confírmame la dirección de recogida y disponibilidad para pagar por ${pago}. ¡Gracias!`;
+            }
+
+            const textoOriginalBoton = btnCheckout.innerHTML;
+            btnCheckout.disabled = true;
+            btnCheckout.innerHTML = '<i class="ph-light ph-spinner ph-spin"></i> Registrando pedido';
+
+            try {
+                await addDoc(collection(db, "pedidos"), {
+                    origen: "Catálogo",
+                    metodo_entrega: entrega,
+                    cliente,
+                    whatsapp_cliente: telCliente,
+                    destinatario,
+                    whatsapp_destinatario: telDestinatario,
+                    ciudad: ciudadFinal,
+                    barrio,
+                    direccion,
+                    producto: productosTexto,
+                    productos_detalle: productosDetalle,
+                    fecha_entrega: fechaEntrega,
+                    hora_entrega: horaEntrega,
+                    detalles_adicionales: pref,
+                    tarjeta_de: tarjetaDe,
+                    tarjeta_para: tarjetaPara,
+                    mensaje: card,
+                    metodo_pago: pago,
+                    valor_total: total,
+                    estado: "Por confirmar",
+                    timestamp: serverTimestamp()
+                });
+            } catch (error) {
+                console.error("Error guardando pedido desde catálogo:", error);
+                alert("No se pudo registrar el pedido en el panel, pero abriremos WhatsApp con toda la información para que no se pierda.");
+            } finally {
+                btnCheckout.disabled = false;
+                btnCheckout.innerHTML = textoOriginalBoton;
+                window.open(`https://wa.me/573028442505?text=${encodeURIComponent(msg)}`, '_blank');
+            }
         });
 
         window.zoomImage = function(e) {
