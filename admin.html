@@ -26,6 +26,9 @@
             --white: #ffffff;
             --gray-light: #f8f9fa;
             --gold: #D4AF37;
+            --pickup-blue: #5B8DB8;
+            --pickup-blue-dark: #3F6F9D;
+            --pickup-blue-soft: #EEF6FC;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Jost', sans-serif; }
@@ -130,7 +133,65 @@
         .edit-btn:hover { color: #b8962b; transform: scale(1.1); }
         .delete-btn { color: #f44336; }
         .delete-btn:hover { color: #d32f2f; transform: scale(1.1); }
-        
+
+        /* ESTADOS DE PEDIDOS */
+        .estado-cell {
+            display: flex;
+            align-items: center;
+            min-width: 155px;
+        }
+        .estado-select {
+            width: 100%;
+            min-width: 150px;
+            height: 40px;
+            padding: 0 38px 0 12px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+            transition: 0.2s ease;
+        }
+        .estado-select:focus {
+            box-shadow: 0 0 0 3px rgba(184, 115, 127, 0.12);
+        }
+        .estado-select.estado-por-confirmar {
+            color: #735b7d;
+            background-color: #f7f1fa;
+            border: 1px solid rgba(115, 91, 125, 0.35);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 256 256' fill='%23735b7d'%3E%3Cpath d='M208.49,88.49l-80,80a12,12,0,0,1-17,0l-80-80a12,12,0,0,1,17-17L120,143l71.51-71.52a12,12,0,0,1,17,17Z'/%3E%3C/svg%3E");
+        }
+        .estado-select.estado-pendiente {
+            color: #a26728;
+            background-color: #fff4e8;
+            border: 1px solid rgba(210, 139, 61, 0.45);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 256 256' fill='%23a26728'%3E%3Cpath d='M208.49,88.49l-80,80a12,12,0,0,1-17,0l-80-80a12,12,0,0,1,17-17L120,143l71.51-71.52a12,12,0,0,1,17,17Z'/%3E%3C/svg%3E");
+        }
+        .estado-select.estado-en-ruta,
+        .estado-select.estado-listo-tienda {
+            color: #3f6f9d;
+            background-color: #eef6fc;
+            border: 1px solid rgba(91, 141, 184, 0.42);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 256 256' fill='%233f6f9d'%3E%3Cpath d='M208.49,88.49l-80,80a12,12,0,0,1-17,0l-80-80a12,12,0,0,1,17-17L120,143l71.51-71.52a12,12,0,0,1,17,17Z'/%3E%3C/svg%3E");
+        }
+        .estado-select.estado-entregado {
+            color: #4f8a63;
+            background-color: #eef7f1;
+            border: 1px solid rgba(79, 138, 99, 0.35);
+            background-image: none;
+            cursor: default;
+        }
+        .estado-select:disabled {
+            opacity: 1;
+        }
+
         .btn-load-base { background: var(--white); color: var(--rose-accent); border: 1px solid var(--rose-accent); padding: 8px 15px; border-radius: 5px; font-weight: 500; cursor: pointer; font-size: 0.85rem; display: none; transition: 0.3s; font-family: inherit;}
         .btn-load-base:hover { background: var(--bg-blush); }
 
@@ -159,6 +220,21 @@
         .guia-label { font-weight: 600; color: var(--rose-hover); display: inline-block; width: 90px; }
         .guia-destacado { background: var(--bg-blush); padding: 12px; border-radius: 8px; border-left: 4px solid var(--gold); margin-top: 15px;}
         .guia-footer { text-align: center; margin-top: 25px; font-size: 0.9rem; color: #888; border-top: 1px solid #eee; padding-top: 15px;}
+        .guia-corte { margin: 18px 0 10px; border-top: 2px dashed #ddd; position: relative; }
+        .guia-corte span { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: #fff; color: #888; font-size: 0.78rem; padding: 0 8px; }
+        .guia-tirilla { border: 1.5px solid var(--gold); border-radius: 10px; padding: 14px; background: #fffaf5; }
+        .guia-tirilla h3 { color: var(--rose-accent); font-size: 1rem; text-align: center; margin-bottom: 10px; }
+        .guia-tirilla p { font-size: 0.92rem; margin-bottom: 6px; }
+        .guia-linea-manual { display: inline-block; min-width: 150px; border-bottom: 1px solid #888; height: 14px; vertical-align: bottom; }
+        .guia-tirilla-recogida { display: none; }
+        #contenedor-guia-oculto.guia-recogida { border-color: var(--pickup-blue); }
+        #contenedor-guia-oculto.guia-recogida .guia-title,
+        #contenedor-guia-oculto.guia-recogida .guia-label,
+        #contenedor-guia-oculto.guia-recogida #guia-print-detalle,
+        #contenedor-guia-oculto.guia-recogida .guia-tirilla h3 { color: var(--pickup-blue-dark); }
+        #contenedor-guia-oculto.guia-recogida .guia-destacado { background: var(--pickup-blue-soft); border-left-color: var(--pickup-blue); }
+        #contenedor-guia-oculto.guia-recogida .guia-tirilla { border-color: var(--pickup-blue); background: #f7fbfe; }
+        #contenedor-guia-oculto.guia-recogida #guia-print-seccion-recogida { color: var(--pickup-blue-dark) !important; }
 
         /* FILTRO DE PEDIDOS POR RANGO DE FECHAS */
         .filtro-pedidos-panel {
@@ -186,6 +262,15 @@
         .filtro-pedidos-group input,
         .filtro-pedidos-group select {
             height: 42px;
+            min-height: 42px;
+        }
+
+        /* Ajuste puntual del selector: misma medida que los demás campos,
+           pero sin recortar visualmente el texto interno */
+        #filtro-metodo-entrega {
+            padding-top: 0;
+            padding-bottom: 0;
+            line-height: normal;
         }
         .filtro-resumen {
             margin-left: auto;
@@ -284,9 +369,9 @@
                             <div class="filtro-pedidos-group">
                                 <label for="filtro-metodo-entrega">Tipo de entrega</label>
                                 <select id="filtro-metodo-entrega" class="form-control" onchange="aplicarFiltroMetodoPedidos()">
-                                    <option value="Todos" selected>Domicilio y tienda</option>
-                                    <option value="Domicilio">Solo domicilio</option>
-                                    <option value="Recogida">Solo tienda</option>
+                                    <option value="Todos" selected>Todos</option>
+                                    <option value="Domicilio">Domicilio</option>
+                                    <option value="Recogida">Tienda</option>
                                 </select>
                             </div>
                             <button type="button" class="btn-submit" onclick="aplicarFiltroFechasPedidos()">
@@ -303,9 +388,10 @@
                                 <thead>
                                     <tr>
                                         <th>Fecha y Hora</th>
-                                        <th>Destinatario</th>
+                                        <th>Cliente</th>
                                         <th>Detalles (Producto)</th>
                                         <th>Método</th>
+                                        <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
@@ -662,6 +748,22 @@
             <p><strong>¡Preparado con mucho cariño!</strong></p>
             <p>momentosatractivos.com</p>
         </div>
+
+        <div class="guia-corte"><span>Cortar aquí</span></div>
+        <div class="guia-tirilla">
+            <h3>Comprobante interno</h3>
+            <p><strong>Nombre:</strong> <span id="guia-print-tirilla-nombre"></span></p>
+            <p><strong>Hora:</strong> <span id="guia-print-tirilla-hora"></span></p>
+            <p><strong>Detalle(s):</strong> <span id="guia-print-tirilla-detalle"></span></p>
+            <div class="guia-tirilla-domicilio">
+                <p><strong>Valor del domicilio:</strong> $ <span class="guia-linea-manual"></span></p>
+                <p><strong>Entregado a domiciliario:</strong> <span class="guia-linea-manual"></span></p>
+            </div>
+            <div class="guia-tirilla-recogida">
+                <p><strong>Entregado en tienda:</strong> ☐ Sí</p>
+                <p><strong>Recibido por:</strong> <span class="guia-linea-manual"></span></p>
+            </div>
+        </div>
     </div>
 
     <script type="module">
@@ -829,9 +931,9 @@
         }
 
         function textoMetodoEntregaFiltro() {
-            if (filtroMetodoActual === 'Domicilio') return 'solo domicilio';
-            if (filtroMetodoActual === 'Recogida') return 'solo tienda';
-            return 'domicilio y tienda';
+            if (filtroMetodoActual === 'Domicilio') return 'domicilio';
+            if (filtroMetodoActual === 'Recogida') return 'tienda';
+            return 'todos';
         }
 
         function aplicarFiltrosPedidosActuales() {
@@ -863,6 +965,62 @@
                 resumen.textContent = `Mostrando ${total} pedido(s) ${partesResumen.join(' · ')}`;
             }
         }
+        function obtenerEstadoIntermedioPedido(p) {
+            return p.metodo_entrega === 'Recogida' ? 'Listo en tienda' : 'En ruta';
+        }
+
+        function esPedidoDeCatalogo(p) {
+            return String(p.origen || '').trim().toLowerCase() === 'catálogo' ||
+                   String(p.origen || '').trim().toLowerCase() === 'catalogo';
+        }
+
+        function obtenerEstadoVisiblePedido(p) {
+            const estadoRaw = String(p.estado || 'Pendiente').trim().toLowerCase();
+            if (estadoRaw === 'por confirmar') return 'Por confirmar';
+            if (estadoRaw === 'entregado') return 'Entregado';
+            if (p.metodo_entrega === 'Recogida') {
+                if (estadoRaw === 'listo en tienda' || estadoRaw === 'en ruta') return 'Listo en tienda';
+            } else {
+                if (estadoRaw === 'en ruta' || estadoRaw === 'listo en tienda') return 'En ruta';
+            }
+            return 'Pendiente';
+        }
+
+        function obtenerClaseEstadoPedido(estado) {
+            if (estado === 'Por confirmar') return 'estado-por-confirmar';
+            if (estado === 'Entregado') return 'estado-entregado';
+            if (estado === 'En ruta') return 'estado-en-ruta';
+            if (estado === 'Listo en tienda') return 'estado-listo-tienda';
+            return 'estado-pendiente';
+        }
+
+        function construirSelectorEstadoPedido(p) {
+            const estadoActual = obtenerEstadoVisiblePedido(p);
+            const estadoIntermedio = obtenerEstadoIntermedioPedido(p);
+            const claseEstado = obtenerClaseEstadoPedido(estadoActual);
+            const permitePorConfirmar = esPedidoDeCatalogo(p) || estadoActual === 'Por confirmar';
+
+            // Mientras el pedido no esté entregado, se pueden visualizar todas las opciones permitidas.
+            // Los pedidos de catálogo pueden iniciar y volver a "Por confirmar".
+            // Una vez entregado, queda bloqueado definitivamente.
+            const opciones = estadoActual === 'Entregado'
+                ? ['Entregado']
+                : permitePorConfirmar
+                    ? ['Por confirmar', 'Pendiente', estadoIntermedio, 'Entregado']
+                    : ['Pendiente', estadoIntermedio, 'Entregado'];
+
+            const optionsHTML = opciones.map(opcion => `
+                <option value="${opcion}" ${opcion === estadoActual ? 'selected' : ''}>${opcion}</option>
+            `).join('');
+
+            return `
+                <div class="estado-cell">
+                    <select class="estado-select ${claseEstado}" onchange="cambiarEstadoPedido('${p.id}', this)" ${estadoActual === 'Entregado' ? 'disabled' : ''}>
+                        ${optionsHTML}
+                    </select>
+                </div>
+            `;
+        }
 
         function renderizarPedidos(lista) {
             const tbodyPedidos = document.getElementById('pedidos-table-body');
@@ -871,7 +1029,7 @@
             if (!lista.length) {
                 tbodyPedidos.innerHTML = `
                     <tr>
-                        <td colspan="5" style="text-align:center; color:var(--text-light); padding:25px;">
+                        <td colspan="6" style="text-align:center; color:var(--text-light); padding:25px;">
                             No hay pedidos para los filtros seleccionados.
                         </td>
                     </tr>
@@ -880,12 +1038,15 @@
             }
 
             lista.forEach((p) => {
+                const estadoHTML = construirSelectorEstadoPedido(p);
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${p.fecha_entrega}</strong><br><span style="color:var(--rose-accent)">${p.hora_entrega}</span></td>
-                    <td><strong>${p.destinatario || p.nombre_recibe || p.tarjeta_para || 'Sin Nombre'}</strong><br><small>${p.whatsapp_destinatario || p.telefono_recibe || 'Sin Celular'}</small></td>
+                    <td><strong>${p.cliente || p.nombre_cliente || 'Sin Nombre'}</strong><br><small>${p.whatsapp_cliente || p.telefono_cliente || 'Sin Celular'}</small></td>
                     <td style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.producto || p.productos}</td>
                     <td>${p.metodo_entrega === 'Recogida' ? '<i class="ph-fill ph-storefront" style="color:var(--gold);"></i> Tienda' : '<i class="ph-fill ph-truck" style="color:var(--rose-accent);"></i> Domicilio'}</td>
+                    <td>${estadoHTML}</td>
                     <td>
                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
                             <button type="button" class="action-btn" style="color: var(--rose-accent); background: var(--bg-blush); border-radius: 8px; padding: 5px 10px; font-size: 1rem; border: 1px solid var(--rose-hover); margin-right:0;" onclick="generarGuia('${p.id}')">
@@ -932,6 +1093,79 @@
             filtroMetodoActual = 'Todos';
             aplicarFiltrosPedidosActuales();
         };
+        window.cambiarEstadoPedido = async function(idPedido, selectElement) {
+            const pedido = pedidosLocal.find(p => p.id === idPedido);
+            if (!pedido) {
+                alert('No se encontró el pedido que deseas actualizar.');
+                aplicarFiltrosPedidosActuales();
+                return;
+            }
+
+            const estadoActual = obtenerEstadoVisiblePedido(pedido);
+            const estadoNuevo = selectElement.value;
+            const estadoIntermedio = obtenerEstadoIntermedioPedido(pedido);
+            const permitePorConfirmar = esPedidoDeCatalogo(pedido) || estadoActual === 'Por confirmar';
+
+            if (estadoActual === 'Entregado') {
+                alert('Este pedido ya está marcado como entregado y no puede volver a otro estado.');
+                aplicarFiltrosPedidosActuales();
+                return;
+            }
+
+            // Si el usuario vuelve a seleccionar el mismo estado, no hace falta actualizar nada.
+            if (estadoNuevo === estadoActual) {
+                aplicarFiltrosPedidosActuales();
+                return;
+            }
+
+            const estadosPermitidos = permitePorConfirmar
+                ? ['Por confirmar', 'Pendiente', estadoIntermedio, 'Entregado']
+                : ['Pendiente', estadoIntermedio, 'Entregado'];
+            if (!estadosPermitidos.includes(estadoNuevo)) {
+                alert('El estado seleccionado no es válido para este pedido.');
+                aplicarFiltrosPedidosActuales();
+                return;
+            }
+
+            const nombre = pedido.cliente || pedido.nombre_cliente || 'Sin nombre';
+            const fecha = pedido.fecha_entrega || 'sin fecha';
+
+            let textoConfirmacion = '';
+            if (estadoNuevo === 'Entregado') {
+                textoConfirmacion = `¿Confirmas que el pedido de ${nombre} del ${fecha} ya fue entregado?
+
+Esta acción no podrá revertirse.`;
+            } else if (estadoNuevo === 'Por confirmar') {
+                textoConfirmacion = `¿Confirmas que deseas dejar el pedido de ${nombre} del ${fecha} como por confirmar?`;
+            } else if (estadoNuevo === 'Pendiente') {
+                textoConfirmacion = estadoActual === 'Por confirmar'
+                    ? `¿Confirmas que el pedido de ${nombre} del ${fecha} ya fue confirmado y pasa a pendiente?`
+                    : `¿Confirmas que deseas devolver el pedido de ${nombre} del ${fecha} al estado pendiente?`;
+            } else {
+                textoConfirmacion = pedido.metodo_entrega === 'Recogida'
+                    ? `¿Confirmas que el pedido de ${nombre} del ${fecha} ya está listo en tienda?`
+                    : `¿Confirmas que el pedido de ${nombre} del ${fecha} ya está en ruta?`;
+            }
+
+            const confirmar = confirm(textoConfirmacion);
+            if (!confirmar) {
+                aplicarFiltrosPedidosActuales();
+                return;
+            }
+
+            showLoading('Actualizando estado del pedido...');
+            try {
+                await updateDoc(doc(db, 'pedidos', idPedido), { estado: estadoNuevo });
+                pedido.estado = estadoNuevo;
+                aplicarFiltrosPedidosActuales();
+            } catch (error) {
+                console.error('Error al actualizar el estado del pedido:', error);
+                alert('No se pudo actualizar el estado del pedido. Intenta nuevamente.');
+                aplicarFiltrosPedidosActuales();
+            } finally {
+                hideLoading();
+            }
+        };
 
         window.eliminarPedido = async function(idPedido) {
             const pedido = pedidosLocal.find(p => p.id === idPedido);
@@ -940,7 +1174,7 @@
                 return;
             }
 
-            const nombre = pedido.destinatario || pedido.nombre_recibe || pedido.tarjeta_para || 'Sin nombre';
+            const nombre = pedido.cliente || pedido.nombre_cliente || pedido.destinatario || pedido.nombre_recibe || pedido.tarjeta_para || 'Sin nombre';
             const fecha = pedido.fecha_entrega || 'sin fecha';
             const confirmar = confirm(`¿Seguro que deseas eliminar el pedido de ${nombre} del ${fecha}?
 
@@ -1167,25 +1401,50 @@ Esta acción no se puede deshacer.`);
             };
         }
 
-        function escribirCampoPDF(pdf, label, value, x, y, labelWidth = 28) {
+        function escribirCampoPDF(pdf, label, value, x, y, labelWidth = 28, colorEtiqueta = [160, 96, 107]) {
             pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor(160, 96, 107);
+            pdf.setTextColor(...colorEtiqueta);
             pdf.text(label, x, y);
             pdf.setFont('helvetica', 'normal');
             pdf.setTextColor(42, 42, 42);
             pdf.text(String(value || 'N/A'), x + labelWidth, y);
         }
 
+        function obtenerPaletaGuia(esRecogida) {
+            return esRecogida
+                ? {
+                    borde: [91, 141, 184],
+                    titulo: [63, 111, 157],
+                    etiqueta: [63, 111, 157],
+                    fondoDetalle: [238, 246, 252],
+                    fondoTirilla: [247, 251, 254]
+                }
+                : {
+                    borde: [212, 175, 55],
+                    titulo: [184, 115, 127],
+                    etiqueta: [160, 96, 107],
+                    fondoDetalle: [255, 238, 242],
+                    fondoTirilla: [255, 250, 245]
+                };
+        }
+
         function obtenerDatosGuia(p) {
-            const nombre = p.destinatario || p.nombre_recibe || p.tarjeta_para || 'N/A';
-            const telefono = p.whatsapp_destinatario || p.telefono_recibe || 'N/A';
-            const ciudad = p.metodo_entrega === 'Recogida' ? 'N/A' : (p.ciudad || 'Sincelejo');
-            const barrio = p.metodo_entrega === 'Recogida' ? 'N/A' : (p.barrio || 'N/A');
-            const direccion = p.metodo_entrega === 'Recogida' ? 'Recoge en tienda' : (p.direccion || 'N/A');
+            const esRecogida = p.metodo_entrega === 'Recogida';
+            const nombre = esRecogida
+                ? (p.cliente || p.nombre_cliente || 'N/A')
+                : (p.destinatario || p.nombre_recibe || p.tarjeta_para || 'N/A');
+            const telefono = esRecogida
+                ? (p.whatsapp_cliente || p.telefono_cliente || 'N/A')
+                : (p.whatsapp_destinatario || p.telefono_recibe || 'N/A');
+            const ciudad = esRecogida ? 'N/A' : (p.ciudad || 'Sincelejo');
+            const barrio = esRecogida ? 'N/A' : (p.barrio || 'N/A');
+            const direccion = esRecogida ? 'Recoge en tienda' : (p.direccion || 'N/A');
             const detalle = p.producto || p.productos || 'N/A';
             const fechaEntrega = p.fecha_entrega || 'N/A';
             const horaEntrega = p.hora_entrega || 'N/A';
             const horaEntregaFormateada = formatearHora12h(horaEntrega);
+            const tipoEntregaTexto = esRecogida ? 'Tienda' : 'Domicilio';
+            const paleta = obtenerPaletaGuia(esRecogida);
 
             return {
                 nombre,
@@ -1197,7 +1456,9 @@ Esta acción no se puede deshacer.`);
                 fechaEntrega,
                 horaEntrega,
                 horaEntregaFormateada,
-                esRecogida: p.metodo_entrega === 'Recogida'
+                tipoEntregaTexto,
+                esRecogida,
+                paleta
             };
         }
 
@@ -1215,10 +1476,10 @@ Esta acción no se puede deshacer.`);
             return { lineas, fontSize: Math.max(fontSize, fuenteMinima) };
         }
 
-        function escribirCampoCompactoPDF(pdf, label, value, x, y, anchoDisponible, labelWidth = 15) {
+        function escribirCampoCompactoPDF(pdf, label, value, x, y, anchoDisponible, labelWidth = 15, colorEtiqueta = [160, 96, 107]) {
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(5.4);
-            pdf.setTextColor(160, 96, 107);
+            pdf.setTextColor(...colorEtiqueta);
             pdf.text(label, x, y);
 
             pdf.setFont('helvetica', 'normal');
@@ -1230,95 +1491,244 @@ Esta acción no se puede deshacer.`);
             return y + Math.max(3.2, lineas.length * 3.2);
         }
 
-        function dibujarGuiaCompactaEnHoja(pdf, p, x, y, w, h, logo) {
-            const datos = obtenerDatosGuia(p);
-            const padding = 4;
-            const innerX = x + padding;
-            const innerW = w - (padding * 2);
-            const centerX = x + (w / 2);
-
-            pdf.setFillColor(255, 255, 255);
-            pdf.setDrawColor(212, 175, 55);
-            pdf.setLineWidth(0.45);
-            pdf.roundedRect(x, y, w, h, 2.8, 2.8, 'FD');
-
-            let cursorY = y + 4.2;
-            const logoW = 18;
+        function calcularMedidasGuiaCompletaParaMiniatura(pdf, datos, logo) {
+            const baseW = 120;
+            const logoW = 36;
             const logoH = logoW / logo.ratio;
-            pdf.addImage(logo.dataUrl, 'PNG', centerX - (logoW / 2), cursorY, logoW, logoH);
-            cursorY += logoH + 3.3;
 
-            pdf.setFont('times', 'bold');
-            pdf.setFontSize(7.3);
-            pdf.setTextColor(184, 115, 127);
-            pdf.text('Guía de Entrega', centerX, cursorY, { align: 'center' });
-            cursorY += 3.8;
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(11);
+            const detalleLineas = pdf.splitTextToSize(datos.detalle, baseW - 28);
+            const cajaAltura = Math.max(22, 12 + detalleLineas.length * 5);
+
+            let yCalculada = 12;
+            yCalculada += logoH + 8;
+            yCalculada += 7;
+            yCalculada += 5;
+            yCalculada += 7;
+            yCalculada += 11;
+            yCalculada += datos.esRecogida ? 24 : 38;
+            yCalculada += cajaAltura + 4;
+            yCalculada += 3;
+            yCalculada += 11;
+
+            const mainGuideH = yCalculada + 8;
 
             pdf.setFont('helvetica', 'normal');
-            pdf.setFontSize(4.8);
-            pdf.setTextColor(136, 136, 136);
-            pdf.text(`Fecha de entrega: ${datos.fechaEntrega}`, centerX, cursorY, { align: 'center' });
-            cursorY += 2.8;
-            pdf.text(`Hora de entrega: ${datos.horaEntregaFormateada}`, centerX, cursorY, { align: 'center' });
-            cursorY += 4;
+            pdf.setFontSize(8.2);
+            const tirillaDetalleLineasTodas = pdf.splitTextToSize(datos.detalle, baseW - 32);
+            const tirillaDetalleLineas = tirillaDetalleLineasTodas.slice(0, 2);
+            const tirillaH = 34 + Math.max(0, tirillaDetalleLineas.length - 1) * 4;
+            const corteGap = 7;
+            const pageH = mainGuideH + corteGap + tirillaH + 7;
 
-            pdf.setDrawColor(230, 230, 230);
-            pdf.setLineDashPattern([1.1, 0.9], 0);
-            pdf.line(innerX, cursorY, x + w - padding, cursorY);
-            pdf.setLineDashPattern([], 0);
-            cursorY += 5.2;
+            return {
+                baseW,
+                logoW,
+                logoH,
+                detalleLineas,
+                cajaAltura,
+                mainGuideH,
+                tirillaDetalleLineas,
+                tirillaH,
+                corteGap,
+                pageH
+            };
+        }
 
-            cursorY = escribirCampoCompactoPDF(pdf, 'Nombre:', datos.nombre, innerX + 1, cursorY, innerW - 2);
-            cursorY = escribirCampoCompactoPDF(pdf, 'Teléfono:', datos.telefono, innerX + 1, cursorY, innerW - 2);
-            cursorY = escribirCampoCompactoPDF(pdf, 'Ciudad:', datos.ciudad, innerX + 1, cursorY, innerW - 2);
-            cursorY = escribirCampoCompactoPDF(pdf, 'Barrio:', datos.barrio, innerX + 1, cursorY, innerW - 2);
-            cursorY = escribirCampoCompactoPDF(pdf, 'Dirección:', datos.direccion, innerX + 1, cursorY, innerW - 2);
+        function dibujarGuiaCompletaMiniaturaEnHoja(pdf, p, slotX, slotY, slotW, slotH, logo) {
+            const datos = obtenerDatosGuia(p);
+            const paleta = datos.paleta;
+            const medidas = calcularMedidasGuiaCompletaParaMiniatura(pdf, datos, logo);
+            const ratioNatural = medidas.baseW / medidas.pageH;
 
-            if (datos.esRecogida) {
-                cursorY += 1;
-                pdf.setFont('helvetica', 'bold');
-                pdf.setFontSize(5.2);
-                pdf.setTextColor(184, 146, 43);
-                pdf.text('RECOGE EN TIENDA', centerX, cursorY, { align: 'center' });
-                cursorY += 3.4;
-            } else {
-                cursorY += 1.1;
+            let drawW = slotW;
+            let drawH = drawW / ratioNatural;
+            if (drawH > slotH) {
+                drawH = slotH;
+                drawW = drawH * ratioNatural;
             }
 
-            const footerLineY = y + h - 11.5;
-            const maxDetailBoxBottom = footerLineY - 3.3;
-            const detailBoxY = cursorY;
-            const detailWidth = innerW - 7;
-            const detalleAjustado = dividirTextoConFuenteAjustada(pdf, datos.detalle, detailWidth, 5.4, 4, 4.5);
-            const detailLineHeight = detalleAjustado.fontSize <= 4.8 ? 2.6 : 2.9;
-            const alturaNecesariaDetalle = 7.2 + (detalleAjustado.lineas.length * detailLineHeight);
-            const alturaMaximaDetalle = Math.max(10.5, maxDetailBoxBottom - detailBoxY);
-            const detailBoxH = Math.min(Math.max(11.5, alturaNecesariaDetalle), alturaMaximaDetalle);
+            const x0 = slotX + ((slotW - drawW) / 2);
+            const y0 = slotY + ((slotH - drawH) / 2);
+            const escala = drawW / medidas.baseW;
+            const S = (valor) => valor * escala;
+            const X = (valor) => x0 + S(valor);
+            const Y = (valor) => y0 + S(valor);
+            const pageW = medidas.baseW;
+            const margin = 10;
 
-            pdf.setFillColor(255, 238, 242);
-            pdf.roundedRect(innerX, detailBoxY, innerW, detailBoxH, 1.8, 1.8, 'F');
-            pdf.setDrawColor(212, 175, 55);
-            pdf.setLineWidth(0.6);
-            pdf.line(innerX, detailBoxY + 0.8, innerX, detailBoxY + detailBoxH - 0.8);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(5.4);
-            pdf.setTextColor(160, 96, 107);
-            pdf.text('Detalle(s):', innerX + 2, detailBoxY + 4.2);
-            pdf.setTextColor(184, 115, 127);
-            pdf.setFontSize(detalleAjustado.fontSize);
-            const lineasQueCaben = Math.max(1, Math.floor((detailBoxH - 6.5) / detailLineHeight));
-            const lineasDetalle = detalleAjustado.lineas.slice(0, lineasQueCaben);
-            pdf.text(lineasDetalle, innerX + 2, detailBoxY + 7.3);
+            pdf.setFillColor(255, 255, 255);
+            pdf.rect(x0, y0, drawW, drawH, 'F');
 
-            pdf.setDrawColor(238, 238, 238);
-            pdf.setLineWidth(0.25);
-            pdf.line(innerX, footerLineY, x + w - padding, footerLineY);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(4.6);
-            pdf.setTextColor(136, 136, 136);
-            pdf.text('¡Preparado con mucho cariño!', centerX, footerLineY + 4, { align: 'center' });
+            // Guía principal: misma proporción que la guía individual, solo reducida.
+            pdf.setDrawColor(...paleta.borde);
+            pdf.setLineWidth(S(0.8));
+            pdf.roundedRect(X(5), Y(5), S(pageW - 10), S(medidas.mainGuideH - 10), S(4), S(4));
+
+            let y = 12;
+
+            // Logo.
+            pdf.addImage(logo.dataUrl, 'PNG', X((pageW - medidas.logoW) / 2), Y(y), S(medidas.logoW), S(medidas.logoH));
+            y += medidas.logoH + 8;
+
+            // Encabezado.
+            pdf.setFont('times', 'bold');
+            pdf.setFontSize(S(16));
+            pdf.setTextColor(...paleta.titulo);
+            pdf.text('Guía de Entrega', X(pageW / 2), Y(y), { align: 'center' });
+            y += 7;
+
             pdf.setFont('helvetica', 'normal');
-            pdf.text('momentosatractivos.com', centerX, footerLineY + 7.1, { align: 'center' });
+            pdf.setFontSize(S(9.5));
+            pdf.setTextColor(136, 136, 136);
+            pdf.text(`Fecha de entrega: ${datos.fechaEntrega}`, X(pageW / 2), Y(y), { align: 'center' });
+            y += 5;
+            pdf.text(`Hora de entrega: ${datos.horaEntregaFormateada}`, X(pageW / 2), Y(y), { align: 'center' });
+            y += 7;
+
+            pdf.setDrawColor(230, 230, 230);
+            pdf.setLineDashPattern([S(1.8), S(1.4)], 0);
+            pdf.line(X(margin), Y(y), X(pageW - margin), Y(y));
+            pdf.setLineDashPattern([], 0);
+            y += 11;
+
+            // Datos principales.
+            const escribirCampoEscalado = (label, value, currentY) => {
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(S(11));
+                pdf.setTextColor(...paleta.etiqueta);
+                pdf.text(label, X(margin + 2), Y(currentY));
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(42, 42, 42);
+                pdf.text(String(value || 'N/A'), X(margin + 30), Y(currentY));
+            };
+
+            escribirCampoEscalado('Nombre:', datos.nombre, y);
+            y += 7;
+            escribirCampoEscalado('Teléfono:', datos.telefono, y);
+            y += 7;
+
+            if (datos.esRecogida) {
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(S(11));
+                pdf.setTextColor(...paleta.titulo);
+                pdf.text('RECOGE EN TIENDA', X(pageW / 2), Y(y), { align: 'center' });
+                y += 10;
+            } else {
+                escribirCampoEscalado('Ciudad:', datos.ciudad, y);
+                y += 7;
+                escribirCampoEscalado('Barrio:', datos.barrio, y);
+                y += 7;
+                escribirCampoEscalado('Dirección:', datos.direccion, y);
+                y += 10;
+            }
+
+            // Detalle(s).
+            pdf.setFillColor(...paleta.fondoDetalle);
+            pdf.roundedRect(X(margin), Y(y), S(pageW - (margin * 2)), S(medidas.cajaAltura), S(3), S(3), 'F');
+            pdf.setDrawColor(...paleta.borde);
+            pdf.setLineWidth(S(1.2));
+            pdf.line(X(margin), Y(y + 1), X(margin), Y(y + medidas.cajaAltura - 1));
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(S(11));
+            pdf.setTextColor(...paleta.etiqueta);
+            pdf.text('Detalle(s):', X(margin + 4), Y(y + 7));
+            pdf.setTextColor(...paleta.titulo);
+            pdf.text(medidas.detalleLineas, X(margin + 4), Y(y + 14));
+            y += medidas.cajaAltura + 4;
+
+            // Pie principal.
+            const footerLineY = y + 3;
+            const footerText1Y = footerLineY + 6;
+            const footerText2Y = footerLineY + 11;
+            pdf.setDrawColor(238, 238, 238);
+            pdf.setLineWidth(S(0.4));
+            pdf.line(X(margin), Y(footerLineY), X(pageW - margin), Y(footerLineY));
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(S(9.5));
+            pdf.setTextColor(136, 136, 136);
+            pdf.text('¡Preparado con mucho cariño!', X(pageW / 2), Y(footerText1Y), { align: 'center' });
+            pdf.setFont('helvetica', 'normal');
+            pdf.text('momentosatractivos.com', X(pageW / 2), Y(footerText2Y), { align: 'center' });
+
+            // Tirilla arrancable.
+            const corteY = medidas.mainGuideH + 2.5;
+            const tirillaY = corteY + 4.5;
+            const tirillaX = margin;
+            const tirillaW = pageW - (margin * 2);
+
+            pdf.setDrawColor(190, 190, 190);
+            pdf.setLineWidth(S(0.4));
+            pdf.setLineDashPattern([S(2), S(1.4)], 0);
+            pdf.line(X(margin), Y(corteY), X(pageW - margin), Y(corteY));
+            pdf.setLineDashPattern([], 0);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(S(7.5));
+            pdf.setTextColor(136, 136, 136);
+            pdf.text('Cortar aquí', X(pageW / 2), Y(corteY - 1.4), { align: 'center' });
+
+            pdf.setFillColor(...paleta.fondoTirilla);
+            pdf.setDrawColor(...paleta.borde);
+            pdf.setLineWidth(S(0.6));
+            pdf.roundedRect(X(tirillaX), Y(tirillaY), S(tirillaW), S(medidas.tirillaH), S(2.5), S(2.5), 'FD');
+
+            let tirillaCursorY = tirillaY + 6;
+            pdf.setFont('times', 'bold');
+            pdf.setFontSize(S(11));
+            pdf.setTextColor(...paleta.titulo);
+            pdf.text('Comprobante interno', X(pageW / 2), Y(tirillaCursorY), { align: 'center' });
+            tirillaCursorY += 6;
+
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(S(8.5));
+            pdf.setTextColor(...paleta.etiqueta);
+            pdf.text('Nombre:', X(tirillaX + 4), Y(tirillaCursorY));
+            pdf.text('Hora:', X(tirillaX + 62), Y(tirillaCursorY));
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(42, 42, 42);
+            pdf.text(String(datos.nombre), X(tirillaX + 20), Y(tirillaCursorY));
+            pdf.text(String(datos.horaEntregaFormateada), X(tirillaX + 74), Y(tirillaCursorY));
+            tirillaCursorY += 5;
+
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(...paleta.etiqueta);
+            pdf.text('Detalle(s):', X(tirillaX + 4), Y(tirillaCursorY));
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(42, 42, 42);
+            pdf.text(medidas.tirillaDetalleLineas, X(tirillaX + 23), Y(tirillaCursorY));
+            tirillaCursorY += 5 + Math.max(0, medidas.tirillaDetalleLineas.length - 1) * 4;
+
+            if (datos.esRecogida) {
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(...paleta.etiqueta);
+                pdf.text('Entregado en tienda:', X(tirillaX + 4), Y(tirillaCursorY));
+                pdf.setDrawColor(136, 136, 136);
+                pdf.rect(X(tirillaX + 39), Y(tirillaCursorY - 2.5), S(2.8), S(2.8));
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(42, 42, 42);
+                pdf.text('Sí', X(tirillaX + 43.5), Y(tirillaCursorY));
+                tirillaCursorY += 6;
+
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(...paleta.etiqueta);
+                pdf.text('Recibido por:', X(tirillaX + 4), Y(tirillaCursorY));
+                pdf.setDrawColor(136, 136, 136);
+                pdf.line(X(tirillaX + 27), Y(tirillaCursorY + 0.5), X(tirillaX + tirillaW - 4), Y(tirillaCursorY + 0.5));
+            } else {
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(...paleta.etiqueta);
+                pdf.text('Valor del domicilio: $', X(tirillaX + 4), Y(tirillaCursorY));
+                pdf.setDrawColor(136, 136, 136);
+                pdf.line(X(tirillaX + 39), Y(tirillaCursorY + 0.5), X(tirillaX + 72), Y(tirillaCursorY + 0.5));
+                tirillaCursorY += 6;
+
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(...paleta.etiqueta);
+                pdf.text('Entregado a domiciliario:', X(tirillaX + 4), Y(tirillaCursorY));
+                pdf.setDrawColor(136, 136, 136);
+                pdf.line(X(tirillaX + 48), Y(tirillaCursorY + 0.5), X(tirillaX + tirillaW - 4), Y(tirillaCursorY + 0.5));
+            }
         }
 
         window.descargarGuiasPDFSegunFiltro = async function() {
@@ -1341,13 +1751,16 @@ Esta acción no se puede deshacer.`);
                 const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
                 const pageW = pdf.internal.pageSize.getWidth();
                 const pageH = pdf.internal.pageSize.getHeight();
-                const cols = 2;
+                // Distribución optimizada: 9 guías por hoja en formato 3 x 3.
+                // Mantienen la misma proporción vertical de la guía individual,
+                // incluyendo la tirilla arrancable, solo en un tamaño menor.
+                const cols = 3;
                 const rows = 3;
                 const guiasPorPagina = cols * rows;
-                const marginX = 8;
-                const marginY = 8;
-                const gapX = 8;
-                const gapY = 7;
+                const marginX = 6;
+                const marginY = 6;
+                const gapX = 5;
+                const gapY = 5;
                 const cardW = (pageW - (marginX * 2) - (gapX * (cols - 1))) / cols;
                 const cardH = (pageH - (marginY * 2) - (gapY * (rows - 1))) / rows;
 
@@ -1361,7 +1774,7 @@ Esta acción no se puede deshacer.`);
                     const row = Math.floor(posicion / cols);
                     const x = marginX + col * (cardW + gapX);
                     const y = marginY + row * (cardH + gapY);
-                    dibujarGuiaCompactaEnHoja(pdf, pedido, x, y, cardW, cardH, logo);
+                    dibujarGuiaCompletaMiniaturaEnHoja(pdf, pedido, x, y, cardW, cardH, logo);
                 });
 
                 const inicio = document.getElementById('filtro-fecha-inicio').value;
@@ -1400,17 +1813,24 @@ Esta acción no se puede deshacer.`);
                     throw new Error('No se encontró el pedido seleccionado.');
                 }
 
-                const nombre = p.destinatario || p.nombre_recibe || p.tarjeta_para || 'N/A';
-                const telefono = p.whatsapp_destinatario || p.telefono_recibe || 'N/A';
-                const ciudad = p.metodo_entrega === 'Recogida' ? 'N/A' : (p.ciudad || 'Sincelejo');
-                const barrio = p.metodo_entrega === 'Recogida' ? 'N/A' : (p.barrio || 'N/A');
-                const direccion = p.metodo_entrega === 'Recogida' ? 'Recoge en tienda' : (p.direccion || 'N/A');
-                const detalle = p.producto || p.productos || 'N/A';
-                const fechaEntrega = p.fecha_entrega || 'N/A';
-                const horaEntrega = p.hora_entrega || 'N/A';
-                const horaEntregaFormateada = formatearHora12h(horaEntrega);
+                const datos = obtenerDatosGuia(p);
+                const {
+                    nombre,
+                    telefono,
+                    ciudad,
+                    barrio,
+                    direccion,
+                    detalle,
+                    fechaEntrega,
+                    horaEntrega,
+                    horaEntregaFormateada,
+                    esRecogida,
+                    paleta
+                } = datos;
 
                 // Mantiene actualizada la guía oculta con el mismo diseño visual original.
+                const contenedorGuiaOculto = document.getElementById('contenedor-guia-oculto');
+                contenedorGuiaOculto.classList.toggle('guia-recogida', esRecogida);
                 document.getElementById('guia-print-fecha').textContent = fechaEntrega;
                 document.getElementById('guia-print-hora').textContent = horaEntregaFormateada;
                 document.getElementById('guia-print-nombre').textContent = nombre;
@@ -1419,8 +1839,13 @@ Esta acción no se puede deshacer.`);
                 document.getElementById('guia-print-barrio').textContent = barrio;
                 document.getElementById('guia-print-dir').textContent = direccion;
                 document.getElementById('guia-print-detalle').textContent = detalle;
-                document.getElementById('guia-print-seccion-recogida').style.display = p.metodo_entrega === 'Recogida' ? 'block' : 'none';
-                document.getElementById('guia-print-seccion-dir').style.display = 'block';
+                document.getElementById('guia-print-tirilla-nombre').textContent = nombre;
+                document.getElementById('guia-print-tirilla-hora').textContent = horaEntregaFormateada;
+                document.getElementById('guia-print-tirilla-detalle').textContent = detalle;
+                document.getElementById('guia-print-seccion-recogida').style.display = esRecogida ? 'block' : 'none';
+                document.getElementById('guia-print-seccion-dir').style.display = esRecogida ? 'none' : 'block';
+                document.querySelector('.guia-tirilla-domicilio').style.display = esRecogida ? 'none' : 'block';
+                document.querySelector('.guia-tirilla-recogida').style.display = esRecogida ? 'block' : 'none';
 
                 const { jsPDF } = window.jspdf;
                 const pageW = 120;
@@ -1435,30 +1860,36 @@ Esta acción no se puede deshacer.`);
                 const pdfMedicion = new jsPDF({
                     orientation: 'portrait',
                     unit: 'mm',
-                    format: [pageW, 175]
+                    format: [pageW, 220]
                 });
                 pdfMedicion.setFont('helvetica', 'bold');
                 pdfMedicion.setFontSize(11);
                 const detalleLineas = pdfMedicion.splitTextToSize(detalle, pageW - 28);
                 const cajaAltura = Math.max(22, 12 + detalleLineas.length * 5);
 
-                // Cálculo del contenido antes del pie.
+                // Cálculo del contenido antes del pie de la guía principal.
                 let yCalculada = 12;
                 yCalculada += logoH + 8; // logo
                 yCalculada += 7;         // título
                 yCalculada += 5;         // fecha
                 yCalculada += 7;         // hora + separación
                 yCalculada += 11;        // línea divisoria + separación
-                yCalculada += 38;        // datos de entrega
-                if (p.metodo_entrega === 'Recogida') yCalculada += 10;
+                yCalculada += esRecogida ? 24 : 38; // datos de entrega según el tipo de pedido
                 yCalculada += cajaAltura + 4;  // recuadro de detalle(s) + separación corta
                 yCalculada += 3;               // espacio antes de la línea del pie
                 yCalculada += 11;              // textos del pie
 
-                // Alto inteligente de la guía:
-                // la tarjeta mide solo lo que realmente necesita el contenido.
-                // Si el detalle crece, la guía crece; si es corto, no deja un hueco grande.
-                const pageH = yCalculada + 8;
+                // La guía principal conserva su diseño actual.
+                const mainGuideH = yCalculada + 8;
+
+                // Tirilla arrancable: se agrega por debajo sin quitar ni alterar la guía principal.
+                pdfMedicion.setFont('helvetica', 'normal');
+                pdfMedicion.setFontSize(8.2);
+                const tirillaDetalleLineasTodas = pdfMedicion.splitTextToSize(detalle, pageW - 32);
+                const tirillaDetalleLineas = tirillaDetalleLineasTodas.slice(0, 2);
+                const tirillaH = 34 + Math.max(0, tirillaDetalleLineas.length - 1) * 4;
+                const corteGap = 7;
+                const pageH = mainGuideH + corteGap + tirillaH + 7;
 
                 const pdf = new jsPDF({
                     orientation: 'portrait',
@@ -1471,9 +1902,9 @@ Esta acción no se puede deshacer.`);
                 // Fondo y borde de la tarjeta.
                 pdf.setFillColor(255, 255, 255);
                 pdf.rect(0, 0, pageW, pageH, 'F');
-                pdf.setDrawColor(212, 175, 55);
+                pdf.setDrawColor(...paleta.borde);
                 pdf.setLineWidth(0.8);
-                pdf.roundedRect(5, 5, pageW - 10, pageH - 10, 4, 4);
+                pdf.roundedRect(5, 5, pageW - 10, mainGuideH - 10, 4, 4);
 
                 // Logo.
                 pdf.addImage(logo.dataUrl, 'PNG', (pageW - logoW) / 2, y, logoW, logoH);
@@ -1482,7 +1913,7 @@ Esta acción no se puede deshacer.`);
                 // Encabezado.
                 pdf.setFont('times', 'bold');
                 pdf.setFontSize(16);
-                pdf.setTextColor(184, 115, 127);
+                pdf.setTextColor(...paleta.titulo);
                 pdf.text('Guía de Entrega', pageW / 2, y, { align: 'center' });
                 y += 7;
 
@@ -1502,44 +1933,40 @@ Esta acción no se puede deshacer.`);
 
                 // Datos de entrega.
                 pdf.setFontSize(11);
-                escribirCampoPDF(pdf, 'Nombre:', nombre, margin + 2, y);
+                escribirCampoPDF(pdf, 'Nombre:', nombre, margin + 2, y, 28, paleta.etiqueta);
                 y += 7;
-                escribirCampoPDF(pdf, 'Teléfono:', telefono, margin + 2, y);
+                escribirCampoPDF(pdf, 'Teléfono:', telefono, margin + 2, y, 28, paleta.etiqueta);
                 y += 7;
-                escribirCampoPDF(pdf, 'Ciudad:', ciudad, margin + 2, y);
-                y += 7;
-                escribirCampoPDF(pdf, 'Barrio:', barrio, margin + 2, y);
-                y += 7;
-                escribirCampoPDF(pdf, 'Dirección:', direccion, margin + 2, y);
-                y += 10;
 
-                if (p.metodo_entrega === 'Recogida') {
+                if (esRecogida) {
                     pdf.setFont('helvetica', 'bold');
-                    pdf.setTextColor(184, 146, 43);
+                    pdf.setTextColor(...paleta.titulo);
                     pdf.text('RECOGE EN TIENDA', pageW / 2, y, { align: 'center' });
+                    y += 10;
+                } else {
+                    escribirCampoPDF(pdf, 'Ciudad:', ciudad, margin + 2, y, 28, paleta.etiqueta);
+                    y += 7;
+                    escribirCampoPDF(pdf, 'Barrio:', barrio, margin + 2, y, 28, paleta.etiqueta);
+                    y += 7;
+                    escribirCampoPDF(pdf, 'Dirección:', direccion, margin + 2, y, 28, paleta.etiqueta);
                     y += 10;
                 }
 
                 // Recuadro de detalle(s).
-                pdf.setFillColor(255, 238, 242);
+                pdf.setFillColor(...paleta.fondoDetalle);
                 pdf.roundedRect(margin, y, pageW - (margin * 2), cajaAltura, 3, 3, 'F');
-                pdf.setDrawColor(212, 175, 55);
+                pdf.setDrawColor(...paleta.borde);
                 pdf.setLineWidth(1.2);
                 pdf.line(margin, y + 1, margin, y + cajaAltura - 1);
                 pdf.setFont('helvetica', 'bold');
                 pdf.setFontSize(11);
-                pdf.setTextColor(160, 96, 107);
+                pdf.setTextColor(...paleta.etiqueta);
                 pdf.text('Detalle(s):', margin + 4, y + 7);
-                pdf.setTextColor(184, 115, 127);
+                pdf.setTextColor(...paleta.titulo);
                 pdf.text(detalleLineas, margin + 4, y + 14);
-                // Después del recuadro de detalles se deja solo el espacio necesario.
-                // Así el pie no queda flotando demasiado abajo, pero sigue moviéndose
-                // automáticamente si el detalle ocupa más líneas.
                 y += cajaAltura + 4;
 
-                // Pie de página inteligente:
-                // conserva ambos textos y queda cerca del contenido, con aire suficiente
-                // para no verse pegado ni generar un vacío exagerado.
+                // Pie de página inteligente.
                 const footerLineY = y + 3;
                 const footerText1Y = footerLineY + 6;
                 const footerText2Y = footerLineY + 11;
@@ -1554,6 +1981,84 @@ Esta acción no se puede deshacer.`);
                 pdf.text('¡Preparado con mucho cariño!', pageW / 2, footerText1Y, { align: 'center' });
                 pdf.setFont('helvetica', 'normal');
                 pdf.text('momentosatractivos.com', pageW / 2, footerText2Y, { align: 'center' });
+
+                // Tirilla arrancable de control interno.
+                const corteY = mainGuideH + 2.5;
+                const tirillaY = corteY + 4.5;
+                const tirillaX = margin;
+                const tirillaW = pageW - (margin * 2);
+
+                pdf.setDrawColor(190, 190, 190);
+                pdf.setLineWidth(0.4);
+                pdf.setLineDashPattern([2, 1.4], 0);
+                pdf.line(margin, corteY, pageW - margin, corteY);
+                pdf.setLineDashPattern([], 0);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(7.5);
+                pdf.setTextColor(136, 136, 136);
+                pdf.text('Cortar aquí', pageW / 2, corteY - 1.4, { align: 'center' });
+
+                pdf.setFillColor(...paleta.fondoTirilla);
+                pdf.setDrawColor(...paleta.borde);
+                pdf.setLineWidth(0.6);
+                pdf.roundedRect(tirillaX, tirillaY, tirillaW, tirillaH, 2.5, 2.5, 'FD');
+
+                let tirillaCursorY = tirillaY + 6;
+                pdf.setFont('times', 'bold');
+                pdf.setFontSize(11);
+                pdf.setTextColor(...paleta.titulo);
+                pdf.text('Comprobante interno', pageW / 2, tirillaCursorY, { align: 'center' });
+                tirillaCursorY += 6;
+
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(8.5);
+                pdf.setTextColor(...paleta.etiqueta);
+                pdf.text('Nombre:', tirillaX + 4, tirillaCursorY);
+                pdf.text('Hora:', tirillaX + 62, tirillaCursorY);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(42, 42, 42);
+                pdf.text(String(nombre), tirillaX + 20, tirillaCursorY);
+                pdf.text(String(horaEntregaFormateada), tirillaX + 74, tirillaCursorY);
+                tirillaCursorY += 5;
+
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(...paleta.etiqueta);
+                pdf.text('Detalle(s):', tirillaX + 4, tirillaCursorY);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(42, 42, 42);
+                pdf.text(tirillaDetalleLineas, tirillaX + 23, tirillaCursorY);
+                tirillaCursorY += 5 + Math.max(0, tirillaDetalleLineas.length - 1) * 4;
+
+                if (esRecogida) {
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(...paleta.etiqueta);
+                    pdf.text('Entregado en tienda:', tirillaX + 4, tirillaCursorY);
+                    pdf.setDrawColor(136, 136, 136);
+                    pdf.rect(tirillaX + 39, tirillaCursorY - 2.5, 2.8, 2.8);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setTextColor(42, 42, 42);
+                    pdf.text('Sí', tirillaX + 43.5, tirillaCursorY);
+                    tirillaCursorY += 6;
+
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(...paleta.etiqueta);
+                    pdf.text('Recibido por:', tirillaX + 4, tirillaCursorY);
+                    pdf.setDrawColor(136, 136, 136);
+                    pdf.line(tirillaX + 27, tirillaCursorY + 0.5, tirillaX + tirillaW - 4, tirillaCursorY + 0.5);
+                } else {
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(...paleta.etiqueta);
+                    pdf.text('Valor del domicilio: $', tirillaX + 4, tirillaCursorY);
+                    pdf.setDrawColor(136, 136, 136);
+                    pdf.line(tirillaX + 39, tirillaCursorY + 0.5, tirillaX + 72, tirillaCursorY + 0.5);
+                    tirillaCursorY += 6;
+
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(...paleta.etiqueta);
+                    pdf.text('Entregado a domiciliario:', tirillaX + 4, tirillaCursorY);
+                    pdf.setDrawColor(136, 136, 136);
+                    pdf.line(tirillaX + 48, tirillaCursorY + 0.5, tirillaX + tirillaW - 4, tirillaCursorY + 0.5);
+                }
 
                 const fechaArchivo = limpiarTextoArchivo(fechaEntrega);
                 const horaArchivo = limpiarTextoArchivo(horaEntregaFormateada.replace(':', 'h').replace(' ', '_'));
