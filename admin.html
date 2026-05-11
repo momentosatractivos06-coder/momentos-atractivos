@@ -1953,7 +1953,17 @@
             hideLoading();
         });
 
-        btnLogout.addEventListener('click', () => { signOut(auth); });
+        btnLogout.addEventListener('click', async () => {
+            const confirmarSalida = confirm("¿Seguro que deseas salir del panel de administrador?");
+            if (!confirmarSalida) return;
+
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Error al cerrar sesión:", error);
+                alert("No se pudo cerrar sesión. Intenta nuevamente.");
+            }
+        });
 
         // Subir Imagen ImgBB
         async function subirImagen(fileInput) {
