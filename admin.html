@@ -743,6 +743,50 @@
                 box-shadow: 0 9px 24px rgba(184, 115, 127, 0.08);
             }
 
+
+            /* Color visual de cada barra móvil según el estado del pedido */
+            .pedido-accordion.estado-por-confirmar {
+                background: linear-gradient(90deg, #fbf4fd 0%, #ffffff 72%);
+                border-color: rgba(160, 113, 176, 0.28);
+                border-left: 4px solid #b88ac6;
+            }
+
+            .pedido-accordion.estado-pendiente {
+                background: linear-gradient(90deg, #fff5e9 0%, #ffffff 72%);
+                border-color: rgba(210, 139, 61, 0.30);
+                border-left: 4px solid #d89345;
+            }
+
+            .pedido-accordion.estado-en-ruta,
+            .pedido-accordion.estado-listo-tienda {
+                background: linear-gradient(90deg, #eef7fd 0%, #ffffff 72%);
+                border-color: rgba(91, 141, 184, 0.30);
+                border-left: 4px solid #5b8db8;
+            }
+
+            .pedido-accordion.estado-entregado {
+                background: linear-gradient(90deg, #eff9f2 0%, #ffffff 72%);
+                border-color: rgba(79, 138, 99, 0.28);
+                border-left: 4px solid #66a878;
+            }
+
+            .pedido-accordion.estado-por-confirmar[open] {
+                box-shadow: 0 9px 24px rgba(160, 113, 176, 0.11);
+            }
+
+            .pedido-accordion.estado-pendiente[open] {
+                box-shadow: 0 9px 24px rgba(216, 147, 69, 0.12);
+            }
+
+            .pedido-accordion.estado-en-ruta[open],
+            .pedido-accordion.estado-listo-tienda[open] {
+                box-shadow: 0 9px 24px rgba(91, 141, 184, 0.12);
+            }
+
+            .pedido-accordion.estado-entregado[open] {
+                box-shadow: 0 9px 24px rgba(79, 138, 99, 0.12);
+            }
+
             .pedido-summary {
                 list-style: none;
                 cursor: pointer;
