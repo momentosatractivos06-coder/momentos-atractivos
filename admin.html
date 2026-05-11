@@ -701,6 +701,162 @@
             .login-box h2 {
                 font-size: 1.75rem;
             }
+
+            /* ========================================================== */
+            /* 📱 PEDIDOS EN MÓVIL: LISTA COMPACTA, NO TARJETAS GRANDES   */
+            /* ========================================================== */
+            #section-pedidos .table-responsive {
+                overflow-x: auto;
+                overflow-y: hidden;
+                border: 1px solid rgba(184, 115, 127, 0.12);
+                border-radius: 14px;
+                background: var(--white);
+                box-shadow: 0 6px 18px rgba(0,0,0,0.035);
+                -webkit-overflow-scrolling: touch;
+            }
+
+            #section-pedidos .table-responsive::before {
+                content: "Desliza la tabla hacia los lados para ver acciones y estado";
+                display: block;
+                padding: 9px 12px;
+                font-size: 0.78rem;
+                color: var(--text-light);
+                background: #fffaf5;
+                border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+                text-align: center;
+            }
+
+            #section-pedidos table {
+                display: table;
+                width: 850px;
+                min-width: 850px;
+                border-collapse: collapse;
+                background: var(--white);
+            }
+
+            #section-pedidos thead {
+                display: table-header-group;
+            }
+
+            #section-pedidos tbody {
+                display: table-row-group;
+            }
+
+            #section-pedidos tr {
+                display: table-row;
+                background: var(--white);
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                margin: 0;
+                box-shadow: none;
+            }
+
+            #section-pedidos tr:hover {
+                background: rgba(255, 238, 242, 0.22);
+            }
+
+            #section-pedidos th,
+            #section-pedidos td {
+                display: table-cell;
+                width: auto;
+                padding: 10px 9px;
+                border-bottom: 1px solid #f3f3f3;
+                font-size: 0.82rem;
+                line-height: 1.25;
+                text-align: left;
+                vertical-align: middle;
+            }
+
+            #section-pedidos th {
+                background: var(--bg-blush);
+                color: var(--rose-hover);
+                font-size: 0.86rem;
+                white-space: nowrap;
+                position: sticky;
+                top: 0;
+                z-index: 2;
+            }
+
+            #section-pedidos td::before {
+                content: none !important;
+                display: none !important;
+            }
+
+            #section-pedidos td:nth-child(1) {
+                min-width: 94px;
+            }
+
+            #section-pedidos td:nth-child(2) {
+                min-width: 150px;
+            }
+
+            #section-pedidos td:nth-child(3) {
+                width: 190px;
+                max-width: 190px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                word-break: normal !important;
+            }
+
+            #section-pedidos td:nth-child(4) {
+                min-width: 104px;
+                white-space: nowrap;
+            }
+
+            #section-pedidos td:nth-child(5) {
+                min-width: 155px;
+            }
+
+            #section-pedidos td:nth-child(6) {
+                min-width: 230px;
+                padding-right: 10px;
+            }
+
+            #section-pedidos td:nth-child(6) > div {
+                width: 100%;
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                align-items: center;
+                gap: 6px !important;
+            }
+
+            #section-pedidos .estado-cell {
+                width: auto;
+                min-width: 0;
+                justify-content: flex-start;
+            }
+
+            #section-pedidos .estado-select {
+                width: 145px;
+                min-width: 145px;
+                max-width: 145px;
+                height: 36px;
+                font-size: 0.78rem;
+                border-radius: 7px;
+                padding-left: 8px;
+                padding-right: 29px;
+            }
+
+            #section-pedidos .action-btn {
+                width: auto;
+                min-height: 34px;
+                margin-right: 0 !important;
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                gap: 4px;
+                border-radius: 7px !important;
+                padding: 5px 8px !important;
+                font-size: 0.78rem !important;
+                white-space: nowrap;
+            }
+
+            #section-pedidos .action-btn i {
+                font-size: 0.95rem;
+            }
+
         }
 
         @media (min-width: 701px) and (max-width: 1024px) {
