@@ -1052,7 +1052,213 @@
             .filtro-pedidos-panel { align-items: stretch; }
         }
 
-    </style>
+    
+
+        /* ========================================================== */
+        /* 📱 AJUSTE FINAL MÓVIL: BARRA COMPACTA, FILTROS PLEGABLES   */
+        /*    Y ACCIONES DEL CATÁLOGO EN DOS COLUMNAS                */
+        /* ========================================================== */
+        .mobile-label,
+        .mobile-filter-checkbox,
+        .mobile-filter-toggle {
+            display: none;
+        }
+
+        .product-action-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .product-action-row .action-btn span {
+            display: none;
+        }
+
+        @media (max-width: 700px) {
+            #section-pedidos .panel-card {
+                padding: 16px 12px 18px;
+            }
+
+            #section-pedidos .section-header {
+                display: block;
+                border-bottom: none;
+                padding-bottom: 0;
+                margin-bottom: 10px;
+            }
+
+            #section-pedidos .section-header h2 {
+                font-size: 1.12rem;
+                margin: 0 0 10px 0;
+                padding-bottom: 8px;
+                border-bottom: 1px solid rgba(184, 115, 127, 0.16);
+            }
+
+            #section-pedidos .pedidos-header-actions {
+                display: grid !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 8px !important;
+                width: 100%;
+                margin-bottom: 8px;
+            }
+
+            #section-pedidos .pedidos-header-actions button {
+                width: 100%;
+                height: 42px;
+                min-height: 42px;
+                padding: 0 6px !important;
+                border-radius: 11px !important;
+                font-size: 0.78rem !important;
+                letter-spacing: 0 !important;
+                line-height: 1 !important;
+                justify-content: center;
+                gap: 5px;
+                white-space: nowrap !important;
+            }
+
+            #section-pedidos .pedidos-header-actions button i {
+                font-size: 1.05rem;
+                flex-shrink: 0;
+            }
+
+            .desktop-label {
+                display: none !important;
+            }
+
+            .mobile-label {
+                display: inline !important;
+            }
+
+            .mobile-filter-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                width: 100%;
+                min-height: 42px;
+                padding: 0 12px;
+                margin: 0 0 9px;
+                background: #fffaf5;
+                border: 1px solid rgba(212, 175, 55, 0.34);
+                border-radius: 12px;
+                color: var(--rose-hover);
+                font-weight: 700;
+                cursor: pointer;
+                box-shadow: 0 5px 14px rgba(0,0,0,0.025);
+            }
+
+            .mobile-filter-toggle span {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                font-size: 0.88rem;
+            }
+
+            .mobile-filter-toggle small {
+                color: var(--text-light);
+                font-size: 0.74rem;
+                font-weight: 500;
+            }
+
+            .mobile-filter-checkbox:not(:checked) + .mobile-filter-toggle + .filtro-pedidos-panel {
+                display: none !important;
+            }
+
+            .mobile-filter-checkbox:checked + .mobile-filter-toggle + .filtro-pedidos-panel {
+                display: grid !important;
+            }
+
+            #section-pedidos .filtro-pedidos-panel {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                padding: 10px;
+                margin: 0 0 11px;
+                border-radius: 13px;
+                background: #fffdf8;
+            }
+
+            #section-pedidos .filtro-pedidos-group {
+                min-width: 0;
+                gap: 4px;
+            }
+
+            #section-pedidos .filtro-pedidos-group label {
+                font-size: 0.7rem;
+                letter-spacing: 0.35px;
+                text-transform: uppercase;
+            }
+
+            #section-pedidos .filtro-pedidos-group input,
+            #section-pedidos .filtro-pedidos-group select {
+                height: 38px;
+                min-height: 38px;
+                padding: 7px 9px;
+                border-radius: 9px;
+                font-size: 0.84rem;
+            }
+
+            #section-pedidos .filtro-entrega-group {
+                grid-column: 1 / -1;
+            }
+
+            #section-pedidos .btn-aplicar-rango,
+            #section-pedidos .btn-todo-historial {
+                height: 38px;
+                min-height: 38px;
+                padding: 0 8px !important;
+                border-radius: 9px;
+                font-size: 0.78rem;
+                justify-content: center;
+            }
+
+            #section-pedidos .filtro-resumen {
+                grid-column: 1 / -1;
+                margin-left: 0;
+                padding: 7px 8px;
+                font-size: 0.76rem;
+                border-radius: 9px;
+                line-height: 1.25;
+                text-align: center;
+                background: rgba(255,255,255,0.72);
+            }
+
+            #section-productos td:nth-child(5) {
+                display: block !important;
+                text-align: left !important;
+            }
+
+            #section-productos td:nth-child(5)::before {
+                display: block;
+                margin-bottom: 7px;
+            }
+
+            #section-productos td:nth-child(5) > div.product-action-row {
+                display: grid !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 8px !important;
+                width: 100%;
+            }
+
+            #section-productos .product-action-row .action-btn {
+                width: 100%;
+                min-height: 38px;
+                margin-right: 0 !important;
+                padding: 7px 8px !important;
+                border-radius: 10px !important;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                font-size: 0.84rem !important;
+            }
+
+            #section-productos .product-action-row .action-btn span {
+                display: inline !important;
+                font-size: 0.82rem;
+                font-weight: 600;
+            }
+        }
+</style>
 </head>
 <body>
 
@@ -1116,11 +1322,17 @@
                         <div class="section-header">
                             <h2>Control de Entregas</h2>
                             <div class="pedidos-header-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <button class="btn-edit" onclick="copiarLinkPedidos()"><i class="ph-bold ph-link"></i> Copiar Link de Pedidos</button>
-                                <button class="btn-submit" onclick="descargarExcelPedidos()" style="background: #20b858;"><i class="ph-bold ph-file-xls"></i> Exportar Excel</button>
-                                <button class="btn-submit" onclick="descargarGuiasPDFSegunFiltro()" style="background: var(--gold);"><i class="ph-bold ph-files"></i> Guías PDF</button>
+                                <button class="btn-edit" onclick="copiarLinkPedidos()"><i class="ph-bold ph-link"></i><span class="desktop-label">Copiar Link de Pedidos</span><span class="mobile-label">Link</span></button>
+                                <button class="btn-submit" onclick="descargarExcelPedidos()" style="background: #20b858;"><i class="ph-bold ph-file-xls"></i><span class="desktop-label">Exportar Excel</span><span class="mobile-label">Excel</span></button>
+                                <button class="btn-submit" onclick="descargarGuiasPDFSegunFiltro()" style="background: var(--gold);"><i class="ph-bold ph-files"></i><span class="desktop-label">Guías PDF</span><span class="mobile-label">Guías</span></button>
                             </div>
                         </div>
+
+                        <input type="checkbox" id="toggle-filtros-mobile" class="mobile-filter-checkbox">
+                        <label for="toggle-filtros-mobile" class="mobile-filter-toggle">
+                            <span><i class="ph-bold ph-funnel-simple"></i> Filtros</span>
+                            <small>Fecha y entrega</small>
+                        </label>
 
                         <div class="filtro-pedidos-panel">
                             <div class="filtro-pedidos-group filtro-fecha-desde">
@@ -2972,8 +3184,10 @@ Esta acción no se puede deshacer.`);
                         <td>${data.categoria === 'ColeccionEspecial' ? 'Detalles' : data.categoria}</td>
                         <td>$${data.precio.toLocaleString('es-CO')}</td>
                         <td>
-                            <button type="button" class="action-btn edit-btn" onclick="editarProducto('${data.id}')"><i class="ph-light ph-pencil-simple"></i></button>
-                            <button type="button" class="action-btn delete-btn" onclick="eliminarProducto('${data.id}')"><i class="ph-light ph-trash"></i></button>
+                            <div class="product-action-row">
+                                <button type="button" class="action-btn edit-btn" onclick="editarProducto('${data.id}')"><i class="ph-light ph-pencil-simple"></i><span>Editar</span></button>
+                                <button type="button" class="action-btn delete-btn" onclick="eliminarProducto('${data.id}')"><i class="ph-light ph-trash"></i><span>Eliminar</span></button>
+                            </div>
                         </td>
                     `;
                     tableBody.appendChild(tr);
