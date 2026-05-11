@@ -1302,7 +1302,69 @@
                 font-weight: 600;
             }
         }
-</style>
+
+
+        /* ========================================================== */
+        /* AJUSTE REAL: colores visibles en las barras móviles por estado */
+        /* No cambia la forma ni la lógica; solo colorea la barra compacta */
+        /* ========================================================== */
+        @media (max-width: 900px) {
+            #section-pedidos .pedido-accordion {
+                background: #ffffff !important;
+                border-left: 0 !important;
+            }
+
+            #section-pedidos .pedido-accordion > .pedido-summary {
+                border-left: 5px solid transparent !important;
+                border-radius: 13px !important;
+                transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            }
+
+            #section-pedidos .pedido-accordion[open] > .pedido-summary {
+                border-bottom-left-radius: 0 !important;
+                border-bottom-right-radius: 0 !important;
+            }
+
+            /* Por confirmar: lila/rosado suave */
+            #section-pedidos .pedido-accordion.estado-por-confirmar > .pedido-summary,
+            #section-pedidos .pedido-summary.estado-por-confirmar {
+                background: #f8f0fb !important;
+                border-left-color: #b88ac6 !important;
+                box-shadow: inset 0 0 0 1px rgba(184, 138, 198, 0.22) !important;
+            }
+
+            /* Pendiente: naranja suave */
+            #section-pedidos .pedido-accordion.estado-pendiente > .pedido-summary,
+            #section-pedidos .pedido-summary.estado-pendiente {
+                background: #fff3e6 !important;
+                border-left-color: #d89345 !important;
+                box-shadow: inset 0 0 0 1px rgba(216, 147, 69, 0.24) !important;
+            }
+
+            /* En ruta / Listo en tienda: azul suave */
+            #section-pedidos .pedido-accordion.estado-en-ruta > .pedido-summary,
+            #section-pedidos .pedido-accordion.estado-listo-tienda > .pedido-summary,
+            #section-pedidos .pedido-summary.estado-en-ruta,
+            #section-pedidos .pedido-summary.estado-listo-tienda {
+                background: #eef7fd !important;
+                border-left-color: #5b8db8 !important;
+                box-shadow: inset 0 0 0 1px rgba(91, 141, 184, 0.24) !important;
+            }
+
+            /* Entregado: verde suave */
+            #section-pedidos .pedido-accordion.estado-entregado > .pedido-summary,
+            #section-pedidos .pedido-summary.estado-entregado {
+                background: #eef8f1 !important;
+                border-left-color: #66a878 !important;
+                box-shadow: inset 0 0 0 1px rgba(102, 168, 120, 0.24) !important;
+            }
+
+            #section-pedidos .pedido-accordion > .pedido-details-mobile {
+                background: #ffffff !important;
+            }
+        }
+
+    </style>
 </head>
 <body>
 
@@ -2084,7 +2146,7 @@
             return `
                 <div class="mobile-date-heading">${textoSeguro(fecha)}</div>
                 <details class="pedido-accordion ${claseEstado}">
-                    <summary class="pedido-summary">
+                    <summary class="pedido-summary ${claseEstado}">
                         <div class="pedido-summary-top">
                             <div class="pedido-cliente-mobile">${textoSeguro(cliente)}</div>
                             <span class="pedido-estado-mini ${claseEstado}">${textoSeguro(estado)}</span>
