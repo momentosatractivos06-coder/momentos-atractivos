@@ -932,6 +932,118 @@
                 font-size: 0.82rem !important;
             }
 
+
+
+            /* ========================================================== */
+            /* 📱 AJUSTE FINO: HERRAMIENTAS COMPACTAS Y CATÁLOGO MÓVIL   */
+            /* ========================================================== */
+            #section-pedidos .section-header {
+                gap: 10px;
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+            }
+
+            #section-pedidos .section-header h2 {
+                font-size: 1.08rem;
+            }
+
+            #section-pedidos .pedidos-header-actions {
+                display: grid !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 7px !important;
+                width: 100%;
+            }
+
+            #section-pedidos .pedidos-header-actions button {
+                width: 100%;
+                min-height: 38px;
+                padding: 7px 5px;
+                border-radius: 9px;
+                font-size: 0.68rem;
+                line-height: 1.1;
+                letter-spacing: 0;
+                gap: 4px;
+                white-space: normal;
+            }
+
+            #section-pedidos .pedidos-header-actions button i {
+                font-size: 1rem;
+                flex-shrink: 0;
+            }
+
+            #section-pedidos .filtro-pedidos-panel {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                padding: 10px;
+                margin: 10px 0 12px;
+                border-radius: 13px;
+                background: #fffdf8;
+            }
+
+            #section-pedidos .filtro-pedidos-group {
+                gap: 4px;
+            }
+
+            #section-pedidos .filtro-pedidos-group label {
+                font-size: 0.72rem;
+                letter-spacing: 0.3px;
+                text-transform: uppercase;
+            }
+
+            #section-pedidos .filtro-pedidos-group input,
+            #section-pedidos .filtro-pedidos-group select {
+                min-height: 38px;
+                height: 38px;
+                font-size: 0.84rem;
+                border-radius: 9px;
+                padding: 7px 9px;
+            }
+
+            #section-pedidos .filtro-entrega-group {
+                grid-column: 1 / -1;
+            }
+
+            #section-pedidos .btn-aplicar-rango,
+            #section-pedidos .btn-todo-historial {
+                min-height: 38px;
+                padding: 8px 8px;
+                border-radius: 9px;
+                font-size: 0.78rem;
+            }
+
+            #section-pedidos .filtro-resumen {
+                grid-column: 1 / -1;
+                padding: 7px 8px;
+                font-size: 0.76rem;
+                border-radius: 9px;
+                line-height: 1.25;
+            }
+
+            /* En catálogo móvil, las acciones quedan lado a lado para evitar tarjetas altas */
+            #section-productos td:nth-child(5) {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                align-items: center;
+                text-align: left;
+            }
+
+            #section-productos td:nth-child(5)::before {
+                grid-column: 1 / -1;
+                flex: none;
+                margin-bottom: 0;
+            }
+
+            #section-productos td:nth-child(5) .action-btn {
+                width: 100%;
+                min-height: 36px;
+                border-radius: 9px;
+                margin-right: 0 !important;
+            }
+
+        }
+
         @media (min-width: 701px) and (max-width: 1024px) {
             .sidebar { width: 220px; }
             .main-content { margin-left: 220px; padding: 28px; }
@@ -1003,23 +1115,23 @@
                     <div class="panel-card">
                         <div class="section-header">
                             <h2>Control de Entregas</h2>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <div class="pedidos-header-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
                                 <button class="btn-edit" onclick="copiarLinkPedidos()"><i class="ph-bold ph-link"></i> Copiar Link de Pedidos</button>
-                                <button class="btn-submit" onclick="descargarExcelPedidos()" style="background: #20b858;"><i class="ph-bold ph-file-xls"></i> Exportar Excel (Prioridad)</button>
-                                <button class="btn-submit" onclick="descargarGuiasPDFSegunFiltro()" style="background: var(--gold);"><i class="ph-bold ph-files"></i> Descargar guías PDF</button>
+                                <button class="btn-submit" onclick="descargarExcelPedidos()" style="background: #20b858;"><i class="ph-bold ph-file-xls"></i> Exportar Excel</button>
+                                <button class="btn-submit" onclick="descargarGuiasPDFSegunFiltro()" style="background: var(--gold);"><i class="ph-bold ph-files"></i> Guías PDF</button>
                             </div>
                         </div>
 
                         <div class="filtro-pedidos-panel">
-                            <div class="filtro-pedidos-group">
+                            <div class="filtro-pedidos-group filtro-fecha-desde">
                                 <label for="filtro-fecha-inicio">Desde</label>
                                 <input type="date" id="filtro-fecha-inicio" class="form-control">
                             </div>
-                            <div class="filtro-pedidos-group">
+                            <div class="filtro-pedidos-group filtro-fecha-hasta">
                                 <label for="filtro-fecha-fin">Hasta</label>
                                 <input type="date" id="filtro-fecha-fin" class="form-control">
                             </div>
-                            <div class="filtro-pedidos-group">
+                            <div class="filtro-pedidos-group filtro-entrega-group">
                                 <label for="filtro-metodo-entrega">Tipo de entrega</label>
                                 <select id="filtro-metodo-entrega" class="form-control" onchange="aplicarFiltroMetodoPedidos()">
                                     <option value="Todos" selected>Todos</option>
@@ -1027,11 +1139,11 @@
                                     <option value="Recogida">Tienda</option>
                                 </select>
                             </div>
-                            <button type="button" class="btn-submit" onclick="aplicarFiltroFechasPedidos()">
-                                <i class="ph-bold ph-funnel"></i> Aplicar rango
+                            <button type="button" class="btn-submit btn-aplicar-rango" onclick="aplicarFiltroFechasPedidos()">
+                                <i class="ph-bold ph-funnel"></i> Aplicar
                             </button>
-                            <button type="button" class="btn-edit" onclick="mostrarTodoHistorialPedidos()">
-                                <i class="ph-bold ph-list"></i> Todo el historial
+                            <button type="button" class="btn-edit btn-todo-historial" onclick="mostrarTodoHistorialPedidos()">
+                                <i class="ph-bold ph-list"></i> Todo
                             </button>
                             <span id="resumen-filtro-pedidos" class="filtro-resumen">Mostrando todo el historial</span>
                         </div>
