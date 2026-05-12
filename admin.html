@@ -3242,16 +3242,16 @@ Esta acción no se puede deshacer.`);
                 const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
                 const pageW = pdf.internal.pageSize.getWidth();
                 const pageH = pdf.internal.pageSize.getHeight();
-                // Distribución optimizada: 9 guías por hoja en formato 3 x 3.
-                // Mantienen la misma proporción vertical de la guía individual,
-                // incluyendo la tirilla arrancable, solo en un tamaño menor.
-                const cols = 3;
-                const rows = 3;
+                // Distribución optimizada para impresión: 4 guías por hoja en formato 2 x 2.
+                // Se conserva el diseño y la proporción de la guía individual,
+                // pero se aumenta el tamaño real para que los datos se lean mejor al imprimir.
+                const cols = 2;
+                const rows = 2;
                 const guiasPorPagina = cols * rows;
                 const marginX = 6;
                 const marginY = 6;
-                const gapX = 5;
-                const gapY = 5;
+                const gapX = 6;
+                const gapY = 8;
                 const cardW = (pageW - (marginX * 2) - (gapX * (cols - 1))) / cols;
                 const cardH = (pageH - (marginY * 2) - (gapY * (rows - 1))) / rows;
 
