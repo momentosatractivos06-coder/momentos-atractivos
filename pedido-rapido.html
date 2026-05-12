@@ -571,45 +571,89 @@
         btn.disabled = true;
         btn.innerText = "Agendando...";
 
-        let ciudadFinal = selectCiudad.value === 'Otro'
-            ? document.getElementById('ciudad_otra').value
-            : selectCiudad.value;
+        const metodoSeleccionado = metodoEntrega.value;
+        const esDomicilio = metodoSeleccionado === "Domicilio";
+        const esRecogida = metodoSeleccionado === "Recogida";
 
-        if (metodoEntrega.value === 'Recogida') {
-            ciudadFinal = "N/A";
+        if (!esDomicilio && !esRecogida) {
+            alert("Por favor selecciona cómo recibirá el detalle.");
+            btn.disabled = false;
+            btn.innerText = "Confirmar mi Pedido";
+            return;
+        }
+
+        let ciudadFinal = "N/A";
+        let barrioFinal = "N/A";
+        let direccionFinal = "Recoge en Tienda";
+
+        if (esDomicilio) {
+            ciudadFinal = selectCiudad.value === 'Otro'
+                ? document.getElementById('ciudad_otra').value.trim()
+                : selectCiudad.value;
+
+            barrioFinal = document.getElementById('barrio').value.trim();
+            direccionFinal = document.getElementById('direccion').value.trim();
+
+            if (!ciudadFinal) {
+                alert("Seleccionaste envío a domicilio. Por favor indica la ciudad.");
+                btn.disabled = false;
+                btn.innerText = "Confirmar mi Pedido";
+                return;
+            }
+
+            if (!barrioFinal || !direccionFinal) {
+                alert("Seleccionaste envío a domicilio. Por favor completa barrio y dirección.");
+                btn.disabled = false;
+                btn.innerText = "Confirmar mi Pedido";
+                return;
+            }
         }
 
         let prodsList = [];
+        let productosValidos = true;
 
         document.querySelectorAll('.producto-row').forEach(row => {
             const cant = row.querySelector('.inp-cant').value;
             const nombreProd = row.querySelector('.inp-prod').value.trim();
+
+            if (!nombreProd) {
+                productosValidos = false;
+                return;
+            }
+
             prodsList.push(`${cant}x ${nombreProd}`);
         });
+
+        if (!productosValidos || prodsList.length === 0) {
+            alert("Por favor escribe el nombre de cada producto del pedido.");
+            btn.disabled = false;
+            btn.innerText = "Confirmar mi Pedido";
+            return;
+        }
 
         const datosPedido = {
             origen: "Redes Sociales",
 
-            metodo_entrega: metodoEntrega.value,
+            metodo_entrega: metodoSeleccionado,
             ciudad: ciudadFinal,
 
-            cliente: document.getElementById('cliente_nombre').value,
-            whatsapp_cliente: document.getElementById('cliente_whatsapp').value,
+            cliente: document.getElementById('cliente_nombre').value.trim(),
+            whatsapp_cliente: document.getElementById('cliente_whatsapp').value.trim(),
 
-            destinatario: document.getElementById('recibe_nombre').value,
-            whatsapp_destinatario: document.getElementById('recibe_whatsapp').value,
+            destinatario: document.getElementById('recibe_nombre').value.trim(),
+            whatsapp_destinatario: document.getElementById('recibe_whatsapp').value.trim(),
 
-            direccion: document.getElementById('direccion').value || "Recoge en Tienda",
-            barrio: document.getElementById('barrio').value || "N/A",
+            direccion: direccionFinal,
+            barrio: barrioFinal,
 
             producto: prodsList.join(" + "),
 
             fecha_entrega: document.getElementById('fecha_entrega').value,
             hora_entrega: document.getElementById('hora_entrega').value,
 
-            tarjeta_de: document.getElementById('tarjeta_de').value,
-            tarjeta_para: document.getElementById('tarjeta_para').value,
-            mensaje: document.getElementById('mensaje').value,
+            tarjeta_de: document.getElementById('tarjeta_de').value.trim(),
+            tarjeta_para: document.getElementById('tarjeta_para').value.trim(),
+            mensaje: document.getElementById('mensaje').value.trim(),
 
             estado: "Pendiente",
             timestamp: serverTimestamp()
