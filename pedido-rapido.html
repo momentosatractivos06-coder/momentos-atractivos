@@ -8,93 +8,271 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+<script>
+    window.MAImages = window.MAImages || (() => {
+        const extensiones = ['png', 'jpg', 'jpeg'];
+        const cache = new Map();
+
+        function esUrlDirecta(valor) {
+            return /^(?:https?:|data:|blob:)/i.test(String(valor || ''));
+        }
+
+        function separarUrl(valor) {
+            const texto = String(valor || '').trim();
+            const coincidencia = texto.match(/^([^?#]+)([?#].*)?$/);
+            return { ruta: coincidencia ? coincidencia[1] : texto, sufijo: coincidencia?.[2] || '' };
+        }
+
+        function candidatosPara(valor) {
+            const texto = String(valor || '').trim();
+            if (!texto) return [];
+            if (esUrlDirecta(texto)) return [texto];
+
+            const { ruta, sufijo } = separarUrl(texto);
+            const extension = ruta.match(/\.(png|jpe?g)$/i)?.[1]?.toLowerCase();
+            const base = extension ? ruta.replace(/\.(png|jpe?g)$/i, '') : ruta;
+            const candidatos = [];
+
+            if (extension) candidatos.push(`${base}.${extension}${sufijo}`);
+            extensiones.forEach(ext => candidatos.push(`${base}.${ext}${sufijo}`));
+            return [...new Set(candidatos)];
+        }
+
+        function comprobar(url) {
+            return new Promise(resolve => {
+                if (!url) return resolve(null);
+                if (esUrlDirecta(url)) return resolve(url);
+                const imagen = new Image();
+                imagen.onload = () => resolve(url);
+                imagen.onerror = () => resolve(null);
+                imagen.src = url;
+            });
+        }
+
+        async function resolver(...entradas) {
+            const lista = entradas.flat(Infinity).filter(Boolean);
+            const clave = JSON.stringify(lista);
+            if (cache.has(clave)) return cache.get(clave);
+
+            const promesa = (async () => {
+                for (const entrada of lista) {
+                    for (const candidato of candidatosPara(entrada)) {
+                        const encontrado = await comprobar(candidato);
+                        if (encontrado) return encontrado;
+                    }
+                }
+                return '';
+            })();
+
+            cache.set(clave, promesa);
+            return promesa;
+        }
+
+        async function aplicarImagen(elemento, ...bases) {
+            if (!elemento) return '';
+            const url = await resolver(...bases);
+            if (url) elemento.src = url;
+            return url;
+        }
+
+        async function aplicarFavicon(...bases) {
+            const url = await resolver(...bases);
+            if (!url) return '';
+            let enlace = document.querySelector('link[rel~="icon"]');
+            if (!enlace) {
+                enlace = document.createElement('link');
+                enlace.rel = 'icon';
+                document.head.appendChild(enlace);
+            }
+            enlace.href = url;
+            enlace.type = url.toLowerCase().includes('.png') ? 'image/png' : 'image/jpeg';
+            return url;
+        }
+
+        async function aplicarVariableCss(nombre, ...bases) {
+            const url = await resolver(...bases);
+            document.documentElement.style.setProperty(nombre, url ? `url("${url}")` : 'none');
+            return url;
+        }
+
+        return { resolver, aplicarImagen, aplicarFavicon, aplicarVariableCss };
+    })();
+</script>
+
     
     <style>
         :root {
             --rose-accent: #b8737f;
-            --rose-hover: #a0606b;
-            --bg-blush: #ffeef2;
-            --text-dark: #2a2a2a;
-            --text-light: #666666;
+            --rose-hover: #9f5d69;
+            --rose-deep: #5d3340;
+            --bg-blush: #fff3f6;
+            --text-dark: #2b2226;
+            --text-light: #6f5e63;
             --gold: #D4AF37;
-            --pattern-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250' viewBox='0 0 250 250' stroke='%23b8737f' stroke-width='1.2' fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.15'%3E%3Crect x='0' y='0' width='24' height='24' rx='2'/%3E%3Cline x1='12' y1='0' x2='12' y2='24'/%3E%3Cline x1='0' y1='12' x2='24' y2='12'/%3E%3Cpath d='M12 0 C4 -8, 4 4, 12 0 C20 -8, 20 4, 12 0'/%3E%3C/g%3E%3Cpath d='M120 40 Q130 30 140 40 T160 40'/%3E%3C/svg%3E");
+            --shadow-rose: 0 24px 60px rgba(122, 72, 85, 0.16);
+            --grain-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='%23ffffff' fill-opacity='.18'%3E%3Ccircle cx='16' cy='18' r='1'/%3E%3Ccircle cx='42' cy='24' r='1.1'/%3E%3Ccircle cx='74' cy='16' r='.9'/%3E%3Ccircle cx='110' cy='22' r='1'/%3E%3Ccircle cx='145' cy='18' r='.9'/%3E%3Ccircle cx='28' cy='58' r='.9'/%3E%3Ccircle cx='58' cy='74' r='1'/%3E%3Ccircle cx='96' cy='64' r='1'/%3E%3Ccircle cx='130' cy='72' r='1.1'/%3E%3Ccircle cx='160' cy='56' r='.9'/%3E%3Ccircle cx='18' cy='120' r='1'/%3E%3Ccircle cx='48' cy='110' r='1'/%3E%3Ccircle cx='82' cy='126' r='1.05'/%3E%3Ccircle cx='116' cy='118' r='.95'/%3E%3Ccircle cx='154' cy='132' r='1'/%3E%3Ccircle cx='34' cy='154' r='1'/%3E%3Ccircle cx='68' cy='160' r='.9'/%3E%3Ccircle cx='108' cy='150' r='1'/%3E%3Ccircle cx='144' cy='158' r='.95'/%3E%3C/g%3E%3C/svg%3E");
+            --pattern-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260' fill='none' stroke='%23b8737f' stroke-width='1.15' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.10'%3E%3Cpath d='M28 64c8-8 16 8 24 0s16 8 24 0'/%3E%3Cpath d='M196 62c8-8 16 8 24 0s16 8 24 0'/%3E%3Crect x='34' y='150' width='20' height='20' rx='2.5'/%3E%3Cpath d='M44 150v20M34 160h20M44 150c-7-8-7 2 0 0 7-8 7 2 0 0Z'/%3E%3Cpath d='M152 142c10-14 24-7 17 2-4 6-10 4-17-2Zm0 0c-10-14-24-7-17 2 4 6 10 4 17-2Z'/%3E%3Cpath d='M114 40 117 49 126 52 117 55 114 64 111 55 102 52 111 49 114 40Z'/%3E%3Cpath d='M204 188 207 197 216 200 207 203 204 212 201 203 192 200 201 197 204 188Z'/%3E%3C/svg%3E");
         }
 
+        * { box-sizing: border-box; }
+        html, body { min-height: 100%; }
+
         body {
-            font-family: 'Jost', sans-serif;
-            background-color: var(--bg-blush);
-            background-image: var(--pattern-url);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-dark);
             margin: 0;
-            padding: 20px;
+            padding: 24px;
             display: flex;
             justify-content: center;
+            align-items: flex-start;
             min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0) 28%),
+                radial-gradient(circle at 88% 16%, rgba(184,115,127,0.16) 0%, rgba(184,115,127,0) 26%),
+                linear-gradient(135deg, #fceff3 0%, #f6e4ea 40%, #fbeef1 100%);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::before {
+            background-image: var(--pattern-url);
+            background-size: 260px 260px;
+            opacity: 0.7;
+        }
+
+        body::after {
+            background-image: var(--grain-url);
+            opacity: 0.34;
+            mix-blend-mode: soft-light;
         }
 
         .order-card {
-            background: white;
+            position: relative;
+            z-index: 1;
             width: 100%;
-            max-width: 550px;
-            padding: 40px 30px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(184, 115, 127, 0.15);
-            border: 1px solid rgba(184, 115, 127, 0.1);
+            max-width: 600px;
+            padding: 34px 28px 30px;
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.74) 0%, rgba(255,255,255,0.60) 100%);
+            border: 1px solid rgba(255,255,255,0.62);
+            box-shadow: var(--shadow-rose), inset 0 1px 0 rgba(255,255,255,0.6);
+            backdrop-filter: blur(18px) saturate(135%);
+            -webkit-backdrop-filter: blur(18px) saturate(135%);
             margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .order-card::before,
+        .order-card::after {
+            content: "";
+            position: absolute;
+            border-radius: 999px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .order-card::before {
+            width: 240px;
+            height: 240px;
+            top: -90px;
+            right: -70px;
+            background: radial-gradient(circle, rgba(184,115,127,0.22) 0%, rgba(184,115,127,0.05) 38%, rgba(184,115,127,0) 72%);
+        }
+
+        .order-card::after {
+            width: 210px;
+            height: 210px;
+            left: -90px;
+            bottom: -80px;
+            background: radial-gradient(circle, rgba(212,175,55,0.12) 0%, rgba(212,175,55,0.04) 40%, rgba(212,175,55,0) 72%);
+        }
+
+        .order-card > * {
+            position: relative;
+            z-index: 1;
         }
 
         .logo-header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .logo-header img {
-            max-height: 80px;
+            max-height: 82px;
+            filter: drop-shadow(0 10px 18px rgba(122,72,85,0.12));
         }
 
         h1 {
             font-family: 'Marcellus', serif;
             color: var(--rose-accent);
             text-align: center;
-            font-size: 2.2rem;
-            margin: 0 0 5px 0;
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            line-height: 1.08;
+            letter-spacing: 0.01em;
+            margin: 0 0 8px 0;
         }
 
         p.subtitle {
             text-align: center;
             color: var(--text-light);
-            margin-bottom: 35px;
-            font-size: 1.05rem;
+            margin: 0 auto 32px;
+            font-size: 1rem;
+            line-height: 1.6;
+            max-width: 420px;
         }
 
         .form-section {
-            background: #fafafa;
-            border: 1px solid #f0f0f0;
-            border-radius: 12px;
-            padding: 25px 20px;
-            margin-bottom: 25px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.56) 0%, rgba(255,255,255,0.42) 100%);
+            border: 1px solid rgba(255,255,255,0.7);
+            border-radius: 20px;
+            padding: 22px 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 14px 34px rgba(184,115,127,0.08), inset 0 1px 0 rgba(255,255,255,0.7);
+            backdrop-filter: blur(10px) saturate(125%);
+            -webkit-backdrop-filter: blur(10px) saturate(125%);
         }
 
         .section-title {
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: var(--rose-hover);
-            border-bottom: 2px solid var(--bg-blush);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 1.03rem;
+            letter-spacing: 0.02em;
+            color: var(--rose-deep);
+            border-bottom: 1px solid rgba(184,115,127,0.14);
+            padding-bottom: 12px;
+            margin-bottom: 18px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
         .section-title i {
-            font-size: 1.4rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.18rem;
             color: var(--gold);
+            background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.42));
+            border: 1px solid rgba(184,115,127,0.12);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
         }
 
         .input-group {
-            margin-bottom: 18px;
+            margin-bottom: 16px;
             position: relative;
             width: 100%;
         }
@@ -102,38 +280,46 @@
         label {
             display: block;
             font-size: 0.9rem;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-dark);
             margin-bottom: 8px;
         }
-        
+
         input,
         select,
         textarea {
             width: 100%;
-            height: 50px;
+            height: 52px;
             padding: 0 15px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
+            border: 1px solid rgba(184,115,127,0.14);
+            border-radius: 14px;
             font-family: inherit;
-            font-size: 1rem;
-            background: white;
-            box-sizing: border-box;
-            transition: 0.3s;
+            font-size: 0.98rem;
+            color: var(--text-dark);
+            background: linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.76) 100%);
+            transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease, background-color .25s ease;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #9b8a90;
         }
 
         textarea {
             height: auto;
-            padding: 15px;
+            min-height: 108px;
+            padding: 14px 15px;
             resize: vertical;
         }
         
         input:focus,
         select:focus,
         textarea:focus {
-            border-color: var(--rose-accent);
+            border-color: rgba(184,115,127,0.42);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(184, 115, 127, 0.1);
+            box-shadow: 0 0 0 4px rgba(184,115,127,0.11), 0 10px 22px rgba(184,115,127,0.07);
+            transform: translateY(-1px);
         }
 
         .row {
@@ -161,30 +347,31 @@
         }
 
         .producto-row {
-            background: #fff;
-            border: 1px solid #eee;
-            padding: 20px;
-            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.76) 0%, rgba(255,255,255,0.58) 100%);
+            border: 1px solid rgba(184,115,127,0.12);
+            padding: 18px;
+            border-radius: 18px;
             margin-bottom: 15px;
             position: relative;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
         }
 
         .btn-remove-prod {
             position: absolute;
             top: -10px;
             right: -10px;
-            background: #ff4d4d;
+            background: linear-gradient(180deg, #ff6a74 0%, #ef4e5b 100%);
             color: white;
-            border: none;
+            border: 2px solid rgba(255,255,255,0.92);
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            font-weight: bold;
+            box-shadow: 0 10px 18px rgba(239,78,91,0.22);
+            font-weight: 700;
         }
 
         .grid-producto-cantidad {
@@ -195,65 +382,106 @@
         }
 
         .btn-secundario {
-            background: transparent;
+            background: linear-gradient(180deg, rgba(255,255,255,0.54) 0%, rgba(255,255,255,0.34) 100%);
             color: var(--rose-accent);
-            border: 2px dashed var(--rose-accent);
+            border: 1.5px dashed rgba(184,115,127,0.48);
             width: 100%;
             padding: 15px;
-            border-radius: 12px;
-            font-weight: 600;
+            border-radius: 16px;
+            font-weight: 700;
             cursor: pointer;
-            transition: 0.3s;
+            transition: .28s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
             margin-bottom: 25px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
         }
 
         .btn-secundario:hover {
-            background: var(--bg-blush);
+            background: linear-gradient(180deg, rgba(255,255,255,0.74) 0%, rgba(255,255,255,0.44) 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 14px 24px rgba(184,115,127,0.10);
         }
 
         button.btn-submit {
             width: 100%;
-            padding: 18px;
-            background: var(--rose-accent);
+            min-height: 58px;
+            padding: 16px 18px;
+            background: linear-gradient(135deg, #b8737f 0%, #9f5d69 100%);
             color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.42);
+            border-radius: 999px;
+            font-size: 1rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: .08em;
             cursor: pointer;
-            transition: 0.3s;
-            margin-top: 15px;
+            transition: .28s ease;
+            margin-top: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 10px;
+            box-shadow: 0 16px 28px rgba(159,93,105,0.28), inset 0 1px 0 rgba(255,255,255,0.22);
+        }
+
+        button.btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 20px 32px rgba(159,93,105,0.34), inset 0 1px 0 rgba(255,255,255,0.22);
         }
 
         button.btn-submit:disabled {
             opacity: 0.75;
             cursor: not-allowed;
+            transform: none;
         }
 
         input[type="date"],
         input[type="time"] {
             cursor: pointer;
             color: var(--rose-hover);
+            font-weight: 600;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid rgba(184,115,127,0.14) !important;
         }
 
         @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
             .row {
                 grid-template-columns: 1fr;
                 gap: 10px;
             }
 
             .order-card {
-                padding: 30px 20px;
+                padding: 26px 16px 20px;
+                border-radius: 24px;
+            }
+
+            h1 {
+                font-size: 1.9rem;
+            }
+
+            p.subtitle {
+                font-size: 0.96rem;
+                margin-bottom: 24px;
+            }
+
+            .form-section {
+                padding: 18px 14px;
+                border-radius: 18px;
+            }
+
+            .section-title {
+                font-size: 1rem;
+                padding-bottom: 10px;
             }
         }
     </style>
@@ -262,7 +490,7 @@
 
 <div class="order-card">
     <div class="logo-header">
-        <img src="imagenes/logo.png" alt="Momentos Atractivos">
+        <img id="ma-pedido-logo" src="imagenes/logo.png" data-ma-base="imagenes/logo" alt="Momentos Atractivos">
     </div>
     
     <h1>¡Armemos tu sorpresa!</h1>
@@ -292,11 +520,10 @@
 
             <div class="input-group">
                 <label>¿Cómo recibirá el detalle? *</label>
-                <select id="metodo_entrega" required>
-                    <option value="" disabled selected>Selecciona...</option>
-                    <option value="Domicilio">Envío a Domicilio</option>
-                    <option value="Recogida">Recoger en Tienda</option>
-                </select>
+                <input type="hidden" id="metodo_entrega" value="Domicilio">
+                <div style="height:52px; padding:0 15px; border:1px solid rgba(184,115,127,0.14); border-radius:14px; background:linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.76) 100%); display:flex; align-items:center; gap:10px; color:var(--rose-hover); font-weight:700; box-sizing:border-box; box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);">
+                    <i class="ph-light ph-truck" style="color:var(--gold); font-size:1.25rem;"></i> Envío a domicilio
+                </div>
             </div>
 
             <div class="input-group">
@@ -309,7 +536,7 @@
                 <input type="tel" id="recibe_whatsapp" required placeholder="Ej: 300 123 4567">
             </div>
 
-            <div id="contenedor-domicilio" class="dinamico">
+            <div id="contenedor-domicilio" style="display:block;">
                 <div class="row">
                     <div class="input-group">
                         <label>Ciudad *</label>
@@ -322,7 +549,7 @@
 
                     <div class="input-group">
                         <label>Barrio *</label>
-                        <input type="text" id="barrio" placeholder="Barrio">
+                        <input type="text" id="barrio" required placeholder="Barrio">
                     </div>
                 </div>
 
@@ -332,7 +559,7 @@
 
                 <div class="input-group">
                     <label>Dirección *</label>
-                    <input type="text" id="direccion" placeholder="Ej: Calle 20 #15-30">
+                    <input type="text" id="direccion" required placeholder="Ej: Calle 20 #15-30">
                 </div>
             </div>
         </div>
@@ -348,6 +575,11 @@
                 <i class="ph-bold ph-plus"></i> Añadir otro producto diferente
             </button>
 
+            <div class="input-group">
+                <label for="detalles_adicionales">Color o detalles adicionales (Opcional)</label>
+                <textarea id="detalles_adicionales" rows="3" placeholder="Ej: Merienda Love en caja dorada, jugo de naranja..."></textarea>
+            </div>
+
             <div class="row">
                 <div class="input-group">
                     <label>Fecha *</label>
@@ -360,7 +592,7 @@
                 </div>
             </div>
 
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
+            <hr style="border: 0; border-top: 1px solid rgba(184,115,127,0.14); margin: 25px 0;">
             
             <div class="row">
                 <div class="input-group">
@@ -415,22 +647,10 @@
     const selectCiudad = document.getElementById('ciudad');
     const contenedorCiudadOtra = document.getElementById('contenedor-ciudad-otra');
 
-    metodoEntrega.addEventListener('change', () => {
-        const esDomicilio = metodoEntrega.value === 'Domicilio';
-
-        contenedorDomicilio.style.display = esDomicilio ? 'block' : 'none';
-
-        document.getElementById('direccion').required = esDomicilio;
-        document.getElementById('barrio').required = esDomicilio;
-
-        if (!esDomicilio) {
-            document.getElementById('direccion').value = '';
-            document.getElementById('barrio').value = '';
-            document.getElementById('ciudad_otra').value = '';
-            document.getElementById('ciudad_otra').required = false;
-            contenedorCiudadOtra.style.display = 'none';
-        }
-    });
+    // El domicilio es el único método habilitado.
+    contenedorDomicilio.style.display = 'block';
+    document.getElementById('direccion').required = true;
+    document.getElementById('barrio').required = true;
 
     selectCiudad.addEventListener('change', () => {
         const esOtraCiudad = selectCiudad.value === 'Otro';
@@ -530,16 +750,15 @@
         mensaje += `• Recibe: ${datos.destinatario}\n`;
         mensaje += `• Teléfono recibe: ${datos.whatsapp_destinatario}\n`;
 
-        if (datos.metodo_entrega === "Domicilio") {
-            mensaje += `• Ciudad: ${datos.ciudad}\n`;
-            mensaje += `• Barrio: ${datos.barrio}\n`;
-            mensaje += `• Dirección: ${datos.direccion}\n`;
-        } else {
-            mensaje += `• Recogida: En tienda\n`;
-        }
+        mensaje += `• Ciudad: ${datos.ciudad}\n`;
+        mensaje += `• Barrio: ${datos.barrio}\n`;
+        mensaje += `• Dirección: ${datos.direccion}\n`;
 
         mensaje += `\n*PEDIDO*\n`;
         mensaje += `• Detalle(s): ${datos.producto}\n`;
+        if (datos.detalles_adicionales && datos.detalles_adicionales.trim() !== "") {
+            mensaje += `• Color o detalles adicionales: ${datos.detalles_adicionales}\n`;
+        }
         mensaje += `• Fecha de entrega: ${formatearFechaLegible(datos.fecha_entrega)}\n`;
         mensaje += `• Hora de entrega: ${formatearHoraAMPM(datos.hora_entrega)}\n\n`;
 
@@ -571,42 +790,25 @@
         btn.disabled = true;
         btn.innerText = "Agendando...";
 
-        const metodoSeleccionado = metodoEntrega.value;
-        const esDomicilio = metodoSeleccionado === "Domicilio";
-        const esRecogida = metodoSeleccionado === "Recogida";
+        const metodoSeleccionado = "Domicilio";
+        const ciudadFinal = selectCiudad.value === 'Otro'
+            ? document.getElementById('ciudad_otra').value.trim()
+            : selectCiudad.value;
+        const barrioFinal = document.getElementById('barrio').value.trim();
+        const direccionFinal = document.getElementById('direccion').value.trim();
 
-        if (!esDomicilio && !esRecogida) {
-            alert("Por favor selecciona cómo recibirá el detalle.");
+        if (!ciudadFinal) {
+            alert("Por favor indica la ciudad de entrega.");
             btn.disabled = false;
             btn.innerText = "Confirmar mi Pedido";
             return;
         }
 
-        let ciudadFinal = "N/A";
-        let barrioFinal = "N/A";
-        let direccionFinal = "Recoge en Tienda";
-
-        if (esDomicilio) {
-            ciudadFinal = selectCiudad.value === 'Otro'
-                ? document.getElementById('ciudad_otra').value.trim()
-                : selectCiudad.value;
-
-            barrioFinal = document.getElementById('barrio').value.trim();
-            direccionFinal = document.getElementById('direccion').value.trim();
-
-            if (!ciudadFinal) {
-                alert("Seleccionaste envío a domicilio. Por favor indica la ciudad.");
-                btn.disabled = false;
-                btn.innerText = "Confirmar mi Pedido";
-                return;
-            }
-
-            if (!barrioFinal || !direccionFinal) {
-                alert("Seleccionaste envío a domicilio. Por favor completa barrio y dirección.");
-                btn.disabled = false;
-                btn.innerText = "Confirmar mi Pedido";
-                return;
-            }
+        if (!barrioFinal || !direccionFinal) {
+            alert("Por favor completa barrio y dirección de entrega.");
+            btn.disabled = false;
+            btn.innerText = "Confirmar mi Pedido";
+            return;
         }
 
         let prodsList = [];
@@ -647,6 +849,7 @@
             barrio: barrioFinal,
 
             producto: prodsList.join(" + "),
+            detalles_adicionales: document.getElementById('detalles_adicionales').value.trim(),
 
             fecha_entrega: document.getElementById('fecha_entrega').value,
             hora_entrega: document.getElementById('hora_entrega').value,
@@ -684,6 +887,16 @@
 
             abrirWhatsAppConRespaldo(mensajeWhatsApp);
         }
+    });
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        await Promise.all([
+            window.MAImages.aplicarFavicon('imagenes/favicon'),
+            window.MAImages.aplicarImagen(document.getElementById('ma-pedido-logo'), 'imagenes/logo')
+        ]);
     });
 </script>
 
