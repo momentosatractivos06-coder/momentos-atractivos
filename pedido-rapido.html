@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
 
 <script>
     window.MAImages = window.MAImages || (() => {
@@ -490,7 +490,7 @@
 
 <div class="order-card">
     <div class="logo-header">
-        <img id="ma-pedido-logo" src="imagenes/logo.png" data-ma-base="imagenes/logo" alt="Momentos Atractivos">
+        <img id="ma-pedido-logo" src="imagenes/logo.png" data-ma-base="imagenes/logo" alt="Momentos Atractivos" decoding="async">
     </div>
     
     <h1>¡Armemos tu sorpresa!</h1>
@@ -619,9 +619,6 @@
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
     const firebaseConfig = {
         apiKey: "AIzaSyCcWZhxgEX-2us4ZabD8QGx5-GpTOTxDhE",
         authDomain: "momentos-atractivos.firebaseapp.com",
@@ -631,8 +628,28 @@
         appId: "1:70547248657:web:6c0d466cb532a71b9f43b0"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    let firebasePedidoPromise = null;
+
+    async function obtenerFirebasePedido() {
+        if (!firebasePedidoPromise) {
+            firebasePedidoPromise = Promise.all([
+                import("https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"),
+                import("https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js")
+            ]).then(([appModule, firestoreModule]) => {
+                const app = appModule.initializeApp(firebaseConfig);
+                return {
+                    db: firestoreModule.getFirestore(app),
+                    collection: firestoreModule.collection,
+                    addDoc: firestoreModule.addDoc,
+                    serverTimestamp: firestoreModule.serverTimestamp
+                };
+            }).catch(error => {
+                firebasePedidoPromise = null;
+                throw error;
+            });
+        }
+        return firebasePedidoPromise;
+    }
 
     // Calendario nativo del navegador: más simple y estable.
     const inputFechaEntrega = document.getElementById('fecha_entrega');
@@ -858,11 +875,12 @@
             tarjeta_para: document.getElementById('tarjeta_para').value.trim(),
             mensaje: document.getElementById('mensaje').value.trim(),
 
-            estado: "Por confirmar",
-            timestamp: serverTimestamp()
+            estado: "Por confirmar"
         };
 
         try {
+            const { db, collection, addDoc, serverTimestamp } = await obtenerFirebasePedido();
+            datosPedido.timestamp = serverTimestamp();
             const docRef = await addDoc(collection(db, "pedidos"), datosPedido);
             const referenciaPedido = docRef.id ? docRef.id.slice(0, 8).toUpperCase() : "";
             const mensajeWhatsApp = construirMensajeWhatsApp(datosPedido, referenciaPedido);
@@ -892,11 +910,11 @@
 
 
 <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        await Promise.all([
+    document.addEventListener('DOMContentLoaded', () => {
+        Promise.all([
             window.MAImages.aplicarFavicon('imagenes/favicon'),
             window.MAImages.aplicarImagen(document.getElementById('ma-pedido-logo'), 'imagenes/logo')
-        ]);
+        ]).catch(error => console.warn('No fue posible resolver una imagen local:', error));
     });
 </script>
 
