@@ -12,6 +12,98 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+<script>
+    window.MAImages = window.MAImages || (() => {
+        const extensiones = ['png', 'jpg', 'jpeg'];
+        const cache = new Map();
+
+        function esUrlDirecta(valor) {
+            return /^(?:https?:|data:|blob:)/i.test(String(valor || ''));
+        }
+
+        function separarUrl(valor) {
+            const texto = String(valor || '').trim();
+            const coincidencia = texto.match(/^([^?#]+)([?#].*)?$/);
+            return { ruta: coincidencia ? coincidencia[1] : texto, sufijo: coincidencia?.[2] || '' };
+        }
+
+        function candidatosPara(valor) {
+            const texto = String(valor || '').trim();
+            if (!texto) return [];
+            if (esUrlDirecta(texto)) return [texto];
+
+            const { ruta, sufijo } = separarUrl(texto);
+            const extension = ruta.match(/\.(png|jpe?g)$/i)?.[1]?.toLowerCase();
+            const base = extension ? ruta.replace(/\.(png|jpe?g)$/i, '') : ruta;
+            const candidatos = [];
+
+            if (extension) candidatos.push(`${base}.${extension}${sufijo}`);
+            extensiones.forEach(ext => candidatos.push(`${base}.${ext}${sufijo}`));
+            return [...new Set(candidatos)];
+        }
+
+        function comprobar(url) {
+            return new Promise(resolve => {
+                if (!url) return resolve(null);
+                if (esUrlDirecta(url)) return resolve(url);
+                const imagen = new Image();
+                imagen.onload = () => resolve(url);
+                imagen.onerror = () => resolve(null);
+                imagen.src = url;
+            });
+        }
+
+        async function resolver(...entradas) {
+            const lista = entradas.flat(Infinity).filter(Boolean);
+            const clave = JSON.stringify(lista);
+            if (cache.has(clave)) return cache.get(clave);
+
+            const promesa = (async () => {
+                for (const entrada of lista) {
+                    for (const candidato of candidatosPara(entrada)) {
+                        const encontrado = await comprobar(candidato);
+                        if (encontrado) return encontrado;
+                    }
+                }
+                return '';
+            })();
+
+            cache.set(clave, promesa);
+            return promesa;
+        }
+
+        async function aplicarImagen(elemento, ...bases) {
+            if (!elemento) return '';
+            const url = await resolver(...bases);
+            if (url) elemento.src = url;
+            return url;
+        }
+
+        async function aplicarFavicon(...bases) {
+            const url = await resolver(...bases);
+            if (!url) return '';
+            let enlace = document.querySelector('link[rel~="icon"]');
+            if (!enlace) {
+                enlace = document.createElement('link');
+                enlace.rel = 'icon';
+                document.head.appendChild(enlace);
+            }
+            enlace.href = url;
+            enlace.type = url.toLowerCase().includes('.png') ? 'image/png' : 'image/jpeg';
+            return url;
+        }
+
+        async function aplicarVariableCss(nombre, ...bases) {
+            const url = await resolver(...bases);
+            document.documentElement.style.setProperty(nombre, url ? `url("${url}")` : 'none');
+            return url;
+        }
+
+        return { resolver, aplicarImagen, aplicarFavicon, aplicarVariableCss };
+    })();
+</script>
+
     
     <style>
         /* 🔥 Desplazamiento suave para toda la página */
@@ -26,6 +118,8 @@
             --text-dark: #2a2a2a;     
             --text-light: #666666;    
             --gold: #D4AF37;
+            --ma-home-bg-desktop: none;
+            --ma-home-bg-mobile: none;
             /* PATRÓN EXCLUSIVO TIPO WHATSAPP */
             --pattern-url: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250' viewBox='0 0 250 250' stroke='%23b8737f' stroke-width='1.2' fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.15'%3E%3C!-- Regalo --%3E%3Cg transform='translate(20,30) rotate(10)'%3E%3Crect x='0' y='0' width='24' height='24' rx='2'/%3E%3Cline x1='12' y1='0' x2='12' y2='24'/%3E%3Cline x1='0' y1='12' x2='24' y2='12'/%3E%3Cpath d='M12 0 C4 -8, 4 4, 12 0 C20 -8, 20 4, 12 0'/%3E%3C/g%3E%3C!-- Corazon --%3E%3Cg transform='translate(90,80) rotate(-15)'%3E%3Cpath d='M12 22 C -4 12, 2 -2, 12 4 C 22 -2, 28 12, 12 22 Z'/%3E%3C/g%3E%3C!-- Sobre --%3E%3Cg transform='translate(160,20) rotate(-5)'%3E%3Crect x='0' y='0' width='30' height='20' rx='1'/%3E%3Cpolyline points='0,0 15,12 30,0'/%3E%3C/g%3E%3C!-- Globo --%3E%3Cg transform='translate(200,130) rotate(15)'%3E%3Cellipse cx='10' cy='15' rx='10' ry='14'/%3E%3Cpolygon points='8,29 12,29 10,33'/%3E%3Cpath d='M10 33 Q2 45 10 55'/%3E%3C/g%3E%3C!-- Flor --%3E%3Cg transform='translate(30,160)'%3E%3Ccircle cx='10' cy='10' r='3'/%3E%3Ccircle cx='10' cy='3' r='4'/%3E%3Ccircle cx='10' cy='17' r='4'/%3E%3Ccircle cx='3' cy='10' r='4'/%3E%3Ccircle cx='17' cy='10' r='4'/%3E%3C/g%3E%3C!-- Destello 1 --%3E%3Cg transform='translate(130,180)'%3E%3Cpath d='M8 0 L10 6 L16 8 L10 10 L8 16 L6 10 L0 8 L6 6 Z'/%3E%3C/g%3E%3C!-- Cupcake --%3E%3Cg transform='translate(80,210) rotate(-10)'%3E%3Cpath d='M4 12 L20 12 L17 24 L7 24 Z'/%3E%3Cpath d='M4 12 C4 -4, 20 -4, 20 12 Z'/%3E%3Ccircle cx='12' cy='-2' r='2'/%3E%3C/g%3E%3C!-- Etiqueta --%3E%3Cg transform='translate(180,200) rotate(25)'%3E%3Cpolygon points='0,8 16,8 24,16 16,24 0,24'/%3E%3Ccircle cx='18' cy='16' r='1.5'/%3E%3C/g%3E%3C!-- Confeti --%3E%3Cpath d='M120 40 Q130 30 140 40 T160 40'/%3E%3Cpath d='M20 110 Q30 120 40 110 T60 120'/%3E%3Cpath d='M220 80 Q210 90 220 100 T210 110'/%3E%3C!-- Puntos --%3E%3Ccircle cx='140' cy='100' r='1' fill='%23b8737f' fill-opacity='0.15'/%3E%3Ccircle cx='70' cy='40' r='1.5' fill='%23b8737f' fill-opacity='0.15'/%3E%3Ccircle cx='230' cy='30' r='1' fill='%23b8737f' fill-opacity='0.15'/%3E%3Ccircle cx='40' cy='230' r='2' fill='%23b8737f' fill-opacity='0.15'/%3E%3Ccircle cx='150' cy='240' r='1' fill='%23b8737f' fill-opacity='0.15'/%3E%3C/svg%3E");
         }
@@ -200,7 +294,7 @@
             justify-content: center; 
             text-align: center; 
             padding: 130px 10% 120px; 
-            background: linear-gradient(rgba(255, 238, 242, 0.4), rgba(255, 238, 242, 0.6)), url('imagenes/fondo.jpg'); 
+            background-image: linear-gradient(rgba(255, 238, 242, 0.4), rgba(255, 238, 242, 0.6)), var(--ma-home-bg-desktop); 
             background-size: cover;
             background-position: center;
         }
@@ -229,7 +323,7 @@
 
         /* --- Títulos de Sección --- */
         .section-title { text-align: center; margin-bottom: 60px; position: relative; z-index: 2; }
-        .section-title h2 { font-size: 2.8rem; color: var(--text-dark); margin-bottom: 15px; }
+        .section-title h2 { font-size: 2.8rem; color: var(--rose-hover); margin-bottom: 15px; }
         .section-title .divider { width: 60px; height: 1px; background: var(--rose-accent); margin: 0 auto; }
 
         /* --- Galería --- */
@@ -345,6 +439,214 @@
             transform: scale(1.05);
         }
 
+
+        .servicio-link {
+            display: block;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .servicio-link:focus-visible {
+            outline: 3px solid rgba(184, 115, 127, 0.28);
+            outline-offset: 4px;
+        }
+
+        .servicios .shape-divider-bottom {
+            bottom: -1px;
+        }
+
+        /* --- Selección dinámica de productos en Inicio --- */
+        .home-products {
+            position: relative;
+            padding: 115px 5% 85px;
+            background: var(--white);
+        }
+
+        .home-products__inner {
+            width: min(1180px, 100%);
+            margin: 0 auto;
+        }
+
+        .home-products__heading {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 28px;
+            margin-bottom: 42px;
+        }
+
+        .home-products__heading-copy {
+            max-width: 680px;
+        }
+
+        .home-products__heading h2 {
+            color: var(--rose-hover);
+            font-size: clamp(2.35rem, 4.4vw, 3.65rem);
+            line-height: 1.05;
+            margin: 0;
+        }
+
+        .home-products__heading p {
+            color: var(--text-light);
+            font-size: 1.03rem;
+            line-height: 1.65;
+            margin: 0;
+        }
+
+        .home-products__all {
+            flex: 0 0 auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0 23px;
+            border: 1px solid rgba(184, 115, 127, 0.34);
+            border-radius: 999px;
+            color: var(--rose-hover);
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: 0.25s ease;
+        }
+
+        .home-products__all:hover {
+            background: var(--rose-accent);
+            border-color: var(--rose-accent);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .home-products-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .home-product-card {
+            position: relative;
+            min-width: 0;
+            overflow: hidden;
+            border: 1px solid rgba(184, 115, 127, 0.15);
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 12px 32px rgba(93, 55, 63, 0.07);
+            color: inherit;
+            text-decoration: none;
+            transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+        }
+
+        .home-product-card:hover {
+            transform: translateY(-7px);
+            border-color: rgba(184, 115, 127, 0.42);
+            box-shadow: 0 21px 44px rgba(93, 55, 63, 0.13);
+        }
+
+        .home-product-card__media {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            background: var(--bg-blush);
+        }
+
+        .home-product-card__media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.48s ease;
+        }
+
+        .home-product-card:hover .home-product-card__media img {
+            transform: scale(1.045);
+        }
+
+        .home-product-card__new,
+        .home-product-card__discount {
+            position: absolute;
+            z-index: 2;
+            top: 12px;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-size: 0.66rem;
+            font-weight: 800;
+            line-height: 1.05;
+            text-align: center;
+        }
+
+        .home-product-card__new {
+            left: 12px;
+            min-height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: rgba(160, 96, 107, 0.94);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .home-product-card__discount {
+            right: 10px;
+            width: 52px;
+            height: 52px;
+            padding: 7px;
+            background: #b85f70;
+            clip-path: polygon(50% 0%,61% 11%,76% 5%,82% 21%,98% 24%,92% 40%,100% 50%,89% 61%,95% 76%,79% 82%,76% 98%,60% 92%,50% 100%,39% 89%,24% 95%,18% 79%,2% 76%,8% 60%,0% 50%,11% 39%,5% 24%,21% 18%,24% 2%,40% 8%);
+            filter: drop-shadow(0 5px 9px rgba(116, 51, 64, 0.22));
+        }
+
+        .home-product-card__body {
+            padding: 17px 17px 18px;
+        }
+
+        .home-product-card__category {
+            display: block;
+            margin-bottom: 7px;
+            color: var(--rose-accent);
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .home-product-card h3 {
+            min-height: 2.45em;
+            margin: 0 0 12px;
+            color: var(--text-dark);
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.24rem;
+            font-weight: 400;
+            line-height: 1.2;
+        }
+
+        .home-product-card__price {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .home-product-card__price-current {
+            color: var(--rose-hover);
+            font-size: 1.04rem;
+            font-weight: 800;
+        }
+
+        .home-product-card__price-old {
+            color: #999;
+            font-size: 0.78rem;
+            text-decoration: line-through;
+        }
+
+        .home-products-status {
+            grid-column: 1 / -1;
+            padding: 35px;
+            border: 1px dashed rgba(184, 115, 127, 0.28);
+            border-radius: 16px;
+            color: var(--text-light);
+            text-align: center;
+        }
+
         /* --- Botones --- */
         .hero-buttons {
             display: flex;
@@ -435,10 +737,29 @@
 
         /* --- Sección: Filosofía --- */
         .filosofia {
-            position: relative; z-index: 2; padding: 80px 10%; background-color: var(--white); text-align: center;
+            position: relative;
+            z-index: 2;
+            /* La curva inferior ocupa parte del padding de abajo.
+               Este valor equilibra el espacio visible arriba y abajo del texto. */
+            padding: 62px 10% 145px;
+            background-color: var(--white);
+            text-align: center;
+            overflow: hidden;
         }
         .filosofia h2 {
-            font-size: clamp(2rem, 4vw, 2.8rem); color: var(--rose-accent); font-weight: 400; line-height: 1.4; max-width: 800px; margin: 0 auto; font-style: italic;
+            position: relative;
+            z-index: 2;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            color: var(--rose-accent);
+            font-weight: 400;
+            line-height: 1.4;
+            max-width: 800px;
+            margin: 0 auto;
+            font-style: italic;
+        }
+        .filosofia .shape-divider-bottom {
+            bottom: -1px;
+            z-index: 1;
         }
 
         /* --- Testimonios --- */
@@ -556,7 +877,7 @@
             .shape-divider-bottom svg { height: 41px; }
 
             .hero {
-                background-image: linear-gradient(rgba(255, 238, 242, 0.5), rgba(255, 238, 242, 0.7)), url('imagenes/fondotelefono.jpg');
+                background-image: linear-gradient(rgba(255, 238, 242, 0.5), rgba(255, 238, 242, 0.7)), var(--ma-home-bg-mobile);
                 background-size: cover; background-position: bottom center; min-height: 90vh; 
                 /* ✨ CAMBIO APLICADO AQUÍ: MISMO PADDING QUE EL CATÁLOGO ✨ */
                 padding: 160px 5% 40px; 
@@ -588,7 +909,7 @@
             .section-title { margin-bottom: 30px; }
             .section-title h2 { font-size: 2.2rem; }
 
-            .filosofia { padding: 50px 5%; }
+            .filosofia { padding: 42px 5% 96px; }
             .filosofia h2 { font-size: 1.6rem; }
             
             .gallery-section { padding: 60px 5% 80px; }
@@ -603,6 +924,22 @@
             .servicio-icon { font-size: 2.5rem; margin-bottom: 15px;}
             .bg-number { font-size: 8rem; top: -10px; right: -5px; }
 
+
+            .home-products { padding: 68px 4% 58px; }
+            .home-products__heading { align-items: flex-start; flex-direction: column; gap: 18px; margin-bottom: 28px; }
+            .home-products__heading h2 { font-size: 2.35rem; }
+            .home-products__heading p { font-size: 0.94rem; }
+            .home-products__all { min-height: 43px; padding: 0 18px; font-size: 0.74rem; }
+            .home-products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+            .home-product-card { border-radius: 12px; }
+            .home-product-card__body { padding: 12px 11px 14px; }
+            .home-product-card__category { font-size: 0.58rem; margin-bottom: 5px; }
+            .home-product-card h3 { min-height: 2.5em; font-size: 1rem; margin-bottom: 9px; }
+            .home-product-card__price-current { font-size: 0.9rem; }
+            .home-product-card__price-old { font-size: 0.68rem; }
+            .home-product-card__new { top: 7px; left: 7px; min-height: 23px; padding: 0 7px; font-size: 0.53rem; }
+            .home-product-card__discount { top: 6px; right: 5px; width: 43px; height: 43px; font-size: 0.57rem; }
+
             .testimonios { padding: 60px 5% 80px; }
             .testimonios-carousel-wrapper { padding: 0 35px; }
             .testimonio-card { flex: 0 0 100%; padding: 30px 20px; }
@@ -615,6 +952,443 @@
             footer { padding: 50px 5% 30px; }
             .main-logo { max-height: 60px; } 
         }
+
+
+        /* ========================================================== */
+        /* PREGUNTAS FRECUENTES Y PIE DE PÁGINA                       */
+        /* ========================================================== */
+        .ma-faq {
+            position: relative;
+            padding: 160px 5% 105px;
+            overflow: hidden;
+            background-color: var(--white);
+        }
+
+        .ma-faq-wave {
+            position: absolute;
+            top: -1px;
+            left: 0;
+            width: 100%;
+            height: 112px;
+            overflow: hidden;
+            line-height: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .ma-faq-wave svg {
+            display: block;
+            width: calc(100% + 2px);
+            height: 100%;
+        }
+
+        .ma-faq-wave path {
+            fill: var(--bg-blush);
+        }
+
+        .ma-faq-inner {
+            width: min(1120px, 100%);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+            align-items: start;
+            gap: 72px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .ma-faq-intro {
+            position: sticky;
+            top: 135px;
+        }
+
+        .ma-faq-intro h2 {
+            margin-bottom: 18px;
+            color: var(--rose-hover);
+            font-size: clamp(2.35rem, 4.2vw, 4rem);
+            line-height: 1.04;
+        }
+
+        .ma-faq-intro p {
+            max-width: 480px;
+            color: var(--text-light);
+            font-size: 1rem;
+            line-height: 1.75;
+        }
+
+        .ma-faq-contact {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            margin-top: 12px;
+            color: var(--rose-hover);
+            font-weight: 650;
+            text-decoration: none;
+        }
+
+        .ma-faq-contact:hover {
+            color: var(--rose-accent);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        .ma-accordion {
+            overflow: hidden;
+            border: 1px solid rgba(184, 115, 127, 0.18);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.93);
+            box-shadow: 0 18px 50px rgba(92, 55, 65, 0.08);
+            backdrop-filter: blur(8px);
+        }
+
+        .ma-accordion-item + .ma-accordion-item {
+            border-top: 1px solid rgba(184, 115, 127, 0.14);
+        }
+
+        .ma-accordion-button {
+            width: 100%;
+            min-height: 76px;
+            padding: 21px 24px;
+            border: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 22px;
+            background: transparent;
+            color: var(--text-dark);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.98rem;
+            font-weight: 650;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.25s ease, color 0.25s ease;
+        }
+
+        .ma-accordion-button:hover,
+        .ma-accordion-item.is-open .ma-accordion-button {
+            background: #fff8fa;
+            color: var(--rose-hover);
+        }
+
+        .ma-accordion-icon {
+            flex: 0 0 32px;
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(184, 115, 127, 0.28);
+            border-radius: 50%;
+            color: var(--rose-accent);
+            font-size: 1.18rem;
+            transition: 0.25s ease;
+        }
+
+        .ma-accordion-item.is-open .ma-accordion-icon {
+            border-color: var(--rose-accent);
+            background: var(--rose-accent);
+            color: #fff;
+            transform: rotate(45deg);
+        }
+
+        .ma-accordion-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.28s ease;
+        }
+
+        .ma-accordion-content > div {
+            overflow: hidden;
+        }
+
+        .ma-accordion-content p {
+            margin: 0;
+            padding: 0 68px 0 24px;
+            color: var(--text-light);
+            font-size: 0.92rem;
+            line-height: 1.7;
+        }
+
+        .ma-accordion-item.is-open .ma-accordion-content {
+            grid-template-rows: 1fr;
+        }
+
+        .ma-accordion-item.is-open .ma-accordion-content p {
+            padding-bottom: 23px;
+        }
+
+        footer.ma-footer {
+            margin: 0;
+            padding: 68px 5% 22px;
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 9% 10%, rgba(212, 175, 55, 0.12), transparent 25%),
+                linear-gradient(135deg, #5b3540 0%, #40242c 100%);
+            color: #fff;
+            text-align: left;
+            border-top: 3px solid rgba(212, 175, 55, 0.70);
+        }
+
+        footer.ma-footer::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: var(--pattern-url);
+            opacity: 0.12;
+            pointer-events: none;
+        }
+
+        .ma-footer-grid,
+        .ma-footer-bottom {
+            width: min(1200px, 100%);
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .ma-footer-grid {
+            display: grid;
+            grid-template-columns: minmax(260px, 1.45fr) repeat(3, minmax(150px, 0.85fr));
+            gap: 48px;
+            align-items: start;
+        }
+
+        .ma-footer-brand img,
+        .ma-footer-logo {
+            display: block;
+            width: 210px;
+            height: 88px;
+            padding: 8px 13px;
+            object-fit: contain;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.14);
+        }
+
+        .ma-footer-brand p {
+            max-width: 390px;
+            margin: 18px 0 22px;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.88rem;
+            line-height: 1.65;
+        }
+
+        .ma-footer-social-title {
+            display: block;
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .ma-footer-socials {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .ma-footer-socials a {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: 0.25s ease;
+        }
+
+        .ma-footer-socials a:hover {
+            border-color: var(--gold);
+            background: rgba(255, 255, 255, 0.09);
+            color: var(--gold);
+            transform: translateY(-2px);
+        }
+
+        .ma-footer-column {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 9px;
+        }
+
+        .ma-footer-column strong {
+            margin-bottom: 8px;
+            color: #fff;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.84rem;
+            font-weight: 700;
+        }
+
+        .ma-footer-column a,
+        .ma-footer-column span {
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 0.82rem;
+            line-height: 1.5;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .ma-footer-column a:hover {
+            color: var(--gold);
+        }
+
+        .ma-footer-bottom {
+            margin-top: 46px;
+            padding-top: 19px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 20px;
+            color: rgba(255, 255, 255, 0.46);
+            font-size: 0.74rem;
+        }
+
+        .ma-footer-bottom a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        @media (max-width: 1150px) {
+            .nav-links {
+                gap: 18px;
+            }
+
+            .nav-links a.nav-item {
+                font-size: 0.80rem;
+                letter-spacing: 1.35px;
+            }
+
+            .header-right-group {
+                gap: 18px;
+            }
+        }
+
+        @media (max-width: 980px) {
+            .ma-faq-inner {
+                grid-template-columns: 1fr;
+                gap: 35px;
+            }
+
+            .ma-faq-intro {
+                position: static;
+            }
+
+            .ma-footer-grid {
+                grid-template-columns: 1.3fr 1fr 1fr;
+            }
+
+            .ma-footer-brand {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .ma-faq {
+                padding: 108px 5% 76px;
+            }
+
+            .ma-faq-wave {
+                height: 72px;
+            }
+
+            .ma-faq-inner {
+                gap: 28px;
+            }
+
+            .ma-accordion-button {
+                min-height: 68px;
+                padding: 18px;
+                font-size: 0.91rem;
+            }
+
+            .ma-accordion-content p {
+                padding-left: 18px;
+                padding-right: 58px;
+            }
+
+            footer.ma-footer {
+                padding: 52px 6% 20px;
+            }
+
+            .ma-footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 32px 22px;
+            }
+
+            .ma-footer-brand {
+                grid-column: 1 / -1;
+            }
+
+            .ma-footer-bottom {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 7px;
+            }
+        }
+
+        @media (max-width: 460px) {
+            .ma-footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ma-footer-brand {
+                grid-column: auto;
+            }
+
+            .ma-footer-column {
+                padding-top: 20px;
+                border-top: 1px solid rgba(255, 255, 255, 0.11);
+            }
+        }
+
+    
+
+        /* ========================================================== */
+        /* EXTREMOS DEL DOCUMENTO: SIN FRANJAS BLANCAS AL SOBREDESPLAZAR */
+        /* ========================================================== */
+        html {
+            min-height: 100%;
+            overscroll-behavior-y: none;
+            background:
+                linear-gradient(
+                    to bottom,
+                    #b8737f 0%,
+                    #b8737f 50%,
+                    #40242c 50%,
+                    #40242c 100%
+                ) fixed;
+        }
+
+        body {
+            min-height: 100vh;
+            overscroll-behavior-y: none;
+            background-color: var(--white);
+        }
+
+        /* El parche anterior añadía un pseudo-elemento al final del body.
+           Se desactiva por completo para no crear artefactos ni altura adicional. */
+        body#inicio::after {
+            content: none !important;
+            display: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Pintura de seguridad por encima de la primera barra fija. */
+        .announcement-bar {
+            box-shadow: 0 -100vh 0 100vh #b8737f;
+        }
+
+        /* Pintura de seguridad por debajo del footer sin aumentar su altura. */
+        footer.ma-footer {
+            box-shadow: 0 100vh 0 100vh #40242c;
+        }
+
     </style>
 </head>
 <body id="inicio">
@@ -633,7 +1407,7 @@
     <header>
         <div class="logo-container">
             <a href="#inicio">
-                <img src="imagenes/logo.png" alt="Logo de Momentos Atractivos" class="main-logo">
+                <img id="ma-logo-principal" src="imagenes/logo.png" data-ma-base="imagenes/logo" alt="Logo de Momentos Atractivos" class="main-logo">
             </a>
         </div>
 
@@ -643,6 +1417,7 @@
                 <a href="catalogo.html" class="nav-item">Catálogo</a>
                 <a href="#galeria" class="nav-item">Galería</a>
                 <a href="#testimonios" class="nav-item">Testimonios</a>
+                <a href="#preguntas-frecuentes" class="nav-item">Preguntas</a>
                 
                 <a href="#" class="cart-action-btn" id="cart-icon-nav-desktop">
                     <span>CARRITO</span>
@@ -698,38 +1473,12 @@
         </div>
     </section>
 
-    <section class="filosofia">
-        <h2 class="reveal">"Creemos que el regalo perfecto no es el más costoso, sino el que está pensado exclusivamente para hacer brillar a quien lo recibe. Somos tus cómplices de sonrisas."</h2>
-    </section>
+    <section class="filosofia" aria-label="Filosofía de Momentos Atractivos">
+        <h2 class="reveal">“Creemos que cada detalle tiene el poder de acercar corazones y transformar momentos en recuerdos que permanecen. Por eso creamos con intención y hacemos de cada regalo una forma de pertenecer.”</h2>
 
-    <section class="gallery-section" id="galeria">
-        <div class="section-title reveal">
-            <h2>Galería</h2>
-            <div class="divider"></div>
-        </div>
-
-        <div class="gallery-grid reveal">
-            <div class="gallery-item">
-                <img src="imagenes/desayuno1.jpg" alt="Desayuno Sorpresa">
-                <div class="gallery-overlay"><p class="overlay-category">Desayunos</p><p class="overlay-text">Sorpresas Matutinas</p></div>
-            </div>
-            <div class="gallery-item">
-                <img src="imagenes/ancheta1.jpg" alt="Ancheta Especial">
-                <div class="gallery-overlay"><p class="overlay-category">Anchetas</p><p class="overlay-text">Para Compartir</p></div>
-            </div>
-            <div class="gallery-item">
-                <img src="imagenes/detalle2.jpg" alt="Fechas Especiales">
-                <div class="gallery-overlay"><p class="overlay-category">Momentos</p><p class="overlay-text">Momentos Atractivos</p></div>
-            </div>
-            <div class="gallery-item">
-                <img src="imagenes/decoracion1.jpg" alt="Detalle Único">
-                <div class="gallery-overlay"><p class="overlay-category">Detalles</p><p class="overlay-text">Regalos Personalizados</p></div>
-            </div>
-        </div>
-        
-        <div class="shape-divider-bottom">
-            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" style="background-color: #ffeef2;">
-                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#ffffff" stroke="#ffffff" stroke-width="1"></path>
+        <div class="shape-divider-bottom" style="transform: rotate(0deg);" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" style="background-color: transparent;">
+                <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" fill="#ffeef2" stroke="#ffeef2" stroke-width="1"></path>
             </svg>
         </div>
     </section>
@@ -740,30 +1489,83 @@
             <div class="divider"></div>
         </div>
         <div class="grid-servicios reveal">
-            <div class="servicio-card">
+            <a class="servicio-card servicio-link" href="catalogo.html?categoria=Desayunos" aria-label="Ver desayunos en el catálogo">
                 <span class="bg-number">1</span>
                 <div class="card-content">
                     <i class="fas fa-coffee servicio-icon"></i>
                     <h3>Desayunos</h3>
                     <p>Sorpresas matutinas diseñadas para empezar el día de la mejor manera y con el mejor sabor.</p>
                 </div>
-            </div>
-            <div class="servicio-card">
+            </a>
+            <a class="servicio-card servicio-link" href="catalogo.html?categoria=Anchetas" aria-label="Ver anchetas en el catálogo">
                 <span class="bg-number">2</span>
                 <div class="card-content">
                     <i class="fas fa-shopping-basket servicio-icon"></i>
                     <h3>Anchetas</h3>
                     <p>Selecciones premium de productos perfectas para regalar, compartir y deslumbrar.</p>
                 </div>
-            </div>
-            <div class="servicio-card">
+            </a>
+            <a class="servicio-card servicio-link" href="catalogo.html?categoria=Detalles" aria-label="Ver detalles en el catálogo">
                 <span class="bg-number">3</span>
                 <div class="card-content">
                     <i class="fas fa-heart servicio-icon"></i>
                     <h3>Detalles</h3>
                     <p>Regalos 100% personalizados que demuestran con arte cuánto te importa esa persona.</p>
                 </div>
+            </a>
+        </div>
+        <div class="shape-divider-bottom" style="transform: rotate(0deg);" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" style="background-color: transparent;">
+                <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" fill="#ffffff" stroke="#ffffff" stroke-width="1"></path>
+            </svg>
+        </div>
+    </section>
+
+    <section class="home-products" id="productos-destacados">
+        <div class="home-products__inner">
+            <div class="home-products__heading reveal">
+                <div class="home-products__heading-copy">
+                    <h2>Nuevas formas de sorprender</h2>
+                </div>
+                <a class="home-products__all" href="catalogo.html">Ver todo el catálogo</a>
             </div>
+
+            <div class="home-products-grid reveal" id="home-products-grid" aria-live="polite">
+                <p class="home-products-status">Cargando detalles seleccionados…</p>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="gallery-section" id="galeria">
+        <div class="section-title reveal">
+            <h2>Momentos que inspiran</h2>
+            <div class="divider"></div>
+        </div>
+
+        <div class="gallery-grid reveal">
+            <div class="gallery-item">
+                <img id="galeria-img-1" src="imagenes/cumpleanos.jpg" data-ma-base="imagenes/cumpleanos" alt="Cumpleaños">
+                <div class="gallery-overlay"><p class="overlay-category">Cumpleaños</p><p class="overlay-text">Celebra su día</p></div>
+            </div>
+            <div class="gallery-item">
+                <img id="galeria-img-2" src="imagenes/aniversarios.jpg" data-ma-base="imagenes/aniversarios" alt="Aniversarios">
+                <div class="gallery-overlay"><p class="overlay-category">Aniversarios</p><p class="overlay-text">Sorprende con amor</p></div>
+            </div>
+            <div class="gallery-item">
+                <img id="galeria-img-3" src="imagenes/logros.jpg" data-ma-base="imagenes/logros" alt="Logros">
+                <div class="gallery-overlay"><p class="overlay-category">Logros</p><p class="overlay-text">Celebra sus metas</p></div>
+            </div>
+            <div class="gallery-item">
+                <img id="galeria-img-4" src="imagenes/fechas-especiales.jpg" data-ma-base="imagenes/fechas-especiales" alt="Fechas especiales">
+                <div class="gallery-overlay"><p class="overlay-category">Fechas especiales</p><p class="overlay-text">Hazlo inolvidable</p></div>
+            </div>
+        </div>
+        
+        <div class="shape-divider-bottom">
+            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" style="background-color: #ffeef2;">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#ffffff" stroke="#ffffff" stroke-width="1"></path>
+            </svg>
         </div>
     </section>
 
@@ -808,38 +1610,93 @@
             <button class="carousel-btn next-btn"><i class="fas fa-chevron-right"></i></button>
         </div>
         
-        <div class="shape-divider-bottom">
-            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" style="background-color: #ffffff;">
-                <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" fill="#ffeef2" stroke="#ffeef2" stroke-width="1"></path>
+    </section>
+
+
+    <section class="ma-faq" id="preguntas-frecuentes">
+        <div class="ma-faq-wave" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M0,0H1200V46C1068,78,934,88,802,70C654,50,535,18,389,31C238,44,131,83,0,62Z"></path>
             </svg>
         </div>
-    </section>
+        <div class="ma-faq-inner">
+            <div class="ma-faq-intro reveal">
+                <h2>Todo claro antes de crear tu sorpresa.</h2>
+                <p>Reunimos las dudas más comunes para que puedas programar tu detalle con tranquilidad. Cada pedido se confirma personalmente por WhatsApp.</p>
+                <a class="ma-faq-contact" href="https://wa.me/573028442505?text=Hola%2C%20Momentos%20Atractivos.%20Tengo%20una%20pregunta%20sobre%20mi%20pedido." target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Hacer otra pregunta</a>
+            </div>
 
-    <section class="cta-box">
-        <h2 class="reveal">¿Quieres hacer algo diferente?</h2>
-        <p class="reveal">Si tienes algo único en mente que no encontraste en nuestro catálogo, ¡nosotras lo hacemos realidad! Escríbenos directamente y diseñemos juntos un detalle 100% personalizado que sorprenda de verdad.</p>
-        
-        <div class="hero-buttons reveal">
-            <a href="https://wa.me/573028442505?text=%C2%A1Hola%2C%20Momentos%20Atractivos%21%20%F0%9F%8E%81%20Tengo%20una%20idea%20y%20quiero%20cotizar%20un%20detalle%20100%25%20personalizado%20que%20no%20est%C3%A1%20en%20el%20cat%C3%A1logo.%20%E2%9C%A8" target="_blank" class="btn btn-solid btn-animado">
-                <i class="fab fa-whatsapp"></i> Cotizar por WhatsApp
-            </a>
+            <div class="ma-accordion reveal" id="faq-momentos">
+                <article class="ma-accordion-item is-open">
+                    <button class="ma-accordion-button" type="button" aria-expanded="true"><span>¿Con cuánto tiempo debo realizar mi pedido?</span><i class="ma-accordion-icon">+</i></button>
+                    <div class="ma-accordion-content"><div><p>Debes realizar tu pedido con mínimo 2 días de anticipación. Para fines de semana y fechas especiales te recomendamos reservar con aún más tiempo, ya que la disponibilidad se confirma por WhatsApp.</p></div></div>
+                </article>
+                <article class="ma-accordion-item">
+                    <button class="ma-accordion-button" type="button" aria-expanded="false"><span>¿Puedo personalizar los productos y la tarjeta?</span><i class="ma-accordion-icon">+</i></button>
+                    <div class="ma-accordion-content"><div><p>Sí. Puedes indicarnos colores, temática, mensaje, preferencias y otros detalles. Revisaremos contigo qué cambios son posibles antes de confirmar el pedido.</p></div></div>
+                </article>
+                <article class="ma-accordion-item">
+                    <button class="ma-accordion-button" type="button" aria-expanded="false"><span>¿Cómo se confirma el valor del domicilio?</span><i class="ma-accordion-icon">+</i></button>
+                    <div class="ma-accordion-content"><div><p>El costo se calcula según la ciudad, el barrio y la dirección de entrega. Después de recibir los datos, te enviaremos el valor final antes de confirmar el pedido.</p></div></div>
+                </article>
+                <article class="ma-accordion-item">
+                    <button class="ma-accordion-button" type="button" aria-expanded="false"><span>¿Puedo escoger una hora exacta de entrega?</span><i class="ma-accordion-icon">+</i></button>
+                    <div class="ma-accordion-content"><div><p>Puedes solicitar una hora. La confirmación dependerá de la agenda, el recorrido del domicilio y las condiciones del día; por eso siempre validamos la franja disponible contigo.</p></div></div>
+                </article>
+                <article class="ma-accordion-item">
+                    <button class="ma-accordion-button" type="button" aria-expanded="false"><span>¿Qué sucede si la persona no está en la dirección?</span><i class="ma-accordion-icon">+</i></button>
+                    <div class="ma-accordion-content"><div><p>Intentaremos comunicarnos con los teléfonos registrados. Es importante proporcionar datos correctos y una persona de contacto para evitar retrasos o un segundo desplazamiento.</p></div></div>
+                </article>
+                <article class="ma-accordion-item">
+                    <button class="ma-accordion-button" type="button" aria-expanded="false"><span>¿Cómo sé que mi pedido quedó confirmado?</span><i class="ma-accordion-icon">+</i></button>
+                    <div class="ma-accordion-content"><div><p>El envío del formulario no reemplaza la confirmación. Tu pedido queda agendado cuando Momentos Atractivos valida disponibilidad, datos de entrega, valor total y forma de pago contigo por WhatsApp.</p></div></div>
+                </article>
+            </div>
         </div>
     </section>
+    <footer class="ma-footer">
+        <div class="ma-footer-grid">
+            <div class="ma-footer-brand">
+                <img id="ma-logo-footer" class="ma-footer-logo" src="imagenes/logo-footer.png" data-ma-base="imagenes/logo-footer" alt="Logo horizontal de Momentos Atractivos">
+                <p>Creamos desayunos, anchetas y detalles personalizados para celebrar, agradecer y convertir cada entrega en un momento inolvidable.</p>
+                <span class="ma-footer-social-title">Síguenos</span>
+                <div class="ma-footer-socials" aria-label="Redes sociales de Momentos Atractivos">
+                    <a href="https://instagram.com/momentosatractivos" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.tiktok.com/@momentos_atractivos?_r=1&_t=ZS-94PaVt1P8Nk" target="_blank" rel="noopener" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                    <a href="https://wa.me/573028442505" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
 
-    <footer>
-        <div class="footer-logo">
-            <img src="imagenes/logo.png" alt="Logo de Momentos Atractivos" style="max-height: 140px; width: auto; position: relative; z-index: 2;">
+            <div class="ma-footer-column">
+                <strong>Explorar</strong>
+                <a href="#inicio">Inicio</a>
+                <a href="catalogo.html">Catálogo</a>
+                <a href="#galeria">Galería</a>
+                <a href="#servicios">Servicios</a>
+                <a href="#preguntas-frecuentes">Preguntas frecuentes</a>
+            </div>
+
+            <div class="ma-footer-column">
+                <strong>Atención al cliente</strong>
+                <a href="pedido-rapido.html">Hacer un pedido</a>
+                <a href="https://wa.me/573028442505" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+                <span>Sincelejo, Sucre</span>
+                <span>Entregas a domicilio</span>
+            </div>
+
+            <div class="ma-footer-column ma-footer-hours">
+                <strong>Horario</strong>
+                <span>Lunes a viernes</span>
+                <span>8:00 a. m. – 6:00 p. m.</span>
+                <span>Sábados</span>
+                <span>8:00 a. m. – 5:00 p. m.</span>
+            </div>
         </div>
-        <p class="siguenos-texto">Síguenos:</p>
-        <div class="social-icons-container">
-            <a href="https://instagram.com/momentosatractivos" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="#" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-            <a href="https://www.tiktok.com/@momentos_atractivos?_r=1&_t=ZS-94PaVt1P8Nk" target="_blank" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+
+        <div class="ma-footer-bottom">
+            <a href="admin.html" class="enlace-secreto">© <span class="ma-current-year">2026</span> Momentos Atractivos</a>
         </div>
-        
-        <p class="copyright">
-            <a href="admin.html" class="enlace-secreto">© 2026 MOMENTOS ATRACTIVOS</a> | SINCELEJO - COLOMBIA
-        </p>
     </footer>
 
     <div class="cart-overlay" id="cart-overlay"></div>
@@ -863,7 +1720,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         // Configuración de Firebase
         const firebaseConfig = {
@@ -878,6 +1735,294 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        // El primer nombre de cada grupo es el actual.
+        // El segundo mantiene compatibilidad con los nombres anteriores.
+        const GALERIA_INICIO_BASES = [
+            ['imagenes/cumpleanos', 'imagenes/desayuno1'],
+            ['imagenes/aniversarios', 'imagenes/ancheta1'],
+            ['imagenes/logros', 'imagenes/detalle2'],
+            ['imagenes/fechas-especiales', 'imagenes/decoracion1']
+        ];
+        let GALERIA_INICIO_PREDETERMINADA = GALERIA_INICIO_BASES.map(
+            bases => `${bases[0]}.jpg`
+        );
+
+        async function resolverGaleriaPredeterminadaInicio() {
+            GALERIA_INICIO_PREDETERMINADA = await Promise.all(
+                GALERIA_INICIO_BASES.map(async bases =>
+                    (await window.MAImages.resolver(...bases)) || `${bases[0]}.jpg`
+                )
+            );
+        }
+
+        function agregarVersionAUrl(url, version) {
+            if (!url || !version || url.startsWith('data:')) return url;
+            const separador = url.includes('?') ? '&' : '?';
+            return `${url}${separador}v=${encodeURIComponent(version)}`;
+        }
+
+        function aplicarGaleriaEnInicio(data = {}) {
+            const version = data.actualizadoEn || Date.now();
+
+            for (let numero = 1; numero <= 4; numero++) {
+                const imagen = document.getElementById(`galeria-img-${numero}`);
+                if (!imagen) continue;
+
+                const urlGuardada = String(data[`imagen${numero}`] || '').trim();
+                const urlFinal = urlGuardada
+                    ? agregarVersionAUrl(urlGuardada, version)
+                    : GALERIA_INICIO_PREDETERMINADA[numero - 1];
+
+                imagen.onerror = function() {
+                    this.onerror = null;
+                    this.src = GALERIA_INICIO_PREDETERMINADA[numero - 1];
+                };
+                imagen.src = urlFinal;
+            }
+        }
+
+        function escucharGaleriaEnInicio() {
+            const docRef = doc(db, 'configuracion', 'galeria_inicio');
+
+            return onSnapshot(
+                docRef,
+                (docSnap) => {
+                    aplicarGaleriaEnInicio(docSnap.exists() ? docSnap.data() : {});
+                },
+                async (error) => {
+                    console.error('Error escuchando la galería de Firebase:', error);
+
+                    // Respaldo: intenta una lectura única si la escucha en tiempo real falla.
+                    try {
+                        const docSnap = await getDoc(docRef);
+                        aplicarGaleriaEnInicio(docSnap.exists() ? docSnap.data() : {});
+                    } catch (readError) {
+                        console.error('Error obteniendo la galería de Firebase:', readError);
+                        aplicarGaleriaEnInicio({});
+                    }
+                }
+            );
+        }
+
+
+        const HOME_PRODUCTOS_NUEVOS_DIAS = 7;
+        const HOME_PRODUCTO_PLACEHOLDER = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500' style='background:%23ffeef2'%3E%3Ctext fill='%23b8737f' font-family='Arial' font-size='22' font-weight='bold' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle'%3EImagen pendiente%3C/text%3E%3C/svg%3E";
+        const formatoPrecioInicio = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+        const nombresCategoriasInicio = new Map([
+            ['Desayunos', 'Desayunos & Brunch'],
+            ['Anchetas', 'Cajas & Anchetas'],
+            ['Detalles', 'Detalles & Dulces'],
+            ['ColeccionEspecial', 'Colección especial']
+        ]);
+
+        function fechaProductoInicioMs(producto) {
+            const valor = producto?.createdAt || producto?.fechaCreacion || producto?.fecha_creacion || producto?.timestampCreacion;
+            if (!valor) return 0;
+            if (typeof valor.toDate === 'function') return valor.toDate().getTime();
+            if (typeof valor.seconds === 'number') return valor.seconds * 1000;
+            if (typeof valor === 'number') return valor > 1e12 ? valor : valor * 1000;
+            const fecha = new Date(valor);
+            return Number.isNaN(fecha.getTime()) ? 0 : fecha.getTime();
+        }
+
+        function productoEsNuevoInicio(producto) {
+            const fecha = fechaProductoInicioMs(producto);
+            if (!fecha) return false;
+            const antiguedad = Date.now() - fecha;
+            return antiguedad >= 0 && antiguedad < HOME_PRODUCTOS_NUEVOS_DIAS * 86400000;
+        }
+
+        function descuentoProductoInicio(producto) {
+            const regular = Number(producto?.precio);
+            const especial = Number(producto?.precioDescuento);
+            if (!Number.isFinite(regular) || !Number.isFinite(especial) || regular <= 0 || especial <= 0 || especial >= regular) return 0;
+            return Math.round(((regular - especial) / regular) * 100);
+        }
+
+        function ordenarProductosInicio(a, b) {
+            const nuevoA = productoEsNuevoInicio(a) ? 1 : 0;
+            const nuevoB = productoEsNuevoInicio(b) ? 1 : 0;
+            if (nuevoA !== nuevoB) return nuevoB - nuevoA;
+            if (nuevoA && nuevoB) {
+                const diferencia = fechaProductoInicioMs(b) - fechaProductoInicioMs(a);
+                if (diferencia) return diferencia;
+            }
+
+            const especialA = a.esColeccionEspecial === true || a.categoria === 'ColeccionEspecial' ? 1 : 0;
+            const especialB = b.esColeccionEspecial === true || b.categoria === 'ColeccionEspecial' ? 1 : 0;
+            if (especialA !== especialB) return especialB - especialA;
+
+            const destacadoA = a.destacado === true ? 1 : 0;
+            const destacadoB = b.destacado === true ? 1 : 0;
+            if (destacadoA !== destacadoB) return destacadoB - destacadoA;
+
+            const ordenA = Number.isFinite(Number(a.orden)) ? Number(a.orden) : Number(a._indice || 0);
+            const ordenB = Number.isFinite(Number(b.orden)) ? Number(b.orden) : Number(b._indice || 0);
+            return ordenA - ordenB;
+        }
+
+        function crearTarjetaProductoInicio(producto) {
+            const enlace = document.createElement('a');
+            enlace.className = 'home-product-card';
+            enlace.href = `catalogo.html?producto=${encodeURIComponent(producto.id)}`;
+            enlace.setAttribute('aria-label', `Ver ${producto.nombre || 'producto'} en el catálogo`);
+
+            const media = document.createElement('div');
+            media.className = 'home-product-card__media';
+            const imagen = document.createElement('img');
+            imagen.loading = 'lazy';
+            imagen.src = String(producto.imagen || HOME_PRODUCTO_PLACEHOLDER);
+            imagen.alt = String(producto.nombre || 'Detalle de Momentos Atractivos');
+            imagen.onerror = function() {
+                this.onerror = null;
+                this.src = HOME_PRODUCTO_PLACEHOLDER;
+            };
+            media.appendChild(imagen);
+
+            if (productoEsNuevoInicio(producto)) {
+                const nuevo = document.createElement('span');
+                nuevo.className = 'home-product-card__new';
+                nuevo.textContent = 'Nueva referencia';
+                media.appendChild(nuevo);
+            }
+
+            const descuento = descuentoProductoInicio(producto);
+            if (descuento > 0) {
+                const badge = document.createElement('span');
+                badge.className = 'home-product-card__discount';
+                badge.textContent = `-${descuento}%`;
+                badge.setAttribute('aria-label', `${descuento}% de descuento`);
+                media.appendChild(badge);
+            }
+
+            const body = document.createElement('div');
+            body.className = 'home-product-card__body';
+            const categoria = document.createElement('span');
+            categoria.className = 'home-product-card__category';
+            categoria.textContent = nombresCategoriasInicio.get(String(producto.categoria || ''))
+                || String(producto.categoria || 'Detalle personalizado');
+            const titulo = document.createElement('h3');
+            titulo.textContent = String(producto.nombre || 'Detalle personalizado');
+
+            const precio = document.createElement('div');
+            precio.className = 'home-product-card__price';
+            const precioRegular = Number(producto.precio);
+            const precioEspecial = Number(producto.precioDescuento);
+            const actual = document.createElement('span');
+            actual.className = 'home-product-card__price-current';
+            actual.textContent = formatoPrecioInicio.format(descuento > 0 ? precioEspecial : precioRegular || 0);
+            precio.appendChild(actual);
+            if (descuento > 0) {
+                const anterior = document.createElement('span');
+                anterior.className = 'home-product-card__price-old';
+                anterior.textContent = formatoPrecioInicio.format(precioRegular);
+                precio.appendChild(anterior);
+            }
+
+            body.append(categoria, titulo, precio);
+            enlace.append(media, body);
+            return enlace;
+        }
+
+        async function cargarProductosSeleccionadosInicio() {
+            const contenedor = document.getElementById('home-products-grid');
+            if (!contenedor) return;
+            try {
+                const [snapshot, categoriasSnapshot] = await Promise.all([
+                    getDocs(collection(db, 'productos')),
+                    getDoc(doc(db, 'configuracion', 'categorias_catalogo'))
+                ]);
+                if (categoriasSnapshot.exists() && Array.isArray(categoriasSnapshot.data().categorias)) {
+                    categoriasSnapshot.data().categorias.forEach(categoria => {
+                        const id = String(categoria?.id || '').trim();
+                        const nombre = String(categoria?.nombre || '').trim();
+                        if (id && nombre) nombresCategoriasInicio.set(id, nombre);
+                    });
+                }
+                const productos = [];
+                let indice = 0;
+                snapshot.forEach(documento => productos.push({ id: documento.id, _indice: indice++, ...documento.data() }));
+                const seleccion = productos.sort(ordenarProductosInicio).slice(0, 4);
+                contenedor.innerHTML = '';
+                if (!seleccion.length) {
+                    contenedor.innerHTML = '<p class="home-products-status">Muy pronto encontrarás aquí nuestras referencias seleccionadas.</p>';
+                    return;
+                }
+                seleccion.forEach(producto => contenedor.appendChild(crearTarjetaProductoInicio(producto)));
+            } catch (error) {
+                console.error('Error cargando productos seleccionados en Inicio:', error);
+                contenedor.innerHTML = '<p class="home-products-status">No fue posible cargar esta selección. Puedes explorar todos los detalles en el catálogo.</p>';
+            }
+        }
+
+
+        const OPINIONES_INICIO_PREDETERMINADAS = [
+            { autor: 'Camila R.', texto: 'Pedí un desayuno sorpresa para el aniversario de mis papás y quedaron fascinados. Los detalles, la frescura y la puntualidad fueron increíbles. ¡Súper recomendados!', activo: true },
+            { autor: 'Andrés M.', texto: 'Vivo fuera del país y quería sorprender a mi novia en su cumpleaños. Me ayudaron en todo el proceso y el resultado superó mis expectativas. Tienen un cliente de por vida.', activo: true },
+            { autor: 'Laura G.', texto: 'Me encantó la ancheta que enviaron por el Día de la Madre. Todo súper fresco y la presentación impecable. Se nota el amor que le ponen a cada detalle. ¡Gracias!', activo: true },
+            { autor: 'Carlos T.', texto: 'Excelente servicio y atención al cliente. Personalizaron la caja de regalo tal como la imaginé, con los colores y dulces favoritos de mi esposo. 100% recomendados.', activo: true },
+            { autor: 'Felipe B.', texto: 'Los pequeños detalles marcan la diferencia y ustedes lo saben hacer a la perfección. A mi hermana le fascinó su sorpresa de graduación, lloró de la emoción.', activo: true },
+            { autor: 'Valeria S.', texto: 'Compré un detalle de última hora y me salvaron la vida. Fueron muy rápidos, súper amables por WhatsApp y los productos son de altísima calidad. ¡Volveré a comprar!', activo: true }
+        ];
+
+        function obtenerOpinionesVisibles(data = {}) {
+            const guardadas = Array.isArray(data.opiniones) ? data.opiniones : [];
+            const fuente = guardadas.length ? guardadas : OPINIONES_INICIO_PREDETERMINADAS;
+            return fuente
+                .map((opinion, indice) => ({
+                    autor: String(opinion?.autor || '').trim(),
+                    texto: String(opinion?.texto || '').trim(),
+                    activo: opinion?.activo !== false,
+                    orden: Number.isFinite(Number(opinion?.orden)) ? Number(opinion.orden) : indice
+                }))
+                .filter(opinion => opinion.activo && opinion.autor && opinion.texto)
+                .sort((a, b) => a.orden - b.orden);
+        }
+
+        function renderizarOpinionesEnInicio(data = {}) {
+            const track = document.getElementById('testimonios-track');
+            if (!track) return;
+            const opiniones = obtenerOpinionesVisibles(data);
+            const visibles = opiniones.length ? opiniones : OPINIONES_INICIO_PREDETERMINADAS;
+            track.innerHTML = '';
+
+            visibles.forEach(opinion => {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'testimonio-card';
+
+                const mensaje = document.createElement('p');
+                mensaje.className = 'testimonio-texto';
+                mensaje.textContent = `“${opinion.texto}”`;
+
+                const autor = document.createElement('p');
+                autor.className = 'testimonio-autor';
+                autor.textContent = `- ${opinion.autor}`;
+
+                tarjeta.append(mensaje, autor);
+                track.appendChild(tarjeta);
+            });
+
+            requestAnimationFrame(() => window.reiniciarCarruselOpiniones?.());
+        }
+
+        function escucharOpinionesEnInicio() {
+            const docRef = doc(db, 'configuracion', 'opiniones_inicio');
+            return onSnapshot(
+                docRef,
+                docSnap => renderizarOpinionesEnInicio(docSnap.exists() ? docSnap.data() : {}),
+                async error => {
+                    console.error('Error escuchando opiniones de Firebase:', error);
+                    try {
+                        const docSnap = await getDoc(docRef);
+                        renderizarOpinionesEnInicio(docSnap.exists() ? docSnap.data() : {});
+                    } catch (readError) {
+                        console.error('Error obteniendo opiniones de Firebase:', readError);
+                        renderizarOpinionesEnInicio({});
+                    }
+                }
+            );
+        }
 
         async function cargarAnunciosEnInicio() {
             try {
@@ -907,9 +2052,40 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            
+        document.addEventListener('DOMContentLoaded', async function() {
+            await Promise.all([
+                window.MAImages.aplicarFavicon('imagenes/favicon'),
+                window.MAImages.aplicarVariableCss('--ma-home-bg-desktop', 'imagenes/fondo'),
+                window.MAImages.aplicarVariableCss('--ma-home-bg-mobile', 'imagenes/fondotelefono', 'imagenes/fondo'),
+                window.MAImages.aplicarImagen(document.getElementById('ma-logo-principal'), 'imagenes/logo'),
+                window.MAImages.aplicarImagen(document.getElementById('ma-logo-footer'), 'imagenes/logo-footer', 'imagenes/logo'),
+                resolverGaleriaPredeterminadaInicio()
+            ]);
+            aplicarGaleriaEnInicio({});
+
             cargarAnunciosEnInicio();
+            escucharGaleriaEnInicio();
+            cargarProductosSeleccionadosInicio();
+
+            document.querySelectorAll('.ma-current-year').forEach(elemento => {
+                elemento.textContent = new Date().getFullYear();
+            });
+
+            const faqItems = document.querySelectorAll('.ma-accordion-item');
+            faqItems.forEach(item => {
+                const button = item.querySelector('.ma-accordion-button');
+                button?.addEventListener('click', () => {
+                    const estabaAbierto = item.classList.contains('is-open');
+                    faqItems.forEach(otherItem => {
+                        otherItem.classList.remove('is-open');
+                        otherItem.querySelector('.ma-accordion-button')?.setAttribute('aria-expanded', 'false');
+                    });
+                    if (!estabaAbierto) {
+                        item.classList.add('is-open');
+                        button.setAttribute('aria-expanded', 'true');
+                    }
+                });
+            });
 
             const cartIconNavDesktop = document.getElementById('cart-icon-nav-desktop');
             const cartIconNavMobile = document.getElementById('cart-icon-nav-mobile');
@@ -957,51 +2133,74 @@
             revealOnScroll();
 
             const track = document.getElementById('testimonios-track');
-            const cards = document.querySelectorAll('.testimonio-card');
             const prevBtn = document.querySelector('.prev-btn');
             const nextBtn = document.querySelector('.next-btn');
             let currentIndex = 0;
             let autoPlayInterval;
 
             function getCardsPerView() { return window.innerWidth <= 768 ? 1 : 2; }
+            function getOpinionCards() { return Array.from(track.querySelectorAll('.testimonio-card')); }
 
             function updateCarousel() {
+                const cards = getOpinionCards();
+                if (!cards.length) return;
+                const maxIndex = Math.max(0, cards.length - getCardsPerView());
+                currentIndex = Math.min(Math.max(0, currentIndex), maxIndex);
                 const cardWidth = cards[0].getBoundingClientRect().width;
-                const gap = 30; 
-                const moveAmount = cardWidth + gap;
-                track.style.transform = `translateX(-${currentIndex * moveAmount}px)`;
+                const gap = 30;
+                track.style.transform = `translateX(-${currentIndex * (cardWidth + gap)}px)`;
+                const necesitaNavegacion = cards.length > getCardsPerView();
+                prevBtn.disabled = !necesitaNavegacion;
+                nextBtn.disabled = !necesitaNavegacion;
+                prevBtn.style.visibility = necesitaNavegacion ? 'visible' : 'hidden';
+                nextBtn.style.visibility = necesitaNavegacion ? 'visible' : 'hidden';
             }
 
             function moveNext() {
+                const cards = getOpinionCards();
                 const cardsPerView = getCardsPerView();
-                const maxIndex = cards.length - cardsPerView;
-                if (currentIndex >= maxIndex) { currentIndex = 0; } else {
-                    currentIndex += cardsPerView;
-                    if(currentIndex > maxIndex) currentIndex = maxIndex; 
-                }
+                const maxIndex = Math.max(0, cards.length - cardsPerView);
+                if (!maxIndex) return;
+                if (currentIndex >= maxIndex) currentIndex = 0;
+                else currentIndex = Math.min(currentIndex + cardsPerView, maxIndex);
                 updateCarousel();
             }
 
             function movePrev() {
+                const cards = getOpinionCards();
                 const cardsPerView = getCardsPerView();
-                const maxIndex = cards.length - cardsPerView;
-                if (currentIndex <= 0) { currentIndex = maxIndex; } else {
-                    currentIndex -= cardsPerView;
-                    if(currentIndex < 0) currentIndex = 0;
-                }
+                const maxIndex = Math.max(0, cards.length - cardsPerView);
+                if (!maxIndex) return;
+                if (currentIndex <= 0) currentIndex = maxIndex;
+                else currentIndex = Math.max(currentIndex - cardsPerView, 0);
                 updateCarousel();
             }
 
-            nextBtn.addEventListener('click', () => { moveNext(); resetAutoPlay(); });
+            function startAutoPlay() {
+                clearInterval(autoPlayInterval);
+                if (getOpinionCards().length > getCardsPerView()) {
+                    autoPlayInterval = setInterval(moveNext, 8000);
+                }
+            }
+            function resetAutoPlay() { startAutoPlay(); }
+
             prevBtn.addEventListener('click', () => { movePrev(); resetAutoPlay(); });
-            function startAutoPlay() { autoPlayInterval = setInterval(moveNext, 8000); }
-            function resetAutoPlay() { clearInterval(autoPlayInterval); startAutoPlay(); }
+            nextBtn.addEventListener('click', () => { moveNext(); resetAutoPlay(); });
             window.addEventListener('resize', () => {
-                const maxIndex = cards.length - getCardsPerView();
-                if (currentIndex > maxIndex) currentIndex = maxIndex;
                 updateCarousel();
+                resetAutoPlay();
             });
+
+            window.reiniciarCarruselOpiniones = function() {
+                currentIndex = 0;
+                track.style.transform = 'translateX(0)';
+                updateCarousel();
+                resetAutoPlay();
+            };
+
+            updateCarousel();
             startAutoPlay();
+            escucharOpinionesEnInicio();
 
             const cartSidebar = document.getElementById('cart-sidebar');
             const closeCartBtn = document.getElementById('close-cart');
