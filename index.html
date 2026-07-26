@@ -2243,17 +2243,10 @@
                 cargarGaleriaLocalInicio();
             }
 
-            const gridProductosInicio = document.getElementById('home-products-grid');
-            if ('IntersectionObserver' in window && gridProductosInicio) {
-                const observadorProductos = new IntersectionObserver((entradas, observador) => {
-                    if (!entradas.some(entrada => entrada.isIntersecting)) return;
-                    observador.disconnect();
-                    cargarProductosSeleccionadosInicio();
-                }, { rootMargin: '450px 0px' });
-                observadorProductos.observe(gridProductosInicio);
-            } else {
-                cargarProductosSeleccionadosInicio();
-            }
+            // Los productos destacados se solicitan desde el primer momento.
+            // La consulta ocurre en paralelo con imágenes y anuncios, sin esperar
+            // a que la sección se acerque a la pantalla.
+            cargarProductosSeleccionadosInicio();
 
             document.querySelectorAll('.ma-current-year').forEach(elemento => {
                 elemento.textContent = new Date().getFullYear();
