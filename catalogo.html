@@ -2949,6 +2949,41 @@
             box-shadow: 0 100vh 0 100vh #40242c;
         }
 
+    
+
+        /* ========================================================== */
+        /* ENCABEZADO UNIFICADO Y UNIÓN SIN FRANJA ROSADA             */
+        /* ========================================================== */
+        body#inicio header,
+        body#inicio header.is-scrolled {
+            min-height: 76px;
+        }
+
+        /* El espacio para las barras fijas pertenece al contenedor,
+           no al margen del hero. Así no colapsa ni deja ver el fondo raíz. */
+        body#inicio .main-wrapper {
+            padding-top: 114px;
+        }
+
+        body#inicio .hero-premium.catalog-hero {
+            margin-top: 0 !important;
+        }
+
+        @media (max-width: 768px) {
+            body#inicio header,
+            body#inicio header.is-scrolled {
+                min-height: 80px;
+            }
+
+            body#inicio .main-wrapper {
+                padding-top: 118px;
+            }
+
+            body#inicio .hero-premium.catalog-hero {
+                margin-top: 0 !important;
+            }
+        }
+
     </style>
 </head>
 <body id="inicio">
