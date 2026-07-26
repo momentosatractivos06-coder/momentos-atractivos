@@ -3735,10 +3735,10 @@
                             <button type="button" class="btn-submit btn-aplicar-rango" onclick="aplicarFiltroFechasPedidos()">
                                 <i class="ph ph-funnel"></i> Aplicar
                             </button>
-                            <button type="button" class="btn-edit btn-todo-historial" onclick="mostrarTodoHistorialPedidos()">
-                                <i class="ph ph-lightning"></i> Vista rápida
+                            <button type="button" class="btn-edit btn-todo-historial" onclick="eliminarFiltroPedidos()">
+                                Eliminar filtro
                             </button>
-                            <span id="resumen-filtro-pedidos" class="filtro-resumen">Mostrando todo el historial</span>
+                            <span id="resumen-filtro-pedidos" class="filtro-resumen">Mostrando pedidos activos y entregados recientes</span>
                         </div>
                         
                         <div class="table-responsive">
@@ -3761,9 +3761,9 @@
                         <div id="pedidos-mobile-list" class="pedidos-mobile-list"></div>
                         <div id="pedidos-history-actions" class="pedidos-history-actions">
                             <button type="button" id="btn-cargar-mas-pedidos" class="btn-edit" onclick="cargarMasHistorialPedidos()">
-                                <i class="ph ph-clock-counter-clockwise"></i> Cargar más entregados
+                                Ver más
                             </button>
-                            <small id="pedidos-history-note">La vista inicial muestra los pedidos activos y el historial más reciente.</small>
+                            <small id="pedidos-history-note">La vista inicial muestra los pedidos activos y 25 entregados recientes.</small>
                         </div>
                     </div>
                 </div>
@@ -4397,12 +4397,12 @@
             { id: 'Detalles', nombre: 'Detalles & Dulces' }
         ];
         let categoriasCatalogo = CATEGORIAS_CATALOGO_PREDETERMINADAS.map(categoria => ({ ...categoria }));
-        let pedidosLocal = []; // Vista rápida: activos + historial entregado reciente
+        let pedidosLocal = []; // Pedidos activos + historial entregado reciente
         let pedidosFiltradosLocal = []; // Consulta independiente del rango de fechas
         let filtroFechasActivo = false;
 
         const ADMIN_CACHE_TTL_MS = 2 * 60 * 1000;
-        const PEDIDOS_HISTORIAL_PAGE_SIZE = 40;
+        const PEDIDOS_HISTORIAL_PAGE_SIZE = 25;
         let pedidosUltimaCarga = 0;
         let productosUltimaCarga = 0;
         let opinionesUltimaCarga = 0;
@@ -4619,11 +4619,54 @@
 
             acciones.hidden = filtroFechasActivo || !historialTieneMas;
             boton.disabled = false;
-            boton.innerHTML = '<i class="ph ph-clock-counter-clockwise"></i> Cargar más entregados';
+            boton.textContent = 'Ver más';
             if (nota && !filtroFechasActivo) {
                 const visibles = pedidosLocal.filter(pedido => obtenerEstadoVisiblePedido(pedido) === 'Entregado').length;
                 nota.textContent = `${visibles} de ${conteosPedidosServidor.entregados} pedidos entregados cargados en pantalla.`;
             }
+        }
+
+        async function consultarPaginaEntregados(cursorInicial = null) {
+            const referencia = collection(db, 'pedidos');
+            const objetivo = PEDIDOS_HISTORIAL_PAGE_SIZE + 1;
+            const pedidosEncontrados = [];
+            const documentosEntregados = [];
+            let cursorEscaneo = cursorInicial;
+            let agotado = false;
+
+            while (pedidosEncontrados.length < objetivo && !agotado) {
+                const restricciones = [orderBy('fecha_entrega', 'desc')];
+                if (cursorEscaneo) restricciones.push(startAfter(cursorEscaneo));
+                restricciones.push(limit(50));
+
+                const snapshot = await getDocs(query(referencia, ...restricciones));
+                if (snapshot.empty) {
+                    agotado = true;
+                    break;
+                }
+
+                for (const documento of snapshot.docs) {
+                    cursorEscaneo = documento;
+                    const pedido = normalizarPedidoSnapshot(documento);
+                    if (obtenerEstadoVisiblePedido(pedido) === 'Entregado') {
+                        pedidosEncontrados.push(pedido);
+                        documentosEntregados.push(documento);
+                        if (pedidosEncontrados.length >= objetivo) break;
+                    }
+                }
+
+                if (pedidosEncontrados.length >= objetivo) break;
+                if (snapshot.size < 50) agotado = true;
+            }
+
+            const hayMas = pedidosEncontrados.length > PEDIDOS_HISTORIAL_PAGE_SIZE;
+            const pedidos = pedidosEncontrados.slice(0, PEDIDOS_HISTORIAL_PAGE_SIZE);
+            const indiceUltimoVisible = Math.min(PEDIDOS_HISTORIAL_PAGE_SIZE, documentosEntregados.length) - 1;
+            const ultimoDocumento = indiceUltimoVisible >= 0
+                ? documentosEntregados[indiceUltimoVisible]
+                : cursorEscaneo;
+
+            return { pedidos, ultimoDocumento, hayMas };
         }
 
         function ajustarConteosCambioEstado(estadoAnterior, estadoNuevo) {
@@ -4971,13 +5014,16 @@
             }
         };
 
-        window.mostrarTodoHistorialPedidos = function() {
+        window.eliminarFiltroPedidos = function() {
             document.getElementById('filtro-fecha-inicio').value = '';
             document.getElementById('filtro-fecha-fin').value = '';
             filtroFechasActivo = false;
             pedidosFiltradosLocal = [];
             aplicarFiltrosPedidosActuales();
         };
+
+        // Alias conservado para evitar incompatibilidades con versiones anteriores.
+        window.mostrarTodoHistorialPedidos = window.eliminarFiltroPedidos;
 
         function actualizarVisibilidadDomicilioEditor() {
             if (!editLocationFields) return;
@@ -5201,29 +5247,27 @@ Esta acción no se puede deshacer.`);
             if (cargaPedidosEnCurso) return cargaPedidosEnCurso;
 
             cargaPedidosEnCurso = (async () => {
-                mostrarCargaPedidosLocal('Cargando pedidos activos e historial reciente…');
+                mostrarCargaPedidosLocal('Cargando pedidos activos y 25 entregados recientes…');
                 try {
                     const referencia = collection(db, 'pedidos');
                     const consultaPorConfirmar = query(referencia, where('estado', '==', 'Por confirmar'));
                     const consultaPendientes = query(referencia, where('estado', '==', 'Pendiente'));
-                    const consultaRecientes = query(referencia, orderBy('fecha_entrega', 'desc'), limit(PEDIDOS_HISTORIAL_PAGE_SIZE));
+                    const paginaEntregados = consultarPaginaEntregados();
                     const conteoPorConfirmar = getCountFromServer(consultaPorConfirmar);
                     const conteoPendientes = getCountFromServer(consultaPendientes);
                     const conteoEntregados = getCountFromServer(query(referencia, where('estado', '==', 'Entregado')));
 
-                    const [snapPorConfirmar, snapPendientes, snapRecientes, countPorConfirmar, countPendientes, countEntregados] = await Promise.all([
+                    const [snapPorConfirmar, snapPendientes, resultadoEntregados, countPorConfirmar, countPendientes, countEntregados] = await Promise.all([
                         getDocs(consultaPorConfirmar),
                         getDocs(consultaPendientes),
-                        getDocs(consultaRecientes),
+                        paginaEntregados,
                         conteoPorConfirmar,
                         conteoPendientes,
                         conteoEntregados
                     ]);
 
                     const activos = [...snapPorConfirmar.docs, ...snapPendientes.docs].map(normalizarPedidoSnapshot);
-                    const entregadosRecientes = snapRecientes.docs
-                        .map(normalizarPedidoSnapshot)
-                        .filter(pedido => obtenerEstadoVisiblePedido(pedido) === 'Entregado');
+                    const entregadosRecientes = resultadoEntregados.pedidos;
 
                     pedidosLocal = [];
                     fusionarPedidosLocal([...activos, ...entregadosRecientes]);
@@ -5232,8 +5276,8 @@ Esta acción no se puede deshacer.`);
                         pendientes: countPendientes.data().count,
                         entregados: countEntregados.data().count
                     };
-                    ultimoDocumentoHistorial = snapRecientes.docs.at(-1) || null;
-                    historialTieneMas = snapRecientes.size === PEDIDOS_HISTORIAL_PAGE_SIZE;
+                    ultimoDocumentoHistorial = resultadoEntregados.ultimoDocumento || null;
+                    historialTieneMas = resultadoEntregados.hayMas;
                     pedidosUltimaCarga = Date.now();
 
                     if (forzar) {
@@ -5280,23 +5324,14 @@ Esta acción no se puede deshacer.`);
             const boton = document.getElementById('btn-cargar-mas-pedidos');
             if (boton) {
                 boton.disabled = true;
-                boton.innerHTML = '<i class="ph ph-spinner-gap"></i> Cargando…';
+                boton.textContent = 'Cargando…';
             }
 
             try {
-                const consulta = query(
-                    collection(db, 'pedidos'),
-                    orderBy('fecha_entrega', 'desc'),
-                    startAfter(ultimoDocumentoHistorial),
-                    limit(PEDIDOS_HISTORIAL_PAGE_SIZE)
-                );
-                const snapshot = await getDocs(consulta);
-                const entregados = snapshot.docs
-                    .map(normalizarPedidoSnapshot)
-                    .filter(pedido => obtenerEstadoVisiblePedido(pedido) === 'Entregado');
-                fusionarPedidosLocal(entregados);
-                ultimoDocumentoHistorial = snapshot.docs.at(-1) || ultimoDocumentoHistorial;
-                historialTieneMas = snapshot.size === PEDIDOS_HISTORIAL_PAGE_SIZE;
+                const resultado = await consultarPaginaEntregados(ultimoDocumentoHistorial);
+                fusionarPedidosLocal(resultado.pedidos);
+                ultimoDocumentoHistorial = resultado.ultimoDocumento || ultimoDocumentoHistorial;
+                historialTieneMas = resultado.hayMas;
                 aplicarFiltrosPedidosActuales();
             } catch (error) {
                 console.error('Error al cargar más historial:', error);
