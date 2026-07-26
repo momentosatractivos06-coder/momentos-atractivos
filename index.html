@@ -9,9 +9,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-    
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
 <script>
     window.MAImages = window.MAImages || (() => {
@@ -156,40 +155,83 @@
             overflow: hidden;
             z-index: 1002;
             pointer-events: none;
+            /* Safari/iPhone: impide que la cinta cambie de tamaño tipográfico. */
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+            contain: layout paint;
         }
 
         .announcement-marquee {
             display: flex;
+            flex: 0 0 auto;
             width: max-content;
-            animation: marquee 35s linear infinite;
+            min-width: max-content;
+            transform: translate3d(0, 0, 0);
+            -webkit-transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            will-change: transform;
+            animation: none;
+            -webkit-animation: none;
+        }
+
+        .announcement-marquee.is-running {
+            animation: ma-announcement-scroll var(--ma-ticker-duration, 24s) linear infinite;
+            -webkit-animation: ma-announcement-scroll var(--ma-ticker-duration, 24s) linear infinite;
         }
 
         .marquee-content {
             display: flex;
+            flex: 0 0 auto;
+            align-items: center;
             justify-content: space-around;
+            min-width: 100vw;
+            width: max-content;
         }
 
         .promo-text {
             display: inline-flex;
+            flex: 0 0 auto;
             align-items: center;
             gap: 12px;
             padding: 0 40px;
-            font-size: 0.85rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13.6px;
+            line-height: 1;
             font-weight: 500;
             letter-spacing: 2px;
             text-transform: uppercase;
             white-space: nowrap;
+            font-synthesis: none;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
 
         .promo-text i {
+            flex: 0 0 auto;
             color: var(--gold);
-            font-size: 1.1rem;
+            font-size: 17.6px;
+            line-height: 1;
         }
 
-        @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
+        @keyframes ma-announcement-scroll {
+            from { transform: translate3d(0, 0, 0); }
+            to { transform: translate3d(var(--ma-ticker-end, -100vw), 0, 0); }
         }
+
+        @-webkit-keyframes ma-announcement-scroll {
+            from { -webkit-transform: translate3d(0, 0, 0); }
+            to { -webkit-transform: translate3d(var(--ma-ticker-end, -100vw), 0, 0); }
+        }
+
+        @media (max-width: 768px) {
+            .promo-text {
+                padding-inline: 30px;
+                font-size: 13.6px;
+                letter-spacing: 1.8px;
+            }
+        }
+
 
         /* --- Encabezado (Header) PREMIUM --- */
         header {
@@ -358,12 +400,18 @@
 
         /* --- Servicios --- */
         .servicios { 
-            /* La curva inferior reduce el espacio visible de abajo.
-               Disminuimos solo la parte superior para equilibrar la sección. */
-            padding: 84px 5% 120px; 
+            /* La onda que llega desde Filosofía ya aporta altura visual.
+               El contenido empieza cerca de la curva para evitar un vacío innecesario. */
+            padding: 24px 5% 120px; 
             background-color: var(--bg-blush); 
             background-image: var(--pattern-url);
             position: relative;
+        }
+
+        /* Esta es la onda que introduce Nuestra especialidad.
+           Se reduce solo aquí; las demás ondas conservan su tamaño. */
+        .filosofia .shape-divider-bottom svg {
+            height: 54px;
         }
         
         .grid-servicios { 
@@ -919,7 +967,8 @@
             .overlay-category { font-size: 1.5rem; } 
             .overlay-text { font-size: 0.7rem; letter-spacing: 1px; }
 
-            .servicios { padding: 42px 5% 60px; }
+            .filosofia .shape-divider-bottom svg { height: 30px; }
+            .servicios { padding: 20px 5% 60px; }
             .grid-servicios { gap: 20px; }
             .servicio-card { padding: 30px 20px; }
             .servicio-card h3 { font-size: 1.8rem; margin-bottom: 10px;}
@@ -1381,9 +1430,10 @@
             box-shadow: none !important;
         }
 
-        /* Pintura de seguridad por encima de la primera barra fija. */
+        /* Safari usa el fondo del elemento raíz durante el sobredesplazamiento.
+           Evitamos una sombra de 100vh que encarecía la capa animada. */
         .announcement-bar {
-            box-shadow: 0 -100vh 0 100vh #b8737f;
+            box-shadow: none;
         }
 
         /* Pintura de seguridad por debajo del footer sin aumentar su altura. */
@@ -1405,6 +1455,101 @@
             </div>
         </div>
     </div>
+
+<script>
+    /* Cinta de anuncios estable para Safari/iPhone.
+       Mide el ancho real después de cargar fuentes e iconos y conserva
+       una velocidad constante aunque cambie el contenido desde Firebase. */
+    (() => {
+        const iniciarCintaAnuncios = () => {
+            const barra = document.getElementById('barra-anuncios');
+            const pista = barra?.querySelector('.announcement-marquee');
+            const bloque1 = document.getElementById('marquee-1');
+            const bloque2 = document.getElementById('marquee-2');
+            if (!barra || !pista || !bloque1 || !bloque2) return;
+            if (pista.dataset.maTickerReady === 'true') return;
+            pista.dataset.maTickerReady = 'true';
+
+            let temporizador = 0;
+            let observador = null;
+            let reconstruyendo = false;
+
+            const observar = () => {
+                if (!observador) {
+                    observador = new MutationObserver(() => {
+                        if (!reconstruyendo) programarRecalculo(40);
+                    });
+                }
+                observador.disconnect();
+                observador.observe(bloque1, { childList: true, subtree: true, characterData: true });
+                observador.observe(bloque2, { childList: true, subtree: true, characterData: true });
+            };
+
+            const recalcular = async () => {
+                clearTimeout(temporizador);
+                reconstruyendo = true;
+                observador?.disconnect();
+
+                /* Firebase actualiza ambos bloques. Esta sincronización cubre
+                   cargas parciales o conexiones lentas sin dejar un hueco. */
+                if (bloque1.innerHTML.trim() && bloque2.innerHTML !== bloque1.innerHTML) {
+                    bloque2.innerHTML = bloque1.innerHTML;
+                }
+
+                try {
+                    await document.fonts?.ready;
+                } catch (_) {}
+
+                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+                const distancia = Math.max(1, Math.ceil(bloque1.getBoundingClientRect().width));
+                const esMovil = window.matchMedia('(max-width: 768px)').matches;
+                const movimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                const pixelesPorSegundo = movimientoReducido ? 44 : (esMovil ? 58 : 68);
+                const duracion = Math.max(16, Math.min(48, distancia / pixelesPorSegundo));
+
+                pista.classList.remove('is-running');
+                pista.style.animation = 'none';
+                pista.style.webkitAnimation = 'none';
+                pista.style.transform = 'translate3d(0,0,0)';
+                pista.style.webkitTransform = 'translate3d(0,0,0)';
+                pista.style.setProperty('--ma-ticker-end', `${-distancia}px`);
+                pista.style.setProperty('--ma-ticker-duration', `${duracion.toFixed(2)}s`);
+
+                /* Fuerza un reinicio limpio en Safari después de volver
+                   desde otra pestaña o tras cambiar la orientación. */
+                void pista.offsetWidth;
+                pista.style.removeProperty('animation');
+                pista.style.removeProperty('-webkit-animation');
+                pista.classList.add('is-running');
+
+                reconstruyendo = false;
+                observar();
+            };
+
+            function programarRecalculo(espera = 120) {
+                clearTimeout(temporizador);
+                temporizador = window.setTimeout(recalcular, espera);
+            }
+
+            observar();
+            programarRecalculo(0);
+
+            window.addEventListener('resize', () => programarRecalculo(180), { passive: true });
+            window.addEventListener('orientationchange', () => programarRecalculo(260), { passive: true });
+            window.addEventListener('pageshow', () => programarRecalculo(80), { passive: true });
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) programarRecalculo(80);
+            });
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', iniciarCintaAnuncios, { once: true });
+        } else {
+            iniciarCintaAnuncios();
+        }
+    })();
+</script>
 
     <header>
         <div class="logo-container">
@@ -1547,19 +1692,19 @@
 
         <div class="gallery-grid reveal">
             <div class="gallery-item">
-                <img id="galeria-img-1" src="imagenes/cumpleanos.jpg" data-ma-base="imagenes/cumpleanos" alt="Cumpleaños">
+                <img id="galeria-img-1" src="imagenes/cumpleanos.jpg" data-ma-base="imagenes/cumpleanos" alt="Cumpleaños" loading="lazy" decoding="async">
                 <div class="gallery-overlay"><p class="overlay-category">Cumpleaños</p><p class="overlay-text">Celebra su día</p></div>
             </div>
             <div class="gallery-item">
-                <img id="galeria-img-2" src="imagenes/aniversarios.jpg" data-ma-base="imagenes/aniversarios" alt="Aniversarios">
+                <img id="galeria-img-2" src="imagenes/aniversarios.jpg" data-ma-base="imagenes/aniversarios" alt="Aniversarios" loading="lazy" decoding="async">
                 <div class="gallery-overlay"><p class="overlay-category">Aniversarios</p><p class="overlay-text">Sorprende con amor</p></div>
             </div>
             <div class="gallery-item">
-                <img id="galeria-img-3" src="imagenes/logros.jpg" data-ma-base="imagenes/logros" alt="Logros">
+                <img id="galeria-img-3" src="imagenes/logros.jpg" data-ma-base="imagenes/logros" alt="Logros" loading="lazy" decoding="async">
                 <div class="gallery-overlay"><p class="overlay-category">Logros</p><p class="overlay-text">Celebra sus metas</p></div>
             </div>
             <div class="gallery-item">
-                <img id="galeria-img-4" src="imagenes/fechas-especiales.jpg" data-ma-base="imagenes/fechas-especiales" alt="Fechas especiales">
+                <img id="galeria-img-4" src="imagenes/fechas-especiales.jpg" data-ma-base="imagenes/fechas-especiales" alt="Fechas especiales" loading="lazy" decoding="async">
                 <div class="gallery-overlay"><p class="overlay-category">Fechas especiales</p><p class="overlay-text">Hazlo inolvidable</p></div>
             </div>
         </div>
@@ -1659,7 +1804,7 @@
     <footer class="ma-footer">
         <div class="ma-footer-grid">
             <div class="ma-footer-brand">
-                <img id="ma-logo-footer" class="ma-footer-logo" src="imagenes/logo-footer.png" data-ma-base="imagenes/logo-footer" alt="Logo horizontal de Momentos Atractivos">
+                <img id="ma-logo-footer" class="ma-footer-logo" src="imagenes/logo-footer.png" data-ma-base="imagenes/logo-footer" alt="Logo horizontal de Momentos Atractivos" loading="lazy" decoding="async">
                 <p>Creamos desayunos, anchetas y detalles personalizados para celebrar, agradecer y convertir cada entrega en un momento inolvidable.</p>
                 <span class="ma-footer-social-title">Síguenos</span>
                 <div class="ma-footer-socials" aria-label="Redes sociales de Momentos Atractivos">
@@ -1722,7 +1867,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         // Configuración de Firebase
         const firebaseConfig = {
@@ -1737,6 +1882,31 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        // Caché pública breve: permite reutilizar datos recientes entre Inicio y Catálogo.
+        const MA_PUBLIC_CATALOG_CACHE_KEY = 'ma_public_catalog_v3';
+        const MA_PUBLIC_CACHE_TTL_MS = 3 * 60 * 1000;
+        const MA_HOME_CONFIG_CACHE_TTL_MS = 5 * 60 * 1000;
+
+        function leerCachePublica(clave, vigenciaMs) {
+            try {
+                const valor = JSON.parse(localStorage.getItem(clave) || 'null');
+                if (!valor || !Number.isFinite(Number(valor.guardadoEn))) return null;
+                if ((Date.now() - Number(valor.guardadoEn)) > vigenciaMs) return null;
+                return valor;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function guardarCachePublica(clave, valor) {
+            try {
+                localStorage.setItem(clave, JSON.stringify({ ...valor, guardadoEn: Date.now() }));
+            } catch (error) {
+                // La página continúa normalmente si el navegador bloquea localStorage.
+            }
+        }
+
 
         // MOMENTOS QUE INSPIRAN: imágenes locales del repositorio.
         // Se buscan automáticamente en PNG, JPG o JPEG.
@@ -1770,13 +1940,21 @@
         ]);
 
         function fechaProductoInicioMs(producto) {
+            if (Number.isFinite(Number(producto?._fechaInicioMs))) return Number(producto._fechaInicioMs);
             const valor = producto?.createdAt || producto?.fechaCreacion || producto?.fecha_creacion || producto?.timestampCreacion;
             if (!valor) return 0;
             if (typeof valor.toDate === 'function') return valor.toDate().getTime();
             if (typeof valor.seconds === 'number') return valor.seconds * 1000;
+            if (typeof valor._seconds === 'number') return valor._seconds * 1000;
             if (typeof valor === 'number') return valor > 1e12 ? valor : valor * 1000;
             const fecha = new Date(valor);
             return Number.isNaN(fecha.getTime()) ? 0 : fecha.getTime();
+        }
+
+        function prepararProductoInicio(producto, indice = 0) {
+            const preparado = { ...producto, _indice: Number(producto?._indice ?? indice) };
+            preparado._fechaInicioMs = fechaProductoInicioMs(preparado);
+            return preparado;
         }
 
         function productoEsNuevoInicio(producto) {
@@ -1825,6 +2003,7 @@
             media.className = 'home-product-card__media';
             const imagen = document.createElement('img');
             imagen.loading = 'lazy';
+            imagen.decoding = 'async';
             imagen.src = String(producto.imagen || HOME_PRODUCTO_PLACEHOLDER);
             imagen.alt = String(producto.nombre || 'Detalle de Momentos Atractivos');
             imagen.onerror = function() {
@@ -1881,28 +2060,57 @@
         async function cargarProductosSeleccionadosInicio() {
             const contenedor = document.getElementById('home-products-grid');
             if (!contenedor) return;
-            try {
-                const [snapshot, categoriasSnapshot] = await Promise.all([
-                    getDocs(collection(db, 'productos')),
-                    getDoc(doc(db, 'configuracion', 'categorias_catalogo'))
-                ]);
-                if (categoriasSnapshot.exists() && Array.isArray(categoriasSnapshot.data().categorias)) {
-                    categoriasSnapshot.data().categorias.forEach(categoria => {
+
+            const cache = leerCachePublica(MA_PUBLIC_CATALOG_CACHE_KEY, MA_PUBLIC_CACHE_TTL_MS);
+            if (cache?.productos?.length) {
+                if (Array.isArray(cache.categorias)) {
+                    cache.categorias.forEach(categoria => {
                         const id = String(categoria?.id || '').trim();
                         const nombre = String(categoria?.nombre || '').trim();
                         if (id && nombre) nombresCategoriasInicio.set(id, nombre);
                     });
                 }
-                const productos = [];
+                const seleccionCache = cache.productos
+                    .map(prepararProductoInicio)
+                    .sort(ordenarProductosInicio)
+                    .slice(0, 4);
+                contenedor.replaceChildren(...seleccionCache.map(crearTarjetaProductoInicio));
+                return;
+            }
+
+            try {
+                const [snapshot, categoriasSnapshot] = await Promise.all([
+                    getDocs(collection(db, 'productos')),
+                    getDoc(doc(db, 'configuracion', 'categorias_catalogo'))
+                ]);
+                const categoriasGuardadas = categoriasSnapshot.exists() && Array.isArray(categoriasSnapshot.data().categorias)
+                    ? categoriasSnapshot.data().categorias
+                    : [];
+                categoriasGuardadas.forEach(categoria => {
+                    const id = String(categoria?.id || '').trim();
+                    const nombre = String(categoria?.nombre || '').trim();
+                    if (id && nombre) nombresCategoriasInicio.set(id, nombre);
+                });
+
+                const productosCargados = [];
                 let indice = 0;
-                snapshot.forEach(documento => productos.push({ id: documento.id, _indice: indice++, ...documento.data() }));
-                const seleccion = productos.sort(ordenarProductosInicio).slice(0, 4);
+                snapshot.forEach(documento => {
+                    productosCargados.push(prepararProductoInicio({ id: documento.id, ...documento.data() }, indice++));
+                });
+                guardarCachePublica(MA_PUBLIC_CATALOG_CACHE_KEY, {
+                    productos: productosCargados,
+                    categorias: categoriasGuardadas
+                });
+
+                const seleccion = productosCargados.sort(ordenarProductosInicio).slice(0, 4);
                 contenedor.innerHTML = '';
                 if (!seleccion.length) {
                     contenedor.innerHTML = '<p class="home-products-status">Muy pronto encontrarás aquí nuestras referencias seleccionadas.</p>';
                     return;
                 }
-                seleccion.forEach(producto => contenedor.appendChild(crearTarjetaProductoInicio(producto)));
+                const fragmento = document.createDocumentFragment();
+                seleccion.forEach(producto => fragmento.appendChild(crearTarjetaProductoInicio(producto)));
+                contenedor.appendChild(fragmento);
             } catch (error) {
                 console.error('Error cargando productos seleccionados en Inicio:', error);
                 contenedor.innerHTML = '<p class="home-products-status">No fue posible cargar esta selección. Puedes explorar todos los detalles en el catálogo.</p>';
@@ -1959,63 +2167,93 @@
             requestAnimationFrame(() => window.reiniciarCarruselOpiniones?.());
         }
 
-        function escucharOpinionesEnInicio() {
+        async function cargarOpinionesEnInicio() {
+            const claveCache = 'ma_home_opiniones_v2';
+            const cache = leerCachePublica(claveCache, MA_HOME_CONFIG_CACHE_TTL_MS);
+            if (cache?.data) {
+                renderizarOpinionesEnInicio(cache.data);
+                return;
+            }
+
             const docRef = doc(db, 'configuracion', 'opiniones_inicio');
-            return onSnapshot(
-                docRef,
-                docSnap => renderizarOpinionesEnInicio(docSnap.exists() ? docSnap.data() : {}),
-                async error => {
-                    console.error('Error escuchando opiniones de Firebase:', error);
-                    try {
-                        const docSnap = await getDoc(docRef);
-                        renderizarOpinionesEnInicio(docSnap.exists() ? docSnap.data() : {});
-                    } catch (readError) {
-                        console.error('Error obteniendo opiniones de Firebase:', readError);
-                        renderizarOpinionesEnInicio({});
-                    }
-                }
-            );
+            try {
+                const docSnap = await getDoc(docRef);
+                const data = docSnap.exists() ? docSnap.data() : {};
+                guardarCachePublica(claveCache, { data });
+                renderizarOpinionesEnInicio(data);
+            } catch (error) {
+                console.error('Error obteniendo opiniones de Firebase:', error);
+                renderizarOpinionesEnInicio({});
+            }
         }
 
         async function cargarAnunciosEnInicio() {
-            try {
-                const docRef = doc(db, "configuracion", "anuncios");
-                const docSnap = await getDoc(docRef);
-                
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    
-                    const p1 = data.promo1 || "Bienvenido a Momentos Atractivos";
-                    const p2 = data.promo2 || "Detalles 100% personalizados";
-                    const p3 = data.promo3 || "Creamos momentos inolvidables";
+            const claveCache = 'ma_home_anuncios_v2';
+            const pintarAnuncios = (data = {}) => {
+                const p1 = data.promo1 || "Bienvenido a Momentos Atractivos";
+                const p2 = data.promo2 || "Detalles 100% personalizados";
+                const p3 = data.promo3 || "Creamos momentos inolvidables";
+                const contenido = `
+                    <span class="promo-text"><i class="ph-light ph-sparkle"></i> ${p1}</span>
+                    <span class="promo-text"><i class="ph-light ph-star-four"></i> ${p2}</span>
+                    <span class="promo-text"><i class="ph-light ph-gift"></i> ${p3}</span>
+                `;
+                const marquee1 = document.getElementById('marquee-1');
+                const marquee2 = document.getElementById('marquee-2');
+                if (marquee1) marquee1.innerHTML = contenido;
+                if (marquee2) marquee2.innerHTML = contenido;
+            };
 
-                    document.getElementById('marquee-1').innerHTML = `
-                        <span class="promo-text"><i class="ph-light ph-sparkle"></i> ${p1}</span>
-                        <span class="promo-text"><i class="ph-light ph-star-four"></i> ${p2}</span>
-                        <span class="promo-text"><i class="ph-light ph-gift"></i> ${p3}</span>
-                    `;
-                    document.getElementById('marquee-2').innerHTML = `
-                        <span class="promo-text"><i class="ph-light ph-sparkle"></i> ${p1}</span>
-                        <span class="promo-text"><i class="ph-light ph-star-four"></i> ${p2}</span>
-                        <span class="promo-text"><i class="ph-light ph-gift"></i> ${p3}</span>
-                    `;
-                }
+            const cache = leerCachePublica(claveCache, MA_HOME_CONFIG_CACHE_TTL_MS);
+            if (cache?.data) {
+                pintarAnuncios(cache.data);
+                return;
+            }
+
+            try {
+                const docSnap = await getDoc(doc(db, "configuracion", "anuncios"));
+                const data = docSnap.exists() ? docSnap.data() : {};
+                guardarCachePublica(claveCache, { data });
+                pintarAnuncios(data);
             } catch (error) {
                 console.error("Error obteniendo anuncios de Firebase:", error);
             }
         }
 
-        document.addEventListener('DOMContentLoaded', async function() {
-            await Promise.all([
+        document.addEventListener('DOMContentLoaded', function() {
+            // Las imágenes se resuelven sin bloquear el menú ni las interacciones iniciales.
+            Promise.all([
                 window.MAImages.aplicarFavicon('imagenes/favicon'),
                 window.MAImages.aplicarVariableCss('--ma-home-bg-desktop', 'imagenes/fondo'),
                 window.MAImages.aplicarVariableCss('--ma-home-bg-mobile', 'imagenes/fondotelefono', 'imagenes/fondo'),
                 window.MAImages.aplicarImagen(document.getElementById('ma-logo-principal'), 'imagenes/logo'),
-                window.MAImages.aplicarImagen(document.getElementById('ma-logo-footer'), 'imagenes/logo-footer', 'imagenes/logo'),
-                cargarGaleriaLocalInicio()
-            ]);
+                window.MAImages.aplicarImagen(document.getElementById('ma-logo-footer'), 'imagenes/logo-footer', 'imagenes/logo')
+            ]).catch(error => console.warn('No fue posible resolver alguna imagen local:', error));
             cargarAnunciosEnInicio();
-            cargarProductosSeleccionadosInicio();
+
+            const seccionGaleriaInicio = document.getElementById('galeria');
+            if ('IntersectionObserver' in window && seccionGaleriaInicio) {
+                const observadorGaleria = new IntersectionObserver((entradas, observador) => {
+                    if (!entradas.some(entrada => entrada.isIntersecting)) return;
+                    observador.disconnect();
+                    cargarGaleriaLocalInicio();
+                }, { rootMargin: '500px 0px' });
+                observadorGaleria.observe(seccionGaleriaInicio);
+            } else {
+                cargarGaleriaLocalInicio();
+            }
+
+            const gridProductosInicio = document.getElementById('home-products-grid');
+            if ('IntersectionObserver' in window && gridProductosInicio) {
+                const observadorProductos = new IntersectionObserver((entradas, observador) => {
+                    if (!entradas.some(entrada => entrada.isIntersecting)) return;
+                    observador.disconnect();
+                    cargarProductosSeleccionadosInicio();
+                }, { rootMargin: '450px 0px' });
+                observadorProductos.observe(gridProductosInicio);
+            } else {
+                cargarProductosSeleccionadosInicio();
+            }
 
             document.querySelectorAll('.ma-current-year').forEach(elemento => {
                 elemento.textContent = new Date().getFullYear();
@@ -2068,19 +2306,19 @@
                 });
             });
 
-            function revealOnScroll() {
-                var reveals = document.querySelectorAll('.reveal');
-                for (var i = 0; i < reveals.length; i++) {
-                    var windowHeight = window.innerHeight;
-                    var elementTop = reveals[i].getBoundingClientRect().top;
-                    var elementVisible = 100; 
-                    if (elementTop < windowHeight - elementVisible) {
-                        reveals[i].classList.add('active');
-                    }
-                }
+            const elementosReveal = Array.from(document.querySelectorAll('.reveal'));
+            if ('IntersectionObserver' in window) {
+                const observadorReveal = new IntersectionObserver((entradas, observador) => {
+                    entradas.forEach(entrada => {
+                        if (!entrada.isIntersecting) return;
+                        entrada.target.classList.add('active');
+                        observador.unobserve(entrada.target);
+                    });
+                }, { rootMargin: '0px 0px -100px 0px', threshold: 0.01 });
+                elementosReveal.forEach(elemento => observadorReveal.observe(elemento));
+            } else {
+                elementosReveal.forEach(elemento => elemento.classList.add('active'));
             }
-            window.addEventListener('scroll', revealOnScroll);
-            revealOnScroll();
 
             const track = document.getElementById('testimonios-track');
             const prevBtn = document.querySelector('.prev-btn');
@@ -2150,7 +2388,7 @@
 
             updateCarousel();
             startAutoPlay();
-            escucharOpinionesEnInicio();
+            cargarOpinionesEnInicio();
 
             const cartSidebar = document.getElementById('cart-sidebar');
             const closeCartBtn = document.getElementById('close-cart');
