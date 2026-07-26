@@ -3455,6 +3455,31 @@
             }
         }
 
+
+
+        /* En pantallas táctiles, Safari/Chrome pueden conservar :hover después de tocar.
+           Se neutraliza ese estado para que solo la pestaña .active quede resaltada. */
+        @media (max-width: 700px) and (hover: none) {
+            .sidebar-menu .menu-item {
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .sidebar-menu .menu-item:hover:not(.active),
+            .sidebar-menu .menu-item:focus:not(.active) {
+                background: transparent !important;
+                color: var(--admin-muted) !important;
+                border-top-color: transparent !important;
+                box-shadow: none !important;
+            }
+
+            .sidebar-menu .menu-item.active {
+                background: var(--admin-primary-soft) !important;
+                color: var(--admin-primary-hover) !important;
+                border-top-color: var(--rose-accent) !important;
+                box-shadow: inset 0 0 0 1px rgba(184, 115, 127, 0.13) !important;
+            }
+        }
+
         @media (max-width: 370px) {
             .sidebar {
                 left: 6px;
@@ -3475,6 +3500,94 @@
                 width: 52px;
                 min-width: 52px;
                 padding: 6px;
+            }
+        }
+
+    
+        /* ========================================================== */
+        /* RESUMEN DE PEDIDOS — CORRECCIÓN COMPACTA PARA TELÉFONOS    */
+        /* ========================================================== */
+        @media (max-width: 700px) {
+            #section-pedidos .pedidos-priority-strip {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 8px !important;
+                width: 100%;
+                overflow: visible !important;
+                padding-bottom: 0 !important;
+            }
+
+            #section-pedidos .pedido-priority-card {
+                min-width: 0 !important;
+                width: 100%;
+                min-height: 126px;
+                padding: 12px 6px !important;
+                gap: 8px !important;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                overflow: hidden;
+            }
+
+            #section-pedidos .pedido-priority-card i {
+                width: 42px !important;
+                height: 42px !important;
+                flex: 0 0 42px !important;
+                margin: 0;
+                font-size: 1.28rem;
+            }
+
+            #section-pedidos .pedido-priority-card > div {
+                width: 100%;
+                min-width: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #section-pedidos .pedido-priority-card strong {
+                width: 100%;
+                margin: 0 0 5px;
+                font-size: 1.35rem !important;
+                line-height: 1;
+                text-align: center;
+            }
+
+            #section-pedidos .pedido-priority-card span {
+                width: 100%;
+                max-width: 100%;
+                font-size: 0.72rem !important;
+                line-height: 1.22;
+                text-align: center;
+                white-space: normal;
+                overflow-wrap: normal;
+                word-break: normal;
+                hyphens: none;
+            }
+        }
+
+        @media (max-width: 380px) {
+            #section-pedidos .pedidos-priority-strip {
+                gap: 6px !important;
+            }
+
+            #section-pedidos .pedido-priority-card {
+                min-height: 118px;
+                padding: 10px 4px !important;
+            }
+
+            #section-pedidos .pedido-priority-card i {
+                width: 38px !important;
+                height: 38px !important;
+                flex-basis: 38px !important;
+            }
+
+            #section-pedidos .pedido-priority-card strong {
+                font-size: 1.2rem !important;
+            }
+
+            #section-pedidos .pedido-priority-card span {
+                font-size: 0.66rem !important;
             }
         }
 
@@ -3523,10 +3636,10 @@
                         <span class="menu-label-desktop">Catálogo</span>
                         <span class="menu-label-mobile">Catálogo</span>
                     </div>
-                    <div class="menu-item" onclick="switchTab('galeria')" id="tab-btn-galeria" aria-label="Galería y Opiniones">
-                        <i class="ph ph-images"></i>
-                        <span class="menu-label-desktop">Galería y Opiniones</span>
-                        <span class="menu-label-mobile">Galería +</span>
+                    <div class="menu-item" onclick="switchTab('galeria')" id="tab-btn-galeria" aria-label="Testimonios">
+                        <i class="ph ph-chat-circle-text"></i>
+                        <span class="menu-label-desktop">Testimonios</span>
+                        <span class="menu-label-mobile">Testimonios</span>
                     </div>
                     <div class="menu-item" onclick="switchTab('anuncios')" id="tab-btn-anuncios" aria-label="Diseño y Promociones">
                         <i class="ph ph-megaphone"></i>
@@ -3785,110 +3898,30 @@
                 <div id="section-galeria" class="dashboard-section">
                     <div class="panel-card">
                         <div class="info-box">
-                            <i class="ph ph-layout"></i>
-                            Administra las cuatro imágenes de <strong>Momentos que inspiran</strong> y los mensajes de <strong>Lo que dicen nuestros clientes</strong>. Ambos contenidos se publican directamente en la página de inicio.
+                            <i class="ph ph-chat-circle-text"></i>
+                            Administra únicamente los <strong>testimonios de clientes</strong> que aparecen en la página de inicio. Las imágenes de <strong>Momentos que inspiran</strong> ahora se cargan directamente desde la carpeta <code>imagenes</code> del repositorio.
                         </div>
-
-                        <form id="form-galeria-inicio">
-                            <div class="admin-section" id="galeria-inicio-section">
-                                <div class="section-header">
-                                    <h2>Momentos que inspiran</h2>
-                                    <button type="button" class="btn-edit" id="edit-galeria-btn" onclick="habilitarEdicion('galeria')">
-                                        <i class="ph ph-pencil-simple"></i> Editar Imágenes
-                                    </button>
-                                </div>
-
-                                <input type="hidden" id="galeria-old-image-1">
-                                <input type="hidden" id="galeria-old-image-2">
-                                <input type="hidden" id="galeria-old-image-3">
-                                <input type="hidden" id="galeria-old-image-4">
-
-                                <div class="home-gallery-admin-grid">
-                                    <div class="home-gallery-admin-card">
-                                        <label>Imagen 1 · Cumpleaños</label>
-                                        <div class="home-gallery-preview">
-                                            <img id="galeria-preview-1" src="imagenes/cumpleanos.jpg" data-ma-base="imagenes/cumpleanos" alt="Vista previa de Cumpleaños">
-                                            <div class="home-gallery-card-actions">
-                                                <button type="button" class="btn-remove-img field-galeria" onclick="restaurarImagenGaleria(1)" disabled>
-                                                    <i class="ph ph-arrow-counter-clockwise"></i> Restaurar original
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <input type="file" id="galeria-imagen-1" class="form-control field-galeria" accept=".png, .jpg, .jpeg, image/png, image/jpeg" disabled>
-                                    </div>
-
-                                    <div class="home-gallery-admin-card">
-                                        <label>Imagen 2 · Aniversarios</label>
-                                        <div class="home-gallery-preview">
-                                            <img id="galeria-preview-2" src="imagenes/aniversarios.jpg" data-ma-base="imagenes/aniversarios" alt="Vista previa de Aniversarios">
-                                            <div class="home-gallery-card-actions">
-                                                <button type="button" class="btn-remove-img field-galeria" onclick="restaurarImagenGaleria(2)" disabled>
-                                                    <i class="ph ph-arrow-counter-clockwise"></i> Restaurar original
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <input type="file" id="galeria-imagen-2" class="form-control field-galeria" accept=".png, .jpg, .jpeg, image/png, image/jpeg" disabled>
-                                    </div>
-
-                                    <div class="home-gallery-admin-card">
-                                        <label>Imagen 3 · Logros</label>
-                                        <div class="home-gallery-preview">
-                                            <img id="galeria-preview-3" src="imagenes/logros.jpg" data-ma-base="imagenes/logros" alt="Vista previa de Logros">
-                                            <div class="home-gallery-card-actions">
-                                                <button type="button" class="btn-remove-img field-galeria" onclick="restaurarImagenGaleria(3)" disabled>
-                                                    <i class="ph ph-arrow-counter-clockwise"></i> Restaurar original
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <input type="file" id="galeria-imagen-3" class="form-control field-galeria" accept=".png, .jpg, .jpeg, image/png, image/jpeg" disabled>
-                                    </div>
-
-                                    <div class="home-gallery-admin-card">
-                                        <label>Imagen 4 · Fechas especiales</label>
-                                        <div class="home-gallery-preview">
-                                            <img id="galeria-preview-4" src="imagenes/fechas-especiales.jpg" data-ma-base="imagenes/fechas-especiales" alt="Vista previa de Fechas especiales">
-                                            <div class="home-gallery-card-actions">
-                                                <button type="button" class="btn-remove-img field-galeria" onclick="restaurarImagenGaleria(4)" disabled>
-                                                    <i class="ph ph-arrow-counter-clockwise"></i> Restaurar original
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <input type="file" id="galeria-imagen-4" class="form-control field-galeria" accept=".png, .jpg, .jpeg, image/png, image/jpeg" disabled>
-                                    </div>
-                                </div>
-
-                                <div class="upload-info" style="margin-top: 20px;">
-                                    <i class="ph ph-info"></i>
-                                    Usa imágenes cuadradas o de proporción similar. Antes de guardar podrás revisar cada cambio en la vista previa.
-                                </div>
-
-                                <div class="context-action-group hidden" id="galeria-save-actions">
-                                    <button type="button" class="btn-cancel" style="display: block;" onclick="cancelarEdicion('galeria')">Cancelar Cambios</button>
-                                    <button type="submit" class="btn-submit"><i class="ph ph-floppy-disk"></i> Guardar y Publicar Imágenes</button>
-                                </div>
-                            </div>
-                        </form>
 
                         <form id="form-opiniones-inicio" class="opinions-admin-form">
                             <div class="admin-section" id="opiniones-inicio-section">
                                 <div class="section-header opinions-section-header">
                                     <div>
                                         <span class="opinions-admin-kicker"><i class="ph ph-chat-circle-text"></i> Página de inicio</span>
-                                        <h2>Opiniones de Clientes</h2>
-                                        <p>Escribe y organiza los mensajes que aparecen en “Lo que dicen nuestros clientes”.</p>
+                                        <h2>Testimonios de clientes</h2>
+                                        <p>Escribe y organiza los testimonios que aparecen en “Lo que dicen nuestros clientes”.</p>
                                     </div>
                                     <button type="button" class="btn-edit" id="edit-opiniones-btn" onclick="habilitarEdicion('opiniones')">
-                                        <i class="ph ph-pencil-simple"></i> Editar Opiniones
+                                        <i class="ph ph-pencil-simple"></i> Editar Testimonios
                                     </button>
                                 </div>
 
                                 <div class="opinions-admin-summary">
                                     <div>
                                         <strong id="opiniones-admin-count">0</strong>
-                                        <span>opiniones publicadas</span>
+                                        <span>testimonios publicados</span>
                                     </div>
                                     <button type="button" class="btn-edit field-opiniones" id="btn-agregar-opinion" onclick="agregarOpinionInicio()" disabled>
-                                        <i class="ph ph-plus"></i> Agregar Opinión
+                                        <i class="ph ph-plus"></i> Agregar Testimonio
                                     </button>
                                 </div>
 
@@ -3896,12 +3929,12 @@
 
                                 <div class="upload-info opinions-admin-help">
                                     <i class="ph ph-info"></i>
-                                    Puedes cambiar el orden, ocultar temporalmente una opinión o eliminarla. En Inicio solo se mostrarán las opiniones activas.
+                                    Puedes cambiar el orden, ocultar temporalmente un testimonio o eliminarlo. En Inicio solo se mostrarán los testimonios activos.
                                 </div>
 
                                 <div class="context-action-group hidden" id="opiniones-save-actions">
                                     <button type="button" class="btn-cancel" style="display: block;" onclick="cancelarEdicion('opiniones')">Cancelar Cambios</button>
-                                    <button type="submit" class="btn-submit"><i class="ph ph-floppy-disk"></i> Guardar y Publicar Opiniones</button>
+                                    <button type="submit" class="btn-submit"><i class="ph ph-floppy-disk"></i> Guardar y publicar testimonios</button>
                                 </div>
                             </div>
                         </form>
@@ -4330,20 +4363,18 @@
 
         // Cambio de Pestañas
         window.switchTab = function(tabName) {
-            document.getElementById('section-pedidos').classList.remove('active');
-            document.getElementById('section-productos').classList.remove('active');
-            document.getElementById('section-galeria').classList.remove('active');
-            document.getElementById('section-anuncios').classList.remove('active');
+            document.querySelectorAll('.dashboard-section.active').forEach(section => section.classList.remove('active'));
+            document.querySelectorAll('.sidebar-menu .menu-item.active').forEach(item => item.classList.remove('active'));
+
+            const sectionTarget = document.getElementById(`section-${tabName}`);
+            const tabTarget = document.getElementById(`tab-btn-${tabName}`);
+            if (!sectionTarget || !tabTarget) return;
+
+            sectionTarget.classList.add('active');
+            tabTarget.classList.add('active');
+            document.activeElement?.blur?.();
             
-            document.getElementById('tab-btn-pedidos').classList.remove('active');
-            document.getElementById('tab-btn-productos').classList.remove('active');
-            document.getElementById('tab-btn-galeria').classList.remove('active');
-            document.getElementById('tab-btn-anuncios').classList.remove('active');
-            
-            document.getElementById(`section-${tabName}`).classList.add('active');
-            document.getElementById(`tab-btn-${tabName}`).classList.add('active');
-            
-            const titles = { 'pedidos': 'Pedidos y Logística', 'productos': 'Catálogo y Productos', 'galeria': 'Galería y Opiniones', 'anuncios': 'Diseño y Promociones' };
+            const titles = { 'pedidos': 'Pedidos y Logística', 'productos': 'Catálogo y Productos', 'galeria': 'Testimonios', 'anuncios': 'Diseño y Promociones' };
             document.getElementById('page-title').textContent = titles[tabName];
             
             if(tabName === 'anuncios') {
@@ -4351,7 +4382,6 @@
                 cargarColoresGuardados();
             }
             if(tabName === 'galeria') {
-                cargarGaleriaInicio();
                 cargarOpinionesInicio();
             }
             if(tabName === 'productos') cargarProductos();
@@ -6338,134 +6368,7 @@ Esta acción no se puede deshacer.`);
         });
 
         // ==========================================
-        // GALERÍA DE LA PÁGINA DE INICIO
-        // ==========================================
-        // El primer nombre de cada grupo es el actual.
-        // El segundo mantiene compatibilidad con los nombres anteriores.
-        const GALERIA_INICIO_BASES = [
-            ['imagenes/cumpleanos', 'imagenes/desayuno1'],
-            ['imagenes/aniversarios', 'imagenes/ancheta1'],
-            ['imagenes/logros', 'imagenes/detalle2'],
-            ['imagenes/fechas-especiales', 'imagenes/decoracion1']
-        ];
-        let GALERIA_INICIO_PREDETERMINADA = GALERIA_INICIO_BASES.map(
-            bases => `${bases[0]}.jpg`
-        );
-        let galeriaPredeterminadaLista = false;
-
-        async function asegurarGaleriaPredeterminada() {
-            if (galeriaPredeterminadaLista) return;
-            GALERIA_INICIO_PREDETERMINADA = await Promise.all(
-                GALERIA_INICIO_BASES.map(async bases =>
-                    (await window.MAImages.resolver(...bases)) || `${bases[0]}.jpg`
-                )
-            );
-            galeriaPredeterminadaLista = true;
-        }
-
-        function actualizarVistaPreviaGaleria(numero, url) {
-            const preview = document.getElementById(`galeria-preview-${numero}`);
-            preview.src = url || GALERIA_INICIO_PREDETERMINADA[numero - 1];
-            preview.onerror = function() {
-                this.onerror = null;
-                this.src = GALERIA_INICIO_PREDETERMINADA[numero - 1];
-            };
-        }
-
-        for (let numero = 1; numero <= 4; numero++) {
-            document.getElementById(`galeria-imagen-${numero}`).addEventListener('change', function() {
-                if (!this.files || !this.files[0]) return;
-
-                const archivo = this.files[0];
-                if (!archivo.type.startsWith('image/')) {
-                    alert('Selecciona un archivo de imagen válido.');
-                    this.value = '';
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = (event) => actualizarVistaPreviaGaleria(numero, event.target.result);
-                reader.readAsDataURL(archivo);
-            });
-        }
-
-        window.restaurarImagenGaleria = function(numero) {
-            document.getElementById(`galeria-old-image-${numero}`).value = '';
-            document.getElementById(`galeria-imagen-${numero}`).value = '';
-            actualizarVistaPreviaGaleria(numero, GALERIA_INICIO_PREDETERMINADA[numero - 1]);
-        };
-
-        async function cargarGaleriaInicio() {
-            await asegurarGaleriaPredeterminada();
-            showLoading('Cargando galería de inicio...');
-            try {
-                const snapGaleria = await getDoc(doc(db, 'configuracion', 'galeria_inicio'));
-                const data = snapGaleria.exists() ? snapGaleria.data() : {};
-
-                for (let numero = 1; numero <= 4; numero++) {
-                    const urlGuardada = data[`imagen${numero}`] || '';
-                    document.getElementById(`galeria-old-image-${numero}`).value = urlGuardada;
-                    document.getElementById(`galeria-imagen-${numero}`).value = '';
-                    actualizarVistaPreviaGaleria(numero, urlGuardada);
-                }
-            } catch (error) {
-                console.error('Error cargando la galería de inicio:', error);
-                alert('No fue posible cargar las imágenes de la galería.');
-            }
-            hideLoading();
-        }
-
-        document.getElementById('form-galeria-inicio').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            showLoading('Guardando galería de inicio...');
-
-            try {
-                const imagenes = {};
-
-                for (let numero = 1; numero <= 4; numero++) {
-                    const input = document.getElementById(`galeria-imagen-${numero}`);
-                    let url = document.getElementById(`galeria-old-image-${numero}`).value;
-
-                    if (input.files && input.files.length > 0) {
-                        url = await subirImagen(input);
-                    }
-
-                    imagenes[`imagen${numero}`] = url || '';
-                }
-
-                imagenes.actualizadoEn = Date.now();
-
-                const galeriaRef = doc(db, 'configuracion', 'galeria_inicio');
-                await setDoc(galeriaRef, imagenes, { merge: true });
-
-                // Confirmación real: vuelve a leer Firestore y comprueba cada campo.
-                const verificacion = await getDoc(galeriaRef);
-                if (!verificacion.exists()) {
-                    throw new Error('La configuración de la galería no quedó registrada en Firestore.');
-                }
-
-                const datosGuardados = verificacion.data();
-                for (let numero = 1; numero <= 4; numero++) {
-                    const esperado = imagenes[`imagen${numero}`] || '';
-                    const guardado = datosGuardados[`imagen${numero}`] || '';
-                    if (esperado !== guardado) {
-                        throw new Error(`La imagen ${numero} no quedó guardada correctamente.`);
-                    }
-                }
-
-                alert('Galería publicada correctamente. Las imágenes ya están conectadas con la sección Galería de Inicio.');
-                cancelarEdicion('galeria');
-            } catch (error) {
-                console.error('Error guardando la galería de inicio:', error);
-                alert('No fue posible guardar la galería. Revisa tu conexión e inténtalo nuevamente.');
-            }
-
-            hideLoading();
-        });
-
-
-        // ==========================================
-        // OPINIONES DE CLIENTES EN LA PÁGINA DE INICIO
+        // TESTIMONIOS DE CLIENTES EN LA PÁGINA DE INICIO
         // ==========================================
         const OPINIONES_INICIO_PREDETERMINADAS = [
             { autor: 'Camila R.', texto: 'Pedí un desayuno sorpresa para el aniversario de mis papás y quedaron fascinados. Los detalles, la frescura y la puntualidad fueron increíbles. ¡Súper recomendados!', activo: true },
@@ -6533,7 +6436,7 @@ Esta acción no se puede deshacer.`);
             if (!opinionesInicio.length) {
                 const vacio = document.createElement('div');
                 vacio.className = 'opinions-admin-empty';
-                vacio.innerHTML = '<i class="ph ph-chat-circle-dots"></i><strong>No hay opiniones agregadas</strong><p>Activa la edición y agrega el primer mensaje de un cliente.</p>';
+                vacio.innerHTML = '<i class="ph ph-chat-circle-dots"></i><strong>No hay testimonios agregados</strong><p>Activa la edición y agrega el primer testimonio de un cliente.</p>';
                 contenedor.appendChild(vacio);
                 actualizarContadorOpinionesAdmin();
                 return;
@@ -6628,11 +6531,11 @@ Esta acción no se puede deshacer.`);
                 opinionesEdicionActiva = false;
                 renderizarOpinionesAdmin();
             } catch (error) {
-                console.error('Error cargando las opiniones de inicio:', error);
+                console.error('Error cargando los testimonios de inicio:', error);
                 opinionesInicio = obtenerOpinionesPredeterminadasAdmin();
                 opinionesEdicionActiva = false;
                 renderizarOpinionesAdmin();
-                alert('No fue posible cargar las opiniones. Se muestran los mensajes predeterminados como respaldo.');
+                alert('No fue posible cargar los testimonios. Se muestran los mensajes predeterminados como respaldo.');
             }
         }
 
@@ -6640,7 +6543,7 @@ Esta acción no se puede deshacer.`);
             if (!opinionesEdicionActiva) return;
             sincronizarOpinionesDesdeFormulario();
             if (opinionesInicio.length >= 12) {
-                alert('Puedes publicar hasta 12 opiniones para mantener el carrusel ágil y fácil de administrar.');
+                alert('Puedes publicar hasta 12 testimonios para mantener el carrusel ágil y fácil de administrar.');
                 return;
             }
             opinionesInicio.push(normalizarOpinionInicio({ autor: '', texto: '', activo: true }, opinionesInicio.length));
@@ -6671,7 +6574,7 @@ Esta acción no se puede deshacer.`);
 
             const incompleta = opinionesInicio.find(opinion => !opinion.autor || !opinion.texto);
             if (incompleta) {
-                alert('Completa el nombre y el mensaje de todas las opiniones antes de publicar.');
+                alert('Completa el nombre y el mensaje de todos los testimonios antes de publicar.');
                 return;
             }
             if (!opinionesInicio.some(opinion => opinion.activo)) {
@@ -6679,7 +6582,7 @@ Esta acción no se puede deshacer.`);
                 return;
             }
 
-            showLoading('Publicando opiniones...');
+            showLoading('Publicando testimonios...');
             try {
                 const opiniones = opinionesInicio.map((opinion, indice) => ({
                     id: opinion.id || crearIdOpinion(),
@@ -6699,8 +6602,8 @@ Esta acción no se puede deshacer.`);
                 document.getElementById('opiniones-save-actions').classList.add('hidden');
                 alert('Opiniones publicadas correctamente. Los cambios ya están vinculados con la página de inicio.');
             } catch (error) {
-                console.error('Error guardando opiniones:', error);
-                alert('No fue posible guardar las opiniones. Revisa tu conexión e inténtalo nuevamente.');
+                console.error('Error guardando testimonios:', error);
+                alert('No fue posible guardar los testimonios. Revisa tu conexión e inténtalo nuevamente.');
             } finally {
                 hideLoading();
             }
@@ -6799,8 +6702,7 @@ Esta acción no se puede deshacer.`);
                  swatches.forEach(s => s.classList.add('disabled'));
             }
             
-            if (section === 'galeria') cargarGaleriaInicio();
-            else if (section === 'opiniones') {
+            if (section === 'opiniones') {
                 opinionesEdicionActiva = false;
                 cargarOpinionesInicio();
             }
@@ -6978,27 +6880,7 @@ Esta acción no se puede deshacer.`);
     document.addEventListener('DOMContentLoaded', async () => {
         await Promise.all([
             window.MAImages.aplicarFavicon('imagenes/favicon'),
-            window.MAImages.aplicarVariableCss('--ma-admin-bg', 'imagenes/fondo'),
-            window.MAImages.aplicarImagen(
-                document.getElementById('galeria-preview-1'),
-                'imagenes/cumpleanos',
-                'imagenes/desayuno1'
-            ),
-            window.MAImages.aplicarImagen(
-                document.getElementById('galeria-preview-2'),
-                'imagenes/aniversarios',
-                'imagenes/ancheta1'
-            ),
-            window.MAImages.aplicarImagen(
-                document.getElementById('galeria-preview-3'),
-                'imagenes/logros',
-                'imagenes/detalle2'
-            ),
-            window.MAImages.aplicarImagen(
-                document.getElementById('galeria-preview-4'),
-                'imagenes/fechas-especiales',
-                'imagenes/decoracion1'
-            )
+            window.MAImages.aplicarVariableCss('--ma-admin-bg', 'imagenes/fondo')
         ]);
     });
 </script>
