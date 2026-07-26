@@ -358,7 +358,9 @@
 
         /* --- Servicios --- */
         .servicios { 
-            padding: 120px 5%; 
+            /* La curva inferior reduce el espacio visible de abajo.
+               Disminuimos solo la parte superior para equilibrar la sección. */
+            padding: 84px 5% 120px; 
             background-color: var(--bg-blush); 
             background-image: var(--pattern-url);
             position: relative;
@@ -917,7 +919,7 @@
             .overlay-category { font-size: 1.5rem; } 
             .overlay-text { font-size: 0.7rem; letter-spacing: 1px; }
 
-            .servicios { padding: 60px 5%; }
+            .servicios { padding: 42px 5% 60px; }
             .grid-servicios { gap: 20px; }
             .servicio-card { padding: 30px 20px; }
             .servicio-card h3 { font-size: 1.8rem; margin-bottom: 10px;}
@@ -1736,75 +1738,26 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // El primer nombre de cada grupo es el actual.
-        // El segundo mantiene compatibilidad con los nombres anteriores.
+        // MOMENTOS QUE INSPIRAN: imágenes locales del repositorio.
+        // Se buscan automáticamente en PNG, JPG o JPEG.
         const GALERIA_INICIO_BASES = [
             ['imagenes/cumpleanos', 'imagenes/desayuno1'],
             ['imagenes/aniversarios', 'imagenes/ancheta1'],
             ['imagenes/logros', 'imagenes/detalle2'],
             ['imagenes/fechas-especiales', 'imagenes/decoracion1']
         ];
-        let GALERIA_INICIO_PREDETERMINADA = GALERIA_INICIO_BASES.map(
-            bases => `${bases[0]}.jpg`
-        );
 
-        async function resolverGaleriaPredeterminadaInicio() {
-            GALERIA_INICIO_PREDETERMINADA = await Promise.all(
-                GALERIA_INICIO_BASES.map(async bases =>
-                    (await window.MAImages.resolver(...bases)) || `${bases[0]}.jpg`
-                )
+        async function cargarGaleriaLocalInicio() {
+            await Promise.all(
+                GALERIA_INICIO_BASES.map(async (bases, indice) => {
+                    const imagen = document.getElementById(`galeria-img-${indice + 1}`);
+                    if (!imagen) return;
+
+                    const url = await window.MAImages.resolver(...bases);
+                    if (url) imagen.src = url;
+                })
             );
         }
-
-        function agregarVersionAUrl(url, version) {
-            if (!url || !version || url.startsWith('data:')) return url;
-            const separador = url.includes('?') ? '&' : '?';
-            return `${url}${separador}v=${encodeURIComponent(version)}`;
-        }
-
-        function aplicarGaleriaEnInicio(data = {}) {
-            const version = data.actualizadoEn || Date.now();
-
-            for (let numero = 1; numero <= 4; numero++) {
-                const imagen = document.getElementById(`galeria-img-${numero}`);
-                if (!imagen) continue;
-
-                const urlGuardada = String(data[`imagen${numero}`] || '').trim();
-                const urlFinal = urlGuardada
-                    ? agregarVersionAUrl(urlGuardada, version)
-                    : GALERIA_INICIO_PREDETERMINADA[numero - 1];
-
-                imagen.onerror = function() {
-                    this.onerror = null;
-                    this.src = GALERIA_INICIO_PREDETERMINADA[numero - 1];
-                };
-                imagen.src = urlFinal;
-            }
-        }
-
-        function escucharGaleriaEnInicio() {
-            const docRef = doc(db, 'configuracion', 'galeria_inicio');
-
-            return onSnapshot(
-                docRef,
-                (docSnap) => {
-                    aplicarGaleriaEnInicio(docSnap.exists() ? docSnap.data() : {});
-                },
-                async (error) => {
-                    console.error('Error escuchando la galería de Firebase:', error);
-
-                    // Respaldo: intenta una lectura única si la escucha en tiempo real falla.
-                    try {
-                        const docSnap = await getDoc(docRef);
-                        aplicarGaleriaEnInicio(docSnap.exists() ? docSnap.data() : {});
-                    } catch (readError) {
-                        console.error('Error obteniendo la galería de Firebase:', readError);
-                        aplicarGaleriaEnInicio({});
-                    }
-                }
-            );
-        }
-
 
         const HOME_PRODUCTOS_NUEVOS_DIAS = 7;
         const HOME_PRODUCTO_PLACEHOLDER = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500' style='background:%23ffeef2'%3E%3Ctext fill='%23b8737f' font-family='Arial' font-size='22' font-weight='bold' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle'%3EImagen pendiente%3C/text%3E%3C/svg%3E";
@@ -2059,12 +2012,9 @@
                 window.MAImages.aplicarVariableCss('--ma-home-bg-mobile', 'imagenes/fondotelefono', 'imagenes/fondo'),
                 window.MAImages.aplicarImagen(document.getElementById('ma-logo-principal'), 'imagenes/logo'),
                 window.MAImages.aplicarImagen(document.getElementById('ma-logo-footer'), 'imagenes/logo-footer', 'imagenes/logo'),
-                resolverGaleriaPredeterminadaInicio()
+                cargarGaleriaLocalInicio()
             ]);
-            aplicarGaleriaEnInicio({});
-
             cargarAnunciosEnInicio();
-            escucharGaleriaEnInicio();
             cargarProductosSeleccionadosInicio();
 
             document.querySelectorAll('.ma-current-year').forEach(elemento => {
