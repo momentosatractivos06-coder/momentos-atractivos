@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo | Momentos Atractivos</title>
     <link rel="icon" href="imagenes/favicon.png" type="image/png">
+
+    <!-- Portadas propias del catálogo: se solicitan desde el primer instante. -->
+    <link rel="preload" as="image" href="imagenes/portada-catalogo-mobile.jpg" media="(max-width: 768px)">
+    <link rel="preload" as="image" href="imagenes/portada-catalogo.jpg" media="(min-width: 769px)">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1919,8 +1923,14 @@
             overflow: hidden;
             isolation: isolate;
             text-align: left;
-            background: #5f3f48;
-            background-image: none !important;
+            background:
+                radial-gradient(circle at 78% 22%, rgba(255,255,255,0.17) 0%, rgba(255,255,255,0) 27%),
+                radial-gradient(circle at 18% 78%, rgba(184,115,127,0.24) 0%, rgba(184,115,127,0) 34%),
+                linear-gradient(135deg, #8d6571 0%, #64434d 52%, #3f2930 100%);
+            background-image:
+                radial-gradient(circle at 78% 22%, rgba(255,255,255,0.17) 0%, rgba(255,255,255,0) 27%),
+                radial-gradient(circle at 18% 78%, rgba(184,115,127,0.24) 0%, rgba(184,115,127,0) 34%),
+                linear-gradient(135deg, #8d6571 0%, #64434d 52%, #3f2930 100%) !important;
             border-bottom: 0;
         }
 
@@ -3011,7 +3021,21 @@
             }
         }
 
-</style>
+
+        /* La imagen principal se pinta sobre un placeholder integrado, sin destello blanco. */
+        .catalog-hero__picture {
+            background:
+                radial-gradient(circle at 78% 22%, rgba(255,255,255,0.12), transparent 28%),
+                linear-gradient(135deg, #8d6571 0%, #64434d 52%, #3f2930 100%);
+        }
+
+        .catalog-hero__background {
+            display: block;
+            opacity: 1;
+            background-color: transparent;
+        }
+
+    </style>
 </head>
 <body id="inicio">
 
@@ -3168,8 +3192,15 @@
         
         <section class="hero-premium catalog-hero" aria-labelledby="catalog-hero-title">
             <picture class="catalog-hero__picture" aria-hidden="true">
-                <source id="ma-catalog-cover-mobile" media="(max-width: 768px)" srcset="">
-                <img id="ma-catalog-cover-desktop" class="catalog-hero__background" decoding="async" fetchpriority="high" src="imagenes/portada-catalogo.jpg" alt="Portada del catálogo de Momentos Atractivos">
+                <source media="(max-width: 768px)" srcset="imagenes/portada-catalogo-mobile.jpg">
+                <img
+                    class="catalog-hero__background"
+                    src="imagenes/portada-catalogo.jpg"
+                    loading="eager"
+                    decoding="sync"
+                    fetchpriority="high"
+                    alt=""
+                >
             </picture>
             <div class="catalog-hero__overlay" aria-hidden="true"></div>
 
@@ -4707,26 +4738,12 @@
 
 
 <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        const imagenPortada = document.getElementById('ma-catalog-cover-desktop');
-        const fuenteMovil = document.getElementById('ma-catalog-cover-mobile');
-
-        const [portadaPc, portadaMovil] = await Promise.all([
-            window.MAImages.resolver('imagenes/portada-catalogo', 'imagenes/fondo'),
-            window.MAImages.resolver('imagenes/portada-catalogo-mobile', 'imagenes/fondotelefono', 'imagenes/portada-catalogo', 'imagenes/fondo')
-        ]);
-
-        if (imagenPortada && (portadaPc || portadaMovil)) imagenPortada.src = portadaPc || portadaMovil;
-        if (fuenteMovil) {
-            if (portadaMovil || portadaPc) fuenteMovil.srcset = portadaMovil || portadaPc;
-            else fuenteMovil.removeAttribute('srcset');
-        }
-
-        await Promise.all([
+    document.addEventListener('DOMContentLoaded', () => {
+        Promise.all([
             window.MAImages.aplicarFavicon('imagenes/favicon'),
             window.MAImages.aplicarImagen(document.getElementById('ma-catalog-logo'), 'imagenes/logo'),
             window.MAImages.aplicarImagen(document.getElementById('ma-catalog-footer-logo'), 'imagenes/logo-footer', 'imagenes/logo')
-        ]);
+        ]).catch(error => console.warn('No fue posible cargar algún recurso gráfico del catálogo:', error));
 
         const seccionPoliticas = document.getElementById('como-pedir-fijo');
         const cargarFondosPoliticas = () => Promise.all([
