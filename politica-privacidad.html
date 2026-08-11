@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="index,follow">
+  <meta name="description" content="Política de privacidad, tratamiento y eliminación de datos personales de Momentos Atractivos.">
+  <title>Política de Privacidad | Momentos Atractivos</title>
+
+  <link rel="icon" href="imagenes/favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+
+  <style>
+    :root {
+      --white: #ffffff;
+      --bg-blush: #ffeef2;
+      --rose-accent: #b8737f;
+      --rose-hover: #a0606b;
+      --text-dark: #2a2a2a;
+      --text-light: #666666;
+      --gold: #D4AF37;
+      --line: rgba(184, 115, 127, 0.18);
+      --soft-shadow: 0 14px 34px rgba(73, 46, 53, 0.07);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--white);
+      color: var(--text-dark);
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3 {
+      font-family: 'DM Serif Display', serif;
+      font-weight: 400;
+    }
+
+    /* Cinta superior */
+    .announcement-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 38px;
+      z-index: 1002;
+      background: var(--rose-accent);
+      color: var(--white);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    .announcement-track {
+      display: flex;
+      width: max-content;
+      min-width: 200%;
+      animation: ticker 28s linear infinite;
+      will-change: transform;
+    }
+
+    .announcement-group {
+      display: flex;
+      min-width: 100vw;
+      justify-content: space-around;
+      align-items: center;
+      gap: 36px;
+      padding: 0 24px;
+      white-space: nowrap;
+    }
+
+    .announcement-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      line-height: 1;
+      font-weight: 600;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    .announcement-item i { color: var(--gold); font-size: 16px; }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* Encabezado */
+    header {
+      position: fixed;
+      top: 38px;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      min-height: 86px;
+      padding: 8px 6%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 238, 242, 0.98);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      min-width: 115px;
+    }
+
+    .main-logo {
+      max-height: 60px;
+      max-width: 95px;
+      object-fit: contain;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-dark);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 600;
+      transition: color .25s ease;
+    }
+
+    .nav-links a:hover { color: var(--rose-accent); }
+
+    .menu-toggle {
+      display: none;
+      border: 0;
+      background: transparent;
+      font-size: 1.8rem;
+      color: var(--text-dark);
+      cursor: pointer;
+    }
+
+    /* Portada */
+    .privacy-hero {
+      position: relative;
+      margin-top: 124px;
+      padding: 95px 5% 82px;
+      text-align: center;
+      background:
+        radial-gradient(circle at 18% 20%, rgba(255,255,255,.88), transparent 27%),
+        radial-gradient(circle at 88% 30%, rgba(212,175,55,.09), transparent 22%),
+        var(--bg-blush);
+      overflow: hidden;
+    }
+
+    .privacy-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: .38;
+      background-image:
+        radial-gradient(circle at 12% 20%, rgba(184,115,127,.10) 0 2px, transparent 3px),
+        radial-gradient(circle at 83% 24%, rgba(212,175,55,.10) 0 2px, transparent 3px),
+        radial-gradient(circle at 28% 82%, rgba(184,115,127,.08) 0 2px, transparent 3px);
+      background-size: 110px 110px, 140px 140px, 155px 155px;
+    }
+
+    .privacy-hero-inner {
+      position: relative;
+      z-index: 2;
+      width: min(900px, 100%);
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      margin-bottom: 18px;
+      color: var(--rose-hover);
+      font-size: .86rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .privacy-hero h1 {
+      color: var(--text-dark);
+      font-size: clamp(2.7rem, 6vw, 5rem);
+      line-height: 1.05;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    .privacy-hero h1 .accent {
+      display: block;
+      color: var(--rose-hover);
+    }
+
+    .privacy-hero .lead {
+      width: min(730px, 100%);
+      margin: 24px auto 0;
+      color: var(--text-light);
+      font-size: 1.02rem;
+      line-height: 1.75;
+    }
+
+    .updated {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 24px;
+      padding: 10px 16px;
+      border: 1px solid rgba(184,115,127,.22);
+      border-radius: 999px;
+      background: rgba(255,255,255,.70);
+      color: var(--rose-hover);
+      font-size: .80rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+
+    /* Índice */
+    .quick-nav {
+      padding: 34px 5% 0;
+      background: var(--white);
+    }
+
+    .quick-nav-inner {
+      width: min(1080px, 100%);
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .quick-nav a {
+      text-decoration: none;
+      color: var(--rose-hover);
+      border: 1px solid rgba(184,115,127,.28);
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+      background: #fff;
+      transition: .2s ease;
+    }
+
+    .quick-nav a:hover {
+      background: var(--rose-accent);
+      border-color: var(--rose-accent);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* Política */
+    .policy-section {
+      padding: 54px 5% 95px;
+      background: var(--white);
+    }
+
+    .policy-wrap {
+      width: min(1060px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    .policy-card {
+      padding: 30px 34px;
+      border: 1px solid rgba(184,115,127,.15);
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: var(--soft-shadow);
+    }
+
+    .policy-card h2 {
+      color: var(--rose-hover);
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+    }
+
+    .policy-card p,
+    .policy-card li {
+      color: var(--text-light);
+      font-size: .98rem;
+      line-height: 1.75;
+    }
+
+    .policy-card p + p { margin-top: 12px; }
+
+    .policy-card ul {
+      margin: 12px 0 0 21px;
+    }
+
+    .policy-card li + li { margin-top: 7px; }
+
+    .policy-card strong { color: var(--text-dark); }
+
+    .policy-card a {
+      color: var(--rose-hover);
+      font-weight: 700;
+      text-underline-offset: 3px;
+    }
+
+    .number {
+      width: 42px;
+      height: 42px;
+      margin-bottom: 16px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--bg-blush);
+      color: var(--rose-accent);
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.25rem;
+    }
+
+    .delete-card {
+      border-color: rgba(212,175,55,.36);
+      background:
+        linear-gradient(135deg, rgba(255,238,242,.76), rgba(255,255,255,1));
+    }
+
+    .notice {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-left: 3px solid var(--gold);
+      background: #fffaf0;
+      border-radius: 10px;
+      color: var(--text-light);
+      font-size: .93rem;
+    }
+
+    .privacy-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 48px;
+      margin-top: 19px;
+      padding: 0 22px;
+      border-radius: 999px;
+      background: var(--rose-accent);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .7px;
+      text-transform: uppercase;
+      transition: .25s ease;
+    }
+
+    .privacy-button:hover {
+      background: var(--rose-hover);
+      transform: translateY(-2px);
+    }
+
+    /* Footer */
+    footer {
+      padding: 55px 5% 28px;
+      background: var(--bg-blush);
+      border-top: 1px solid rgba(184,115,127,.14);
+    }
+
+    .footer-grid {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr;
+      gap: 44px;
+    }
+
+    .footer-brand img {
+      width: 185px;
+      max-width: 100%;
+      display: block;
+      margin-bottom: 14px;
+    }
+
+    .footer-brand p,
+    .footer-col a,
+    .footer-col span {
+      color: var(--text-light);
+      font-size: .9rem;
+      line-height: 1.7;
+    }
+
+    .footer-col strong {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--text-dark);
+      font-size: .88rem;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+    }
+
+    .footer-col a {
+      display: block;
+      text-decoration: none;
+      margin-bottom: 5px;
+      transition: color .2s ease;
+    }
+
+    .footer-col a:hover { color: var(--rose-accent); }
+
+    .footer-bottom {
+      width: min(1100px, 100%);
+      margin: 34px auto 0;
+      padding-top: 18px;
+      border-top: 1px solid rgba(184,115,127,.16);
+      color: var(--text-light);
+      font-size: .78rem;
+      text-align: center;
+    }
+
+    @media (max-width: 860px) {
+      header {
+        min-height: 72px;
+        padding: 8px 5%;
+      }
+
+      .main-logo { max-height: 48px; }
+
+      .menu-toggle { display: block; }
+
+      .nav-links {
+        position: absolute;
+        top: 72px;
+        right: 0;
+        width: min(320px, 86vw);
+        padding: 24px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        background: rgba(255,238,242,.99);
+        box-shadow: 0 18px 35px rgba(0,0,0,.08);
+        transform: translateX(105%);
+        transition: transform .25s ease;
+      }
+
+      .nav-links.active { transform: translateX(0); }
+
+      .nav-links a {
+        width: 100%;
+        padding: 13px 0;
+      }
+
+      .privacy-hero {
+        margin-top: 110px;
+        padding: 72px 6% 60px;
+      }
+
+      .privacy-hero h1 { font-size: clamp(2.35rem, 12vw, 3.5rem); }
+
+      .policy-card { padding: 25px 22px; }
+
+      .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+    }
+
+    @media (max-width: 520px) {
+      .announcement-item { font-size: 11.5px; letter-spacing: 1.3px; }
+      .announcement-group { gap: 24px; }
+
+      .privacy-hero {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .privacy-hero h1 {
+        font-size: 2.45rem;
+        line-height: 1.03;
+      }
+
+      .privacy-hero .lead { font-size: .94rem; }
+
+      .quick-nav { display: none; }
+
+      .policy-section {
+        padding: 34px 14px 70px;
+      }
+
+      .policy-card h2 { font-size: 1.55rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .announcement-track { animation: none; }
+      * { scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="announcement-bar" aria-label="Información destacada">
+    <div class="announcement-track">
+      <div class="announcement-group">
+        <span class="announcement-item"><i class="ph-light ph-gift"></i> Detalles 100% personalizados</span>
+        <span class="announcement-item"><i class="ph-light ph-sparkle"></i> Creamos momentos inolvidables</span>
+        <span class="announcement-item"><i class="ph-light ph-heart"></i> Hecho con intención</span>
+      </div>
+      <div class="announcement-group" aria-hidden="true">
+        <span class="announcement-item"><i class="ph-light ph-gift"></i> Detalles 100% personalizados</span>
+        <span class="announcement-item"><i class="ph-light ph-sparkle"></i> Creamos momentos inolvidables</span>
+        <span class="announcement-item"><i class="ph-light ph-heart"></i> Hecho con intención</span>
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <div class="logo-container">
+      <a href="index.html" aria-label="Ir al inicio">
+        <img src="imagenes/logo.png" alt="Logo de Momentos Atractivos" class="main-logo">
+      </a>
+    </div>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú" aria-expanded="false">
+      <i class="ph-light ph-list"></i>
+    </button>
+
+    <nav class="nav-links" id="nav-links">
+      <a href="index.html#inicio">Inicio</a>
+      <a href="catalogo.html">Catálogo</a>
+      <a href="index.html#galeria">Galería</a>
+      <a href="index.html#testimonios">Testimonios</a>
+      <a href="index.html#preguntas-frecuentes">Preguntas</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="privacy-hero">
+      <div class="privacy-hero-inner">
+        <p class="eyebrow">Momentos Atractivos · Privacidad</p>
+        <h1>
+          Tu información,
+          <span class="accent">tratada con cuidado.</span>
+        </h1>
+        <p class="lead">
+          Esta política explica cómo Momentos Atractivos puede recopilar y utilizar información
+          cuando una persona visita nuestros canales digitales o se comunica con nosotros,
+          incluyendo la atención a través de WhatsApp y herramientas automatizadas.
+        </p>
+        <span class="updated">
+          <i class="ph-light ph-calendar-blank"></i>
+          Última actualización: 11 de agosto de 2026
+        </span>
+      </div>
+    </section>
+
+    <nav class="quick-nav" aria-label="Secciones de la política">
+      <div class="quick-nav-inner">
+        <a href="#responsable">Responsable</a>
+        <a href="#informacion">Información tratada</a>
+        <a href="#finalidades">Finalidades</a>
+        <a href="#ia">Atención automatizada</a>
+        <a href="#derechos">Tus derechos</a>
+        <a href="#eliminacion-datos">Eliminar datos</a>
+        <a href="#contacto">Contacto</a>
+      </div>
+    </nav>
+
+    <section class="policy-section">
+      <div class="policy-wrap">
+
+        <article class="policy-card" id="responsable">
+          <div class="number">1</div>
+          <h2>Responsable del tratamiento</h2>
+          <p>
+            El responsable del tratamiento descrito en esta política es
+            <strong>Momentos Atractivos</strong>, negocio con operación en Colombia.
+          </p>
+          <p>
+            Para consultas relacionadas con privacidad o tratamiento de datos personales puedes escribir a
+            <a href="mailto:momentosatractivos06@gmail.com">momentosatractivos06@gmail.com</a>.
+          </p>
+        </article>
+
+        <article class="policy-card">
+          <div class="number">2</div>
+          <h2>Marco de protección de datos</h2>
+          <p>
+            El tratamiento de datos personales se realiza de acuerdo con la normativa colombiana aplicable,
+            incluyendo la Ley 1581 de 2012 y sus normas reglamentarias vigentes. Momentos Atractivos procura
+            aplicar los principios de legalidad, finalidad, libertad, transparencia, seguridad y confidencialidad
+            en el manejo de la información personal.
+          </p>
+        </article>
+
+        <article class="policy-card" id="informacion">
+          <div class="number">3</div>
+          <h2>Información que podemos tratar</h2>
+          <p>Dependiendo de la forma en que interactúes con nosotros, podemos recibir:</p>
+          <ul>
+            <li>Número de teléfono asociado a WhatsApp.</li>
+            <li>Nombre o nombre de perfil cuando sea suministrado por WhatsApp o por la propia persona.</li>
+            <li>Contenido de los mensajes enviados durante una conversación.</li>
+            <li>Información entregada voluntariamente para atender una consulta o gestionar un pedido, como nombres, fechas, preferencias, datos de entrega o mensajes para tarjetas.</li>
+            <li>Datos técnicos mínimos vinculados con la comunicación, como identificadores de mensajes y fecha u hora de la interacción.</li>
+          </ul>
+          <div class="notice">
+            Recomendamos no enviar información sensible ni datos que no sean necesarios para atender tu solicitud.
+          </div>
+        </article>
+
+        <article class="policy-card" id="finalidades">
+          <div class="number">4</div>
+          <h2>Para qué utilizamos la información</h2>
+          <p>La información puede utilizarse para:</p>
+          <ul>
+            <li>Responder consultas realizadas a través de WhatsApp u otros canales habilitados.</li>
+            <li>Orientar sobre productos, servicios, disponibilidad y procesos de compra.</li>
+            <li>Gestionar solicitudes, pedidos, entregas, novedades y servicio al cliente.</li>
+            <li>Mantener continuidad en la atención de una conversación.</li>
+            <li>Prevenir usos indebidos, errores técnicos, fraude o incidentes de seguridad.</li>
+            <li>Cumplir obligaciones legales o atender requerimientos de autoridades competentes cuando corresponda.</li>
+            <li>Mejorar la calidad de la atención y el funcionamiento de nuestros canales digitales.</li>
+          </ul>
+        </article>
+
+        <article class="policy-card" id="ia">
+          <div class="number">5</div>
+          <h2>Atención automatizada e inteligencia artificial</h2>
+          <p>
+            Momentos Atractivos puede utilizar herramientas de atención automatizada para responder consultas
+            recibidas por WhatsApp. En determinados casos, el contenido del mensaje puede ser procesado por
+            servicios de inteligencia artificial con la finalidad de generar una respuesta relacionada con la
+            solicitud de la persona.
+          </p>
+          <p>
+            La automatización no impide la atención humana. Cuando sea necesario, una persona del equipo de
+            Momentos Atractivos podrá continuar la conversación.
+          </p>
+        </article>
+
+        <article class="policy-card">
+          <div class="number">6</div>
+          <h2>Proveedores tecnológicos</h2>
+          <p>
+            Para operar nuestros canales digitales podemos utilizar proveedores tecnológicos que participan en
+            la transmisión o procesamiento de comunicaciones, incluyendo servicios de <strong>Meta/WhatsApp</strong>
+            y herramientas de <strong>Google</strong> empleadas para funciones de inteligencia artificial.
+          </p>
+          <p>
+            Estos proveedores pueden procesar información conforme a sus propias condiciones, políticas y medidas
+            de seguridad aplicables. Momentos Atractivos no vende los datos personales de sus usuarios a anunciantes
+            ni a otros terceros.
+          </p>
+        </article>
+
+        <article class="policy-card">
+          <div class="number">7</div>
+          <h2>Conservación y seguridad</h2>
+          <p>
+            Conservamos la información durante el tiempo razonablemente necesario para cumplir las finalidades
+            descritas, atender solicitudes, cumplir obligaciones legales o mantener la seguridad de los servicios.
+            Cuando la información deje de ser necesaria y no exista un deber legal o contractual de conservarla,
+            podrá ser eliminada o anonimizada según corresponda.
+          </p>
+          <p>
+            Aplicamos medidas razonables de carácter administrativo y técnico orientadas a reducir riesgos de
+            acceso, alteración, pérdida, uso o divulgación no autorizada.
+          </p>
+        </article>
+
+        <article class="policy-card" id="derechos">
+          <div class="number">8</div>
+          <h2>Derechos de los titulares</h2>
+          <p>De acuerdo con la legislación colombiana aplicable, el titular puede, cuando corresponda:</p>
+          <ul>
+            <li>Conocer, actualizar y rectificar sus datos personales.</li>
+            <li>Solicitar información sobre el uso dado a sus datos.</li>
+            <li>Solicitar prueba de la autorización cuando legalmente resulte exigible.</li>
+            <li>Revocar la autorización o solicitar la supresión de los datos cuando proceda.</li>
+            <li>Acceder gratuitamente a sus datos personales objeto de tratamiento.</li>
+            <li>Presentar consultas o reclamos relacionados con el tratamiento de su información.</li>
+          </ul>
+        </article>
+
+        <article class="policy-card delete-card" id="eliminacion-datos">
+          <div class="number">9</div>
+          <h2>Solicitud de eliminación de datos</h2>
+          <p>
+            Puedes solicitar la eliminación de los datos personales asociados a tu interacción con Momentos Atractivos
+            enviando un correo a
+            <a href="mailto:momentosatractivos06@gmail.com">momentosatractivos06@gmail.com</a>
+            con el asunto <strong>“Solicitud de eliminación de datos”</strong>.
+          </p>
+          <p>
+            Para identificar correctamente la información, incluye el número de WhatsApp utilizado para contactar
+            a Momentos Atractivos y una descripción breve de la solicitud. Podemos pedir información razonable para
+            verificar la identidad del solicitante y evitar la eliminación de información de terceros.
+          </p>
+          <p>
+            La eliminación podrá estar limitada cuando exista una obligación legal o contractual que requiera
+            conservar determinada información.
+          </p>
+
+          <a class="privacy-button"
+             href="mailto:momentosatractivos06@gmail.com?subject=Solicitud%20de%20eliminaci%C3%B3n%20de%20datos">
+            <i class="ph-light ph-envelope-simple"></i>
+            Solicitar eliminación
+          </a>
+        </article>
+
+        <article class="policy-card">
+          <div class="number">10</div>
+          <h2>Menores de edad</h2>
+          <p>
+            Nuestros canales comerciales no están diseñados para recopilar intencionalmente datos personales de
+            niños, niñas o adolescentes sin la intervención o autorización que resulte aplicable. Si se identifica
+            información de un menor tratada de manera inadecuada, podrá solicitarse su revisión o eliminación por
+            medio del canal de contacto indicado en esta política.
+          </p>
+        </article>
+
+        <article class="policy-card">
+          <div class="number">11</div>
+          <h2>Cambios a esta política</h2>
+          <p>
+            Esta política puede actualizarse cuando cambien nuestros servicios, procesos, proveedores tecnológicos
+            o las obligaciones legales aplicables. La versión vigente se mantendrá disponible en esta misma
+            dirección web e indicará su fecha de última actualización.
+          </p>
+        </article>
+
+        <article class="policy-card" id="contacto">
+          <div class="number">12</div>
+          <h2>Contacto</h2>
+          <p>
+            Para consultas, solicitudes, reclamos o ejercicio de derechos relacionados con datos personales:
+            <a href="mailto:momentosatractivos06@gmail.com">momentosatractivos06@gmail.com</a>.
+          </p>
+          <div class="notice">
+            Esta misma página contiene las instrucciones necesarias para solicitar la eliminación de datos asociados
+            al uso de los canales digitales de Momentos Atractivos.
+          </div>
+        </article>
+
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <img src="imagenes/logo-footer.png" alt="Logo horizontal de Momentos Atractivos">
+        <p>
+          Creamos desayunos, anchetas y detalles personalizados para celebrar, agradecer
+          y convertir cada entrega en un momento inolvidable.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <strong>Explorar</strong>
+        <a href="index.html#inicio">Inicio</a>
+        <a href="catalogo.html">Catálogo</a>
+        <a href="index.html#galeria">Galería</a>
+        <a href="index.html#preguntas-frecuentes">Preguntas frecuentes</a>
+      </div>
+
+      <div class="footer-col">
+        <strong>Atención al cliente</strong>
+        <a href="pedido-rapido.html">Hacer un pedido</a>
+        <a href="https://wa.me/573028442505" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+        <span>Sincelejo, Sucre</span><br>
+        <span>Entregas a domicilio</span>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      © <span id="year">2026</span> Momentos Atractivos · Política de Privacidad
+    </div>
+  </footer>
+
+  <script>
+    const toggle = document.getElementById('menu-toggle');
+    const nav = document.getElementById('nav-links');
+
+    toggle?.addEventListener('click', () => {
+      const open = nav.classList.toggle('active');
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.innerHTML = open
+        ? '<i class="ph-light ph-x"></i>'
+        : '<i class="ph-light ph-list"></i>';
+    });
+
+    nav?.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        nav.classList.remove('active');
+        toggle?.setAttribute('aria-expanded', 'false');
+        if (toggle) toggle.innerHTML = '<i class="ph-light ph-list"></i>';
+      });
+    });
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+
+</body>
+</html>
