@@ -830,6 +830,7 @@
 
             productosCatalogoPedido = snapshot.docs
                 .map(documento => ({ ...documento.data(), id: documento.id }))
+                .filter(producto => producto.visible !== false)
                 .map(producto => ({
                     id: producto.id,
                     nombre: String(producto.nombre || '').replace(/\s+/g, ' ').trim()
