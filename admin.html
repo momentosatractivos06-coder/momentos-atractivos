@@ -5383,23 +5383,54 @@ Esta acción no se puede deshacer.`);
                     'DOMICILIO', 'DIRECCIÓN', 'CIUDAD', 'VALOR TOTAL', 'ABONO (PAGO)',
                     'SALDO RESTANTE', 'ESTADO', 'NOTA'
                 ];
-                const filas = pedidosParaExcel.map((p, index) => [
-                    p.numero_pedido || p.id_numerico || (index + 1),
-                    p.cliente || p.nombre_cliente || '',
-                    p.whatsapp_cliente || p.telefono_cliente || '',
-                    p.destinatario || p.nombre_recibe || p.tarjeta_para || '',
-                    p.whatsapp_destinatario || p.telefono_recibe || '',
-                    p.producto || p.productos || '',
-                    p.detalles_adicionales || p.color_detalles || p.personalizacion || '',
-                    formatearFechaExcel(p.fecha_entrega),
-                    formatearHoraExcel(p.hora_entrega),
-                    'SI', p.direccion || '', p.ciudad || '',
-                    formatearMonedaExcel(p.valor_total ?? p.total ?? ''),
-                    formatearMonedaExcel(p.abono ?? p.pago ?? ''),
-                    formatearMonedaExcel(p.saldo_restante ?? p.saldo ?? ''),
-                    String(p.estado || 'Pendiente').toUpperCase(),
-                    p.mensaje || p.mensaje_tarjeta || ''
-                ]);
+                // ==========================================================
+                // SISTEMA EXCLUSIVO PARA EXPORTACIÓN ADMINISTRATIVA A EXCEL
+                // ==========================================================
+                // El Excel conserva TODA la información administrativa del pedido:
+                // producto, detalles adicionales/personalización y mensaje de tarjeta.
+                // Esta lógica es independiente de las guías de entrega.
+                const obtenerDatosExcelPedido = (p, index) => ({
+                    id: p.numero_pedido || p.id_numerico || (index + 1),
+                    cliente: p.cliente || p.nombre_cliente || '',
+                    telefonoCliente: p.whatsapp_cliente || p.telefono_cliente || '',
+                    recibe: p.destinatario || p.nombre_recibe || p.tarjeta_para || '',
+                    telefonoRecibe: p.whatsapp_destinatario || p.telefono_recibe || '',
+                    detalle: p.producto || p.productos || '',
+                    detallesAdicionales: p.detalles_adicionales || p.color_detalles || p.personalizacion || '',
+                    fechaEntrega: p.fecha_entrega || '',
+                    horaEntrega: p.hora_entrega || '',
+                    direccion: p.direccion || '',
+                    ciudad: p.ciudad || '',
+                    valorTotal: p.valor_total ?? p.total ?? '',
+                    abono: p.abono ?? p.pago ?? '',
+                    saldo: p.saldo_restante ?? p.saldo ?? '',
+                    estado: String(p.estado || 'Pendiente').toUpperCase(),
+                    nota: p.mensaje || p.mensaje_tarjeta || ''
+                });
+
+                const filas = pedidosParaExcel.map((p, index) => {
+                    const datosExcel = obtenerDatosExcelPedido(p, index);
+
+                    return [
+                        datosExcel.id,
+                        datosExcel.cliente,
+                        datosExcel.telefonoCliente,
+                        datosExcel.recibe,
+                        datosExcel.telefonoRecibe,
+                        datosExcel.detalle,
+                        datosExcel.detallesAdicionales,
+                        formatearFechaExcel(datosExcel.fechaEntrega),
+                        formatearHoraExcel(datosExcel.horaEntrega),
+                        'SI',
+                        datosExcel.direccion,
+                        datosExcel.ciudad,
+                        formatearMonedaExcel(datosExcel.valorTotal),
+                        formatearMonedaExcel(datosExcel.abono),
+                        formatearMonedaExcel(datosExcel.saldo),
+                        datosExcel.estado,
+                        datosExcel.nota
+                    ];
+                });
 
                 const tituloHoja = filtroFechasActivo && fechaInicio && fechaFin
                     ? `GESTIÓN DE PEDIDOS DEL ${formatearFechaExcel(fechaInicio)} AL ${formatearFechaExcel(fechaFin)} - DOMICILIO`
@@ -5502,17 +5533,35 @@ Esta acción no se puede deshacer.`);
             };
         }
 
+        // ==========================================================
+        // SISTEMA EXCLUSIVO PARA GUÍAS DE ENTREGA
+        // ==========================================================
+        // IMPORTANTE:
+        // Las guías NO deben reutilizar la información administrativa del Excel.
+        // Aquí solo se exponen los datos que necesita el domiciliario.
+        // NO se incluyen:
+        // - color o detalles adicionales
+        // - cinta
+        // - personalización
+        // - tarjeta "De / Para"
+        // - mensaje o dedicatoria
+        // - notas administrativas
+        //
+        // Esta misma salida limpia alimenta:
+        // 1. Guía individual
+        // 2. PDF consolidado
+        // 3. Comprobante interno / "Cortar aquí"
         function obtenerDatosGuia(p) {
             const nombre = p.destinatario || p.nombre_recibe || p.tarjeta_para || 'N/A';
             const telefono = p.whatsapp_destinatario || p.telefono_recibe || 'N/A';
             const ciudad = p.ciudad || 'Sincelejo';
             const barrio = p.barrio || 'N/A';
             const direccion = p.direccion || 'N/A';
-            const detalleBase = p.producto || p.productos || 'N/A';
-            const detallesAdicionales = p.detalles_adicionales || p.color_detalles || p.personalizacion || '';
-            const detalle = detallesAdicionales
-                ? `${detalleBase} | Color o detalles adicionales: ${detallesAdicionales}`
-                : detalleBase;
+
+            // ÚNICO contenido permitido en "Detalle(s)" de las guías:
+            // cantidad + nombre del producto o productos.
+            const detalle = p.producto || p.productos || 'N/A';
+
             const fechaEntrega = p.fecha_entrega || 'N/A';
             const horaEntrega = p.hora_entrega || 'N/A';
             const horaEntregaFormateada = formatearHora12h(horaEntrega);
