@@ -2341,16 +2341,15 @@
         .admin-product-card {
             width: 100%;
             display: grid;
-            grid-template-columns: 64px minmax(0, 1fr) auto;
+            grid-template-columns: minmax(0, 1fr) auto;
             align-items: center;
-            gap: 10px;
-            padding: 9px;
+            gap: 8px;
+            padding: 6px;
             border: 1px solid transparent;
             border-radius: 12px;
             background: var(--white);
             color: var(--text-dark);
             text-align: left;
-            cursor: pointer;
             transition: 0.2s ease;
         }
 
@@ -2365,12 +2364,43 @@
             box-shadow: inset 3px 0 0 var(--rose-accent);
         }
 
+        .admin-product-card.is-hidden {
+            border-color: #e1e3e7;
+            background: #f7f7f8;
+        }
+
+        .admin-product-card-main {
+            min-width: 0;
+            display: grid;
+            grid-template-columns: 64px minmax(0, 1fr) 10px;
+            align-items: center;
+            gap: 10px;
+            padding: 3px;
+            border: 0;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .admin-product-card-main:focus-visible {
+            outline: 2px solid var(--rose-accent);
+            outline-offset: 2px;
+            border-radius: 9px;
+        }
+
         .admin-product-card img {
             width: 64px;
             height: 56px;
             object-fit: cover;
             border-radius: 9px;
             background: var(--bg-blush);
+        }
+
+        .admin-product-card.is-hidden img {
+            opacity: 0.52;
+            filter: grayscale(0.8);
         }
 
         .admin-product-card-copy {
@@ -2415,6 +2445,78 @@
         .admin-product-card-status.is-special {
             background: var(--gold);
             box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.15);
+        }
+
+        .product-visibility-control {
+            position: relative;
+            display: grid;
+            justify-items: center;
+            gap: 4px;
+            min-width: 54px;
+            margin: 0;
+            padding: 5px 4px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .product-visibility-control input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .product-visibility-switch {
+            position: relative;
+            width: 42px;
+            height: 23px;
+            border-radius: 999px;
+            background: #c9cbd0;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+            transition: 0.2s ease;
+        }
+
+        .product-visibility-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 17px;
+            height: 17px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.20);
+            transition: transform 0.2s ease;
+        }
+
+        .product-visibility-control input:checked + .product-visibility-switch {
+            background: #4ca875;
+        }
+
+        .product-visibility-control input:checked + .product-visibility-switch::after {
+            transform: translateX(19px);
+        }
+
+        .product-visibility-control input:focus-visible + .product-visibility-switch {
+            outline: 2px solid var(--rose-accent);
+            outline-offset: 2px;
+        }
+
+        .product-visibility-control input:disabled + .product-visibility-switch {
+            opacity: 0.55;
+            cursor: wait;
+        }
+
+        .product-visibility-label {
+            color: var(--text-light);
+            font-size: 0.66rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .product-visibility-control input:checked ~ .product-visibility-label {
+            color: #347c55;
         }
 
         .catalog-empty-products {
@@ -3894,7 +3996,7 @@
                             <div class="catalog-browser-header">
                                 <div class="catalog-browser-title">
                                     <div><span>Inventario actual</span><strong>Selecciona un producto</strong></div>
-                                    <span class="catalog-visible-count" id="catalog-visible-count">0 visibles</span>
+                                    <span class="catalog-visible-count" id="catalog-visible-count">0 resultados</span>
                                 </div>
                                 <div class="catalog-search-wrap">
                                     <i class="ph ph-magnifying-glass"></i>
@@ -6647,7 +6749,7 @@ Esta acción no se puede deshacer.`);
 
             const visibles = obtenerProductosAdminVisibles();
             tableBody.innerHTML = '';
-            if (catalogVisibleCount) catalogVisibleCount.textContent = `${visibles.length} visibles`;
+            if (catalogVisibleCount) catalogVisibleCount.textContent = `${visibles.length} resultado${visibles.length === 1 ? '' : 's'}`;
             actualizarResumenCatalogo();
 
             if (!visibles.length) {
@@ -6662,11 +6764,15 @@ Esta acción no se puede deshacer.`);
 
             visibles.forEach(producto => {
                 const esEspecial = producto.esColeccionEspecial === true || producto.categoria === 'ColeccionEspecial';
+                const estaVisible = producto.visible !== false;
                 const categoriaVisible = esEspecial ? 'Colección Especial' : obtenerNombreCategoriaAdmin(producto.categoria);
-                const card = document.createElement('button');
-                card.type = 'button';
-                card.className = `admin-product-card${producto.id === productoAdminActivo ? ' is-active' : ''}`;
-                card.setAttribute('aria-label', `Editar ${producto.nombre || 'producto'}`);
+                const card = document.createElement('article');
+                card.className = `admin-product-card${producto.id === productoAdminActivo ? ' is-active' : ''}${estaVisible ? '' : ' is-hidden'}`;
+
+                const botonEditar = document.createElement('button');
+                botonEditar.type = 'button';
+                botonEditar.className = 'admin-product-card-main';
+                botonEditar.setAttribute('aria-label', `Editar ${producto.nombre || 'producto'}`);
 
                 const imagen = document.createElement('img');
                 imagen.src = producto.imagen || 'https://via.placeholder.com/120x100?text=Sin+foto';
@@ -6690,10 +6796,77 @@ Esta acción no se puede deshacer.`);
                 estado.className = `admin-product-card-status${esEspecial ? ' is-special' : ''}`;
                 estado.setAttribute('aria-hidden', 'true');
 
-                card.append(imagen, copy, estado);
-                card.addEventListener('click', () => window.editarProducto(producto.id));
+                botonEditar.append(imagen, copy, estado);
+                botonEditar.addEventListener('click', () => window.editarProducto(producto.id));
+
+                const controlVisibilidad = document.createElement('label');
+                controlVisibilidad.className = 'product-visibility-control';
+                controlVisibilidad.title = estaVisible
+                    ? 'Ocultar este producto del catálogo y de Pedido Rápido'
+                    : 'Volver a mostrar este producto en el catálogo y en Pedido Rápido';
+
+                const interruptor = document.createElement('input');
+                interruptor.type = 'checkbox';
+                interruptor.checked = estaVisible;
+                interruptor.setAttribute('aria-label', `${estaVisible ? 'Ocultar' : 'Mostrar'} ${producto.nombre || 'producto'}`);
+
+                const interruptorVisual = document.createElement('span');
+                interruptorVisual.className = 'product-visibility-switch';
+                interruptorVisual.setAttribute('aria-hidden', 'true');
+
+                const textoVisibilidad = document.createElement('small');
+                textoVisibilidad.className = 'product-visibility-label';
+                textoVisibilidad.textContent = estaVisible ? 'Visible' : 'Oculto';
+
+                interruptor.addEventListener('change', () => cambiarVisibilidadProducto(producto.id, interruptor.checked, interruptor));
+                controlVisibilidad.append(interruptor, interruptorVisual, textoVisibilidad);
+                card.append(botonEditar, controlVisibilidad);
                 tableBody.appendChild(card);
             });
+        }
+
+        async function cambiarVisibilidadProducto(id, visible, interruptor) {
+            const producto = productosLocal.find(item => item.id === id);
+            if (!producto) return;
+
+            const nombreProducto = producto.nombre || 'este producto';
+            const mensajeConfirmacion = visible
+                ? `¿Deseas activar “${nombreProducto}”?\n\nVolverá a aparecer en el catálogo público y en Pedido Rápido.`
+                : `¿Deseas ocultar “${nombreProducto}”?\n\nDejará de aparecer en el catálogo público y en Pedido Rápido, pero no se eliminará.`;
+
+            if (!confirm(mensajeConfirmacion)) {
+                interruptor.checked = !visible;
+                return;
+            }
+
+            interruptor.disabled = true;
+            try {
+                await updateDoc(doc(db, 'productos', id), {
+                    visible,
+                    updatedAt: serverTimestamp()
+                });
+                producto.visible = visible;
+                productosUltimaCarga = Date.now();
+                try {
+                    localStorage.removeItem('ma_public_catalog_v3');
+                    localStorage.removeItem('ma_public_catalog_v4');
+                } catch (cacheError) {
+                    console.warn('No fue posible limpiar la caché local del catálogo:', cacheError);
+                }
+                renderizarListaProductosAdmin();
+
+                if (productoAdminActivo === id && productEditorStatus) {
+                    productEditorStatus.textContent = visible
+                        ? 'Este producto está visible en el catálogo y en Pedido Rápido.'
+                        : 'Este producto está oculto temporalmente del catálogo y de Pedido Rápido.';
+                    if (productEditorBadge) productEditorBadge.textContent = visible ? 'Modo edición' : 'Producto oculto';
+                }
+            } catch (error) {
+                console.error('Error cambiando la visibilidad del producto:', error);
+                interruptor.checked = !visible;
+                interruptor.disabled = false;
+                alert('No se pudo cambiar la visibilidad del producto. Intenta nuevamente.');
+            }
         }
 
         async function cargarProductos(forzar = false) {
@@ -6763,8 +6936,12 @@ Esta acción no se puede deshacer.`);
             configurarPrevisualizacion(4, prod.imagen4, 'prod-old-image4', 'prod-imagen4');
 
             formTitle.textContent = "Editando: " + (prod.nombre || 'Producto');
-            if (productEditorStatus) productEditorStatus.textContent = 'Los cambios se publicarán en el catálogo al guardar.';
-            if (productEditorBadge) productEditorBadge.textContent = 'Modo edición';
+            if (productEditorStatus) {
+                productEditorStatus.textContent = prod.visible === false
+                    ? 'Este producto está oculto temporalmente del catálogo y de Pedido Rápido.'
+                    : 'Este producto está visible en el catálogo y en Pedido Rápido.';
+            }
+            if (productEditorBadge) productEditorBadge.textContent = prod.visible === false ? 'Producto oculto' : 'Modo edición';
             btnSave.innerHTML = '<i class="ph ph-arrows-clockwise"></i> Guardar Cambios';
             btnCancel.style.display = 'inline-flex';
             if (btnDeleteProductEditor) btnDeleteProductEditor.style.display = 'inline-flex';
@@ -6938,6 +7115,7 @@ Esta acción no se puede deshacer.`);
                 } else {
                     await addDoc(collection(db, "productos"), {
                         ...data,
+                        visible: true,
                         createdAt: serverTimestamp(),
                         updatedAt: serverTimestamp()
                     });
