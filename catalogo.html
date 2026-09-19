@@ -636,6 +636,10 @@
         .vd-btn-buy { width: 100%; height: 50px; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; border-radius: 8px; border: 2px solid var(--rose-accent); background-color: transparent; color: var(--rose-accent); cursor: pointer; font-weight: 600; font-family: 'DM Sans', sans-serif; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 8px;}
         .vd-btn-buy:hover { background: var(--bg-blush); }
 
+        .vd-btn-share { width: 100%; min-height: 46px; padding: 10px 14px; font-size: 0.9rem; border-radius: 8px; border: 1px solid #e6d7db; background: #fffafb; color: var(--rose-hover); cursor: pointer; font-weight: 600; font-family: 'DM Sans', sans-serif; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .vd-btn-share:hover { border-color: var(--rose-accent); background: var(--bg-blush); }
+        .vd-btn-share i { font-size: 1.2rem; }
+
         .vd-perks { border-top: 1px solid #eee; margin-top: 10px; padding-top: 15px; display: flex; flex-direction: column; gap: 12px;}
         .vd-perk-item { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; color: var(--text-light); }
         .vd-perk-item i { font-size: 1.4rem; color: var(--rose-accent); }
@@ -3579,7 +3583,7 @@
         </div>
     </div>
 
-    <div id="toast-notificacion" class="toast-notificacion">
+    <div id="toast-notificacion" class="toast-notificacion" role="status" aria-live="polite">
         <i class="ph-light ph-check-circle"></i> <span>¡Agregado al carrito con éxito!</span>
     </div>
 
@@ -3636,6 +3640,8 @@
         let busquedaActual = '';
         let ordenActual = 'destacados';
         let parametrosCatalogoAplicados = false;
+        let productoDetalleActivoId = null;
+        const tituloCatalogoOriginal = document.title;
         const NUEVA_REFERENCIA_DIAS = 7;
         const CATEGORIAS_CATALOGO_PREDETERMINADAS = [
             { id: 'Desayunos', nombre: 'Desayunos & Brunch' },
@@ -3938,15 +3944,12 @@
         };
 
 
-        function aplicarParametrosInicialesCatalogo() {
-            if (parametrosCatalogoAplicados) return;
-            parametrosCatalogoAplicados = true;
-
+        function aplicarParametrosInicialesCatalogo(validacionDefinitiva = false) {
             const parametros = new URLSearchParams(window.location.search);
             const categoriaSolicitada = String(parametros.get('categoria') || '').trim();
             const productoSolicitado = String(parametros.get('producto') || '').trim();
 
-            if (categoriaSolicitada) {
+            if (!parametrosCatalogoAplicados && categoriaSolicitada) {
                 const categoriaValida = ['Todos', 'ColeccionEspecial', ...categoriasCatalogo.map(categoria => categoria.id)]
                     .includes(categoriaSolicitada);
                 if (categoriaValida) {
@@ -3959,9 +3962,22 @@
                     renderizarProductos();
                 }
             }
+            parametrosCatalogoAplicados = true;
 
-            if (productoSolicitado && productos.some(producto => producto.id === productoSolicitado)) {
-                window.setTimeout(() => window.abrirDetalleProducto?.(productoSolicitado), 80);
+            if (productoSolicitado) {
+                const productoDisponible = productos.some(producto => producto.id === productoSolicitado);
+                if (productoDisponible && (productoDetalleActivoId !== productoSolicitado || validacionDefinitiva)) {
+                    window.setTimeout(() => window.abrirDetalleProducto?.(productoSolicitado, { actualizarUrl: false }), 80);
+                } else if (!productoDisponible && validacionDefinitiva) {
+                    window.cerrarDetalleProducto?.({ actualizarUrl: false });
+                    const urlCatalogo = new URL(window.location.href);
+                    urlCatalogo.searchParams.delete('producto');
+                    urlCatalogo.hash = '';
+                    window.history.replaceState({ vista: 'catalogo' }, '', urlCatalogo);
+                    window.mostrarToast?.('Este producto ya no está disponible en el catálogo.', 'ph-warning-circle');
+                }
+            } else if (productoDetalleActivoId) {
+                window.cerrarDetalleProducto?.({ actualizarUrl: false });
             }
         }
 
@@ -3993,7 +4009,7 @@
                 aplicarCategoriasCatalogo(categoriasSnapshot);
                 guardarCacheCatalogo(productos, categoriasCatalogo);
                 renderizarProductos();
-                aplicarParametrosInicialesCatalogo();
+                aplicarParametrosInicialesCatalogo(true);
                 return productos;
             } catch (error) {
                 console.error("Error cargando productos: ", error);
@@ -4314,8 +4330,25 @@
             grid.appendChild(fragmentoProductos);
         }
 
-        window.abrirDetalleProducto = function(id) {
+        function crearUrlProducto(id, conservarParametros = true) {
+            const urlProducto = new URL(window.location.href);
+            if (!conservarParametros) urlProducto.search = '';
+            urlProducto.searchParams.set('producto', id);
+            urlProducto.hash = '';
+            return urlProducto;
+        }
+
+        window.abrirDetalleProducto = function(id, opciones = {}) {
             const p = productos.find(x => x.id === id);
+            if (!p) return false;
+
+            const actualizarUrl = opciones.actualizarUrl !== false;
+            if (actualizarUrl && new URLSearchParams(window.location.search).get('producto') !== id) {
+                window.history.pushState({ vista: 'producto', producto: id }, '', crearUrlProducto(id));
+            }
+
+            productoDetalleActivoId = id;
+            document.title = `${p.nombre} | Momentos Atractivos`;
             window.cantidadModalActual = 1; 
             
             let precioFinal = p.precioDescuento ? parseFloat(p.precioDescuento) : parseFloat(p.precio);
@@ -4405,6 +4438,10 @@
                             Comprar Ahora
                         </button>
 
+                        <button class="vd-btn-share" onclick="compartirProducto('${p.id}');">
+                            <i class="ph-light ph-share-network"></i> Compartir producto
+                        </button>
+
                         <div class="vd-perks">
                             <div class="vd-perk-item"><i class="ph-light ph-truck"></i> Envío a Domicilio</div>
                             <div class="vd-perk-item"><i class="ph-light ph-shield-check"></i> Pago 100% Seguro</div>
@@ -4429,6 +4466,62 @@
                     else if (endX - startX > threshold) window.toggleImagenDetalle(-1); 
                 }
             }
+            return true;
+        };
+
+        function copiarEnlaceProducto(texto) {
+            const copiarConMetodoClasico = () => new Promise(resolve => {
+                const temporal = document.createElement('textarea');
+                temporal.value = texto;
+                temporal.setAttribute('readonly', '');
+                temporal.style.position = 'fixed';
+                temporal.style.opacity = '0';
+                document.body.appendChild(temporal);
+                temporal.select();
+                let copiado = false;
+                try {
+                    copiado = document.execCommand('copy');
+                } catch (error) {
+                    copiado = false;
+                }
+                temporal.remove();
+                resolve(copiado);
+            });
+
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard.writeText(texto)
+                    .then(() => true)
+                    .catch(copiarConMetodoClasico);
+            }
+
+            return copiarConMetodoClasico();
+        }
+
+        window.compartirProducto = async function(id) {
+            const producto = productos.find(item => item.id === id);
+            if (!producto) return;
+
+            const enlace = crearUrlProducto(id, false).toString();
+            const datosCompartir = {
+                title: producto.nombre,
+                text: `Mira este detalle de Momentos Atractivos: ${producto.nombre}`,
+                url: enlace
+            };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(datosCompartir);
+                    return;
+                } catch (error) {
+                    if (error?.name === 'AbortError') return;
+                }
+            }
+
+            const copiado = await copiarEnlaceProducto(enlace);
+            window.mostrarToast(
+                copiado ? 'Enlace del producto copiado.' : 'No fue posible copiar el enlace.',
+                copiado ? 'ph-check-circle' : 'ph-warning-circle'
+            );
         };
 
         window.comprarAhora = function(id) {
@@ -4438,11 +4531,31 @@
             }, 100);
         };
 
-        window.cerrarDetalleProducto = function() { 
+        window.cerrarDetalleProducto = function(opciones = {}) {
+            const actualizarUrl = opciones.actualizarUrl !== false;
+            if (actualizarUrl) {
+                const urlCatalogo = new URL(window.location.href);
+                urlCatalogo.searchParams.delete('producto');
+                urlCatalogo.hash = '';
+                window.history.pushState({ vista: 'catalogo' }, '', urlCatalogo);
+            }
+
+            productoDetalleActivoId = null;
+            document.title = tituloCatalogoOriginal;
             seccionVistaDetalle.style.display = 'none';
             seccionCatalogo.style.display = 'block';
             window.scrollTo(0, 0);
         };
+
+        window.addEventListener('popstate', () => {
+            const productoEnUrl = String(new URLSearchParams(window.location.search).get('producto') || '').trim();
+            if (productoEnUrl) {
+                const abierto = window.abrirDetalleProducto(productoEnUrl, { actualizarUrl: false });
+                if (!abierto && productos.length) window.cerrarDetalleProducto({ actualizarUrl: false });
+            } else {
+                window.cerrarDetalleProducto({ actualizarUrl: false });
+            }
+        });
 
         window.cambiarCantidadModal = function(cambio) {
             let nuevaCant = window.cantidadModalActual + cambio;
@@ -4486,10 +4599,15 @@
             }
         };
 
-        window.mostrarToast = function() {
+        window.mostrarToast = function(mensaje = '¡Agregado al carrito con éxito!', icono = 'ph-check-circle') {
             const toast = document.getElementById('toast-notificacion');
+            const textoToast = toast.querySelector('span');
+            const iconoToast = toast.querySelector('i');
+            if (textoToast) textoToast.textContent = mensaje;
+            if (iconoToast) iconoToast.className = `ph-light ${icono}`;
             toast.classList.add('show');
-            setTimeout(() => {
+            clearTimeout(toast._temporizadorOcultar);
+            toast._temporizadorOcultar = setTimeout(() => {
                 toast.classList.remove('show');
             }, 3000); 
         };
