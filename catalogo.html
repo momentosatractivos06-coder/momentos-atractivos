@@ -3485,9 +3485,9 @@
                 <div class="seccion-titulo"><i class="ph-light ph-user"></i> Datos de quien realiza el pedido</div>
                 <div class="seccion-form">
                     <label class="input-label" for="nombre-cliente">Tu nombre completo <span style="color:red;">*</span></label>
-                    <input type="text" id="nombre-cliente" class="input-campo" placeholder="Ej: Juan Pérez">
+                    <input type="text" id="nombre-cliente" class="input-campo" required minlength="3" maxlength="60" autocomplete="name" placeholder="Ej: Juan Pérez">
                     <label class="input-label" for="telefono-cliente">Tu teléfono <span style="color:red;">*</span></label>
-                    <input type="tel" id="telefono-cliente" class="input-campo" placeholder="Ej: 3001234567">
+                    <input type="tel" id="telefono-cliente" class="input-campo" required minlength="7" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="Ej: 3001234567">
                 </div>
 
                 <div class="seccion-titulo"><i class="ph-light ph-calendar-blank"></i> Fecha y hora de entrega</div>
@@ -3495,11 +3495,11 @@
                     <div class="cart-form-row">
                         <div>
                             <label class="input-label" for="fecha-entrega-cart">Fecha de entrega <span style="color:red;">*</span></label>
-                            <input type="date" id="fecha-entrega-cart" class="input-campo">
+                            <input type="date" id="fecha-entrega-cart" class="input-campo" required>
                         </div>
                         <div>
                             <label class="input-label" for="hora-entrega-cart">Hora de entrega <span style="color:red;">*</span></label>
-                            <input type="time" id="hora-entrega-cart" class="input-campo">
+                            <input type="time" id="hora-entrega-cart" class="input-campo" required>
                         </div>
                     </div>
                 </div>
@@ -3508,13 +3508,13 @@
                 <div class="seccion-form">
                     <div id="contenedor-datos-domicilio" style="display: block;">
                         <label class="input-label" for="nombre-recibe">Nombre de quien recibe <span style="color:red;">*</span></label>
-                        <input type="text" id="nombre-recibe" class="input-campo" placeholder="Ej: María Pérez">
+                        <input type="text" id="nombre-recibe" class="input-campo" required minlength="3" maxlength="60" placeholder="Ej: María Pérez">
                         <label class="input-label" for="telefono-recibe">Teléfono de quien recibe <span style="color:red;">*</span></label>
-                        <input type="tel" id="telefono-recibe" class="input-campo" placeholder="Ej: 3001234567">
+                        <input type="tel" id="telefono-recibe" class="input-campo" required minlength="7" maxlength="20" inputmode="tel" placeholder="Ej: 3001234567">
                         <div class="cart-form-row">
                             <div>
                                 <label class="input-label" for="ciudad-recibe">Ciudad <span style="color:red;">*</span></label>
-                                <select id="ciudad-recibe" class="selector-form">
+                                <select id="ciudad-recibe" class="selector-form" required>
                                     <option value="Sincelejo" selected>Sincelejo</option>
                                     <option value="Corozal">Corozal</option>
                                     <option value="Otro">Otra ciudad...</option>
@@ -3522,40 +3522,41 @@
                             </div>
                             <div>
                                 <label class="input-label" for="barrio-recibe">Barrio <span style="color:red;">*</span></label>
-                                <input type="text" id="barrio-recibe" class="input-campo" placeholder="Ej: La Ford">
+                                <input type="text" id="barrio-recibe" class="input-campo" required minlength="2" maxlength="60" placeholder="Ej: La Ford">
                             </div>
                         </div>
                         <div id="contenedor-ciudad-otra-cart" style="display:none;">
                             <label class="input-label" for="ciudad-otra-cart">Otra ciudad <span style="color:red;">*</span></label>
-                            <input type="text" id="ciudad-otra-cart" class="input-campo" placeholder="Escribe la ciudad">
+                            <input type="text" id="ciudad-otra-cart" class="input-campo" minlength="3" maxlength="50" placeholder="Escribe la ciudad">
                         </div>
                         <label class="input-label" for="direccion-recibe">Dirección de entrega <span style="color:red;">*</span></label>
-                        <input type="text" id="direccion-recibe" class="input-campo" placeholder="Ej: Calle 12 #34-56">
+                        <input type="text" id="direccion-recibe" class="input-campo" required minlength="5" maxlength="70" autocomplete="street-address" placeholder="Ej: Transversal 3D #39-72, cerca de Super Jairo">
+                        <small id="contador-direccion-cart" style="display:block; margin:-9px 2px 14px; color:#8b7f82; text-align:right; font-size:.76rem;">0/70 caracteres</small>
                     </div>
                 </div>
 
                 <div class="seccion-titulo"><i class="ph-light ph-gift"></i> Personalización</div>
                 <div class="seccion-form">
-                    <label class="input-label" for="preferencia-pedido">Color o detalles adicionales (Opcional):</label>
-                    <textarea id="preferencia-pedido" class="input-campo input-area" rows="2" placeholder="Ej: Merienda Love en caja dorada, Jugo de naranja..."></textarea>
+                    <label class="input-label" for="preferencia-pedido">Color de cinta (Opcional):</label>
+                    <textarea id="preferencia-pedido" class="input-campo input-area" rows="2" maxlength="60" placeholder="Ej: Rosada, dorada o azul"></textarea>
                     <div class="cart-form-row">
                         <div>
                             <label class="input-label" for="tarjeta-de-cart">De: <span style="color:red;">*</span></label>
-                            <input type="text" id="tarjeta-de-cart" class="input-campo" placeholder="Ej: De tu amor">
+                            <input type="text" id="tarjeta-de-cart" class="input-campo" required minlength="2" maxlength="60" placeholder="Ej: De tu amor">
                         </div>
                         <div>
                             <label class="input-label" for="tarjeta-para-cart">Para: <span style="color:red;">*</span></label>
-                            <input type="text" id="tarjeta-para-cart" class="input-campo" placeholder="Ej: Para mi princesa">
+                            <input type="text" id="tarjeta-para-cart" class="input-campo" required minlength="2" maxlength="60" placeholder="Ej: Para mi princesa">
                         </div>
                     </div>
                     <label class="input-label" for="mensaje-tarjeta">Mensaje para la tarjeta (Opcional):</label>
-                    <textarea id="mensaje-tarjeta" class="input-campo input-area" rows="3" placeholder="Ej: Feliz cumpleaños mi amor, que cumplas muchos más..."></textarea>
+                    <textarea id="mensaje-tarjeta" class="input-campo input-area" rows="3" maxlength="300" placeholder="Ej: Feliz cumpleaños mi amor, que cumplas muchos más..."></textarea>
                 </div>
 
                 <div class="seccion-titulo"><i class="ph-light ph-wallet"></i> Facturación</div>
                 <div class="seccion-form">
                     <label class="input-label" for="metodo-pago">Método de pago <span style="color:red;">*</span></label>
-                    <select id="metodo-pago" class="selector-form" style="margin-bottom: 0;">
+                    <select id="metodo-pago" class="selector-form" required style="margin-bottom: 0;">
                         <option value="" disabled selected>Elige cómo deseas pagar...</option>
                         <option value="Nequi">Nequi</option>
                         <option value="Bancolombia">Bancolombia Ahorros</option>
@@ -3675,8 +3676,33 @@
         const selectCiudadRecibe = document.getElementById('ciudad-recibe');
         const contenedorCiudadOtraCart = document.getElementById('contenedor-ciudad-otra-cart');
         const inputFechaEntregaCart = document.getElementById('fecha-entrega-cart');
+        const inputDireccionCart = document.getElementById('direccion-recibe');
+        const contadorDireccionCart = document.getElementById('contador-direccion-cart');
         const notaDomicilio = document.getElementById('nota-domicilio');
         const selectorPago = document.getElementById('metodo-pago');
+
+        function actualizarContadorDireccionCart() {
+            contadorDireccionCart.textContent = `${inputDireccionCart.value.length}/70 caracteres`;
+        }
+
+        inputDireccionCart.addEventListener('input', actualizarContadorDireccionCart);
+        actualizarContadorDireccionCart();
+
+        function esTextoRealCatalogo(valor, minimo = 2) {
+            const limpio = String(valor || '').replace(/\s+/g, ' ').trim();
+            if (limpio.length < minimo) return false;
+            const caracteres = limpio
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, '');
+            return caracteres.length >= minimo && new Set(caracteres).size >= 2;
+        }
+
+        function esTelefonoValidoCatalogo(valor) {
+            const digitos = String(valor || '').replace(/\D/g, '');
+            return digitos.length >= 7 && digitos.length <= 15 && new Set(digitos).size >= 2;
+        }
         
         const seccionCatalogo = document.getElementById('seccion-catalogo-principal');
         const seccionVistaDetalle = document.getElementById('seccion-vista-detalle');
@@ -4569,13 +4595,42 @@
             const barrio = document.getElementById('barrio-recibe').value.trim();
             const direccion = document.getElementById('direccion-recibe').value.trim();
 
-            if (!entrega || !cliente || !telCliente || !fechaEntrega || !horaEntrega || !tarjetaDe || !tarjetaPara || !pago) {
-                alert("Por favor completa todos los campos obligatorios (*).");
-                return;
+            const camposTextoObligatorios = [
+                { id: 'nombre-cliente', nombre: 'tu nombre completo', minimo: 3 },
+                { id: 'nombre-recibe', nombre: 'el nombre de quien recibe', minimo: 3 },
+                { id: 'barrio-recibe', nombre: 'el barrio', minimo: 2 },
+                { id: 'direccion-recibe', nombre: 'la dirección', minimo: 5 },
+                { id: 'tarjeta-de-cart', nombre: 'el remitente de la tarjeta', minimo: 2 },
+                { id: 'tarjeta-para-cart', nombre: 'el destinatario de la tarjeta', minimo: 2 }
+            ];
+
+            if (ciudadSeleccionada === 'Otro') {
+                camposTextoObligatorios.push({ id: 'ciudad-otra-cart', nombre: 'la ciudad', minimo: 3 });
             }
 
-            if (!destinatario || !telDestinatario || !ciudadFinal || !barrio || !direccion) {
-                alert("Por favor completa todos los datos de entrega para domicilio.");
+            for (const campo of camposTextoObligatorios) {
+                const elemento = document.getElementById(campo.id);
+                if (!esTextoRealCatalogo(elemento.value, campo.minimo)) {
+                    alert(`Por favor escribe correctamente ${campo.nombre}. No uses datos de relleno como “Xxxx”.`);
+                    elemento.focus();
+                    return;
+                }
+            }
+
+            for (const campoTelefono of [
+                { id: 'telefono-cliente', nombre: 'tu teléfono' },
+                { id: 'telefono-recibe', nombre: 'el teléfono de quien recibe' }
+            ]) {
+                const elemento = document.getElementById(campoTelefono.id);
+                if (!esTelefonoValidoCatalogo(elemento.value)) {
+                    alert(`Por favor escribe correctamente ${campoTelefono.nombre}, con 7 a 15 dígitos.`);
+                    elemento.focus();
+                    return;
+                }
+            }
+
+            if (!entrega || !ciudadFinal || !fechaEntrega || !horaEntrega || !pago) {
+                alert("Por favor completa todos los campos obligatorios (*).");
                 return;
             }
 
@@ -4619,7 +4674,7 @@
             msg += `▪️ Barrio: ${barrio}\n`;
             msg += `▪️ Dirección: ${direccion}\n`;
 
-            if (pref) msg += `\n*Detalles adicionales:* \n"${pref}"\n`;
+            if (pref) msg += `\n*Color de cinta:* \n"${pref}"\n`;
             if (card) msg += `\n*Mensaje Tarjeta:* \n"${card}"\n`;
 
             msg += `\n*Método de pago:* ${pago}\n`;
