@@ -504,12 +504,12 @@
 
             <div class="input-group">
                 <label>Tu Nombre Completo *</label>
-                <input type="text" id="cliente_nombre" required placeholder="Ej: Juan Pérez">
+                <input type="text" id="cliente_nombre" required minlength="3" maxlength="60" autocomplete="name" placeholder="Ej: Juan Pérez">
             </div>
 
             <div class="input-group">
                 <label>Tu Teléfono *</label>
-                <input type="tel" id="cliente_whatsapp" required placeholder="Ej: 300 123 4567">
+                <input type="tel" id="cliente_whatsapp" required minlength="7" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="Ej: 300 123 4567">
             </div>
         </div>
 
@@ -528,19 +528,19 @@
 
             <div class="input-group">
                 <label>Nombre de quien recibe *</label>
-                <input type="text" id="recibe_nombre" required placeholder="Ej: María Gómez">
+                <input type="text" id="recibe_nombre" required minlength="3" maxlength="60" placeholder="Ej: María Gómez">
             </div>
 
             <div class="input-group">
                 <label>Teléfono de quien recibe *</label>
-                <input type="tel" id="recibe_whatsapp" required placeholder="Ej: 300 123 4567">
+                <input type="tel" id="recibe_whatsapp" required minlength="7" maxlength="20" inputmode="tel" placeholder="Ej: 300 123 4567">
             </div>
 
             <div id="contenedor-domicilio" style="display:block;">
                 <div class="row">
                     <div class="input-group">
                         <label>Ciudad *</label>
-                        <select id="ciudad">
+                        <select id="ciudad" required>
                             <option value="Sincelejo" selected>Sincelejo</option>
                             <option value="Corozal">Corozal</option>
                             <option value="Otro">Otra ciudad...</option>
@@ -549,17 +549,18 @@
 
                     <div class="input-group">
                         <label>Barrio *</label>
-                        <input type="text" id="barrio" required placeholder="Barrio">
+                        <input type="text" id="barrio" required minlength="2" maxlength="60" placeholder="Ej: Boston">
                     </div>
                 </div>
 
                 <div id="contenedor-ciudad-otra" class="dinamico">
-                    <input type="text" id="ciudad_otra" placeholder="Escribe la ciudad" style="margin-top:-10px; margin-bottom:15px;">
+                    <input type="text" id="ciudad_otra" minlength="3" maxlength="50" placeholder="Escribe la ciudad" style="margin-top:-10px; margin-bottom:15px;">
                 </div>
 
                 <div class="input-group">
                     <label>Dirección *</label>
-                    <input type="text" id="direccion" required placeholder="Ej: Calle 20 #15-30">
+                    <input type="text" id="direccion" required minlength="5" maxlength="70" autocomplete="street-address" placeholder="Ej: Transversal 3D #39-72, cerca de Super Jairo">
+                    <small id="contador-direccion" style="display:block; margin-top:6px; color:#8b7f82; text-align:right; font-size:.78rem;">0/70 caracteres</small>
                 </div>
             </div>
         </div>
@@ -576,8 +577,8 @@
             </button>
 
             <div class="input-group">
-                <label for="detalles_adicionales">Color o detalles adicionales (Opcional)</label>
-                <textarea id="detalles_adicionales" rows="3" placeholder="Ej: Merienda Love en caja dorada, jugo de naranja..."></textarea>
+                <label for="detalles_adicionales">Color de cinta (Opcional)</label>
+                <textarea id="detalles_adicionales" rows="2" maxlength="60" placeholder="Ej: Rosada, dorada o azul"></textarea>
             </div>
 
             <div class="row">
@@ -597,18 +598,18 @@
             <div class="row">
                 <div class="input-group">
                     <label>De: (Remitente) *</label>
-                    <input type="text" id="tarjeta_de" required placeholder="Ej: De tu amor">
+                    <input type="text" id="tarjeta_de" required minlength="2" maxlength="60" placeholder="Ej: De tu amor">
                 </div>
 
                 <div class="input-group">
                     <label>Para: (Destinatario) *</label>
-                    <input type="text" id="tarjeta_para" required placeholder="Ej: Para mi princesa">
+                    <input type="text" id="tarjeta_para" required minlength="2" maxlength="60" placeholder="Ej: Para mi princesa">
                 </div>
             </div>
 
             <div class="input-group">
                 <label>Mensaje para la Tarjeta (Opcional)</label>
-                <textarea id="mensaje" rows="3" placeholder="Tu mensaje aquí..."></textarea>
+                <textarea id="mensaje" rows="3" maxlength="300" placeholder="Escribe el mensaje que llevará la tarjeta"></textarea>
             </div>
         </div>
 
@@ -663,6 +664,31 @@
     const contenedorDomicilio = document.getElementById('contenedor-domicilio');
     const selectCiudad = document.getElementById('ciudad');
     const contenedorCiudadOtra = document.getElementById('contenedor-ciudad-otra');
+    const inputDireccion = document.getElementById('direccion');
+    const contadorDireccion = document.getElementById('contador-direccion');
+
+    function actualizarContadorDireccion() {
+        contadorDireccion.textContent = `${inputDireccion.value.length}/70 caracteres`;
+    }
+
+    inputDireccion.addEventListener('input', actualizarContadorDireccion);
+    actualizarContadorDireccion();
+
+    function esTextoReal(valor, minimo = 2) {
+        const limpio = String(valor || '').replace(/\s+/g, ' ').trim();
+        if (limpio.length < minimo) return false;
+        const caracteres = limpio
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '');
+        return caracteres.length >= minimo && new Set(caracteres).size >= 2;
+    }
+
+    function esTelefonoValido(valor) {
+        const digitos = String(valor || '').replace(/\D/g, '');
+        return digitos.length >= 7 && digitos.length <= 15 && new Set(digitos).size >= 2;
+    }
 
     // El domicilio es el único método habilitado.
     contenedorDomicilio.style.display = 'block';
@@ -710,7 +736,7 @@
 
                 <div class="input-group" style="margin-bottom: 0;">
                     <label>Producto *</label>
-                    <input type="text" class="inp-prod" required placeholder="Ej: Desayuno sabanero, mug corazón, detalle personalizado...">
+                    <input type="text" class="inp-prod" required minlength="2" maxlength="100" placeholder="Ej: Desayuno sabanero, mug corazón, detalle personalizado...">
                 </div>
             </div>
         `;
@@ -774,7 +800,7 @@
         mensaje += `\n*PEDIDO*\n`;
         mensaje += `• Detalle(s): ${datos.producto}\n`;
         if (datos.detalles_adicionales && datos.detalles_adicionales.trim() !== "") {
-            mensaje += `• Color o detalles adicionales: ${datos.detalles_adicionales}\n`;
+            mensaje += `• Color de cinta: ${datos.detalles_adicionales}\n`;
         }
         mensaje += `• Fecha de entrega: ${formatearFechaLegible(datos.fecha_entrega)}\n`;
         mensaje += `• Hora de entrega: ${formatearHoraAMPM(datos.hora_entrega)}\n\n`;
@@ -803,6 +829,40 @@
         e.preventDefault();
 
         const btn = document.getElementById('btnEnviar');
+
+        const camposTextoObligatorios = [
+            { id: 'cliente_nombre', nombre: 'tu nombre completo', minimo: 3 },
+            { id: 'recibe_nombre', nombre: 'el nombre de quien recibe', minimo: 3 },
+            { id: 'barrio', nombre: 'el barrio', minimo: 2 },
+            { id: 'direccion', nombre: 'la dirección', minimo: 5 },
+            { id: 'tarjeta_de', nombre: 'el remitente de la tarjeta', minimo: 2 },
+            { id: 'tarjeta_para', nombre: 'el destinatario de la tarjeta', minimo: 2 }
+        ];
+
+        if (selectCiudad.value === 'Otro') {
+            camposTextoObligatorios.push({ id: 'ciudad_otra', nombre: 'la ciudad', minimo: 3 });
+        }
+
+        for (const campo of camposTextoObligatorios) {
+            const elemento = document.getElementById(campo.id);
+            if (!esTextoReal(elemento.value, campo.minimo)) {
+                alert(`Por favor escribe correctamente ${campo.nombre}. No uses datos de relleno como “Xxxx”.`);
+                elemento.focus();
+                return;
+            }
+        }
+
+        for (const campoTelefono of [
+            { id: 'cliente_whatsapp', nombre: 'tu teléfono' },
+            { id: 'recibe_whatsapp', nombre: 'el teléfono de quien recibe' }
+        ]) {
+            const elemento = document.getElementById(campoTelefono.id);
+            if (!esTelefonoValido(elemento.value)) {
+                alert(`Por favor escribe correctamente ${campoTelefono.nombre}, con 7 a 15 dígitos.`);
+                elemento.focus();
+                return;
+            }
+        }
 
         btn.disabled = true;
         btn.innerText = "Agendando...";
@@ -835,7 +895,7 @@
             const cant = row.querySelector('.inp-cant').value;
             const nombreProd = row.querySelector('.inp-prod').value.trim();
 
-            if (!nombreProd) {
+            if (!esTextoReal(nombreProd, 2)) {
                 productosValidos = false;
                 return;
             }
@@ -844,7 +904,7 @@
         });
 
         if (!productosValidos || prodsList.length === 0) {
-            alert("Por favor escribe el nombre de cada producto del pedido.");
+            alert("Por favor escribe correctamente el nombre de cada producto. No uses datos de relleno.");
             btn.disabled = false;
             btn.innerText = "Confirmar mi Pedido";
             return;
