@@ -381,6 +381,38 @@
             align-items: start;
         }
 
+        .grid-producto-cantidad > * {
+            min-width: 0;
+        }
+
+        .ayuda-productos-catalogo {
+            display: block;
+            margin: -6px 0 15px;
+            color: #7f7175;
+            font-size: .84rem;
+            line-height: 1.45;
+        }
+
+        .estado-productos-catalogo {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            min-height: 20px;
+            margin: -5px 0 15px;
+            color: #8b7f82;
+            font-size: .82rem;
+        }
+
+        .estado-productos-catalogo.error {
+            color: #a15b66;
+        }
+
+        .otro-producto-wrap {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed rgba(184,115,127,0.24);
+        }
+
         .btn-secundario {
             background: linear-gradient(180deg, rgba(255,255,255,0.54) 0%, rgba(255,255,255,0.34) 100%);
             color: var(--rose-accent);
@@ -569,7 +601,12 @@
             <div class="section-title">
                 <i class="ph-light ph-gift"></i> Productos
             </div>
-            
+
+            <small class="ayuda-productos-catalogo">Selecciona un producto del catálogo. Si no aparece en la lista, elige “Otro producto”.</small>
+            <div id="estado-productos-catalogo" class="estado-productos-catalogo" role="status" aria-live="polite">
+                <i class="ph ph-spinner-gap"></i> Cargando productos del catálogo…
+            </div>
+
             <div id="contenedor-productos"></div>
 
             <button type="button" id="btn-add-producto" class="btn-secundario">
@@ -641,6 +678,7 @@
                 return {
                     db: firestoreModule.getFirestore(app),
                     collection: firestoreModule.collection,
+                    getDocs: firestoreModule.getDocs,
                     addDoc: firestoreModule.addDoc,
                     serverTimestamp: firestoreModule.serverTimestamp
                 };
@@ -707,10 +745,118 @@
     });
 
     // =====================================================
-    // PRODUCTOS ESCRITOS MANUALMENTE
-    // Cada producto se escribe directamente para evitar
-    // depender de listas desplegables o del catálogo.
+    // PRODUCTOS DEL CATÁLOGO
+    // Los nombres se consultan desde la misma colección que
+    // usa el catálogo. "Otro producto" habilita escritura.
     // =====================================================
+
+    const VALOR_OTRO_PRODUCTO = '__otro_producto__';
+    const estadoProductosCatalogo = document.getElementById('estado-productos-catalogo');
+    let productosCatalogoPedido = [];
+    let catalogoProductosCargado = false;
+    let errorCatalogoProductos = false;
+
+    function nombreNormalizadoProducto(nombre) {
+        return String(nombre || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toLowerCase();
+    }
+
+    function actualizarCampoOtroProducto(fila, enfocar = false) {
+        const selector = fila.querySelector('.inp-prod-select');
+        const contenedorOtro = fila.querySelector('.otro-producto-wrap');
+        const inputOtro = fila.querySelector('.inp-prod-otro');
+        const esOtro = selector.value === VALOR_OTRO_PRODUCTO;
+
+        contenedorOtro.hidden = !esOtro;
+        inputOtro.disabled = !esOtro;
+        inputOtro.required = esOtro;
+
+        if (esOtro && enfocar) inputOtro.focus();
+    }
+
+    function poblarSelectorProducto(fila) {
+        const selector = fila.querySelector('.inp-prod-select');
+        const valorAnterior = selector.value;
+        selector.innerHTML = '';
+
+        if (!catalogoProductosCargado) {
+            const opcionCargando = new Option('Cargando productos…', '');
+            opcionCargando.disabled = true;
+            opcionCargando.selected = true;
+            selector.add(opcionCargando);
+            selector.disabled = true;
+            actualizarCampoOtroProducto(fila);
+            return;
+        }
+
+        selector.disabled = false;
+
+        const opcionInicial = new Option('Selecciona un producto', '');
+        opcionInicial.disabled = true;
+        opcionInicial.selected = true;
+        selector.add(opcionInicial);
+
+        productosCatalogoPedido.forEach(producto => {
+            const opcion = new Option(producto.nombre, producto.id);
+            opcion.dataset.nombre = producto.nombre;
+            selector.add(opcion);
+        });
+
+        selector.add(new Option('Otro producto (escribir nombre)', VALOR_OTRO_PRODUCTO));
+
+        const valorSigueDisponible = Array.from(selector.options).some(opcion => opcion.value === valorAnterior);
+        if (valorSigueDisponible && valorAnterior) {
+            selector.value = valorAnterior;
+        } else if (errorCatalogoProductos || productosCatalogoPedido.length === 0) {
+            selector.value = VALOR_OTRO_PRODUCTO;
+        }
+
+        actualizarCampoOtroProducto(fila);
+    }
+
+    function actualizarTodosLosSelectoresProducto() {
+        document.querySelectorAll('.producto-row').forEach(poblarSelectorProducto);
+    }
+
+    async function cargarProductosCatalogo() {
+        try {
+            const { db, collection, getDocs } = await obtenerFirebasePedido();
+            const snapshot = await getDocs(collection(db, 'productos'));
+            const nombresVistos = new Set();
+
+            productosCatalogoPedido = snapshot.docs
+                .map(documento => ({ ...documento.data(), id: documento.id }))
+                .map(producto => ({
+                    id: producto.id,
+                    nombre: String(producto.nombre || '').replace(/\s+/g, ' ').trim()
+                }))
+                .filter(producto => {
+                    const clave = nombreNormalizadoProducto(producto.nombre);
+                    if (!clave || nombresVistos.has(clave)) return false;
+                    nombresVistos.add(clave);
+                    return true;
+                })
+                .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
+
+            catalogoProductosCargado = true;
+            errorCatalogoProductos = false;
+            estadoProductosCatalogo.classList.remove('error');
+            estadoProductosCatalogo.innerHTML = `<i class="ph ph-check-circle"></i> ${productosCatalogoPedido.length} productos disponibles para seleccionar.`;
+        } catch (error) {
+            console.error('No fue posible cargar los productos del catálogo:', error);
+            productosCatalogoPedido = [];
+            catalogoProductosCargado = true;
+            errorCatalogoProductos = true;
+            estadoProductosCatalogo.classList.add('error');
+            estadoProductosCatalogo.innerHTML = '<i class="ph ph-warning-circle"></i> No se pudo cargar el catálogo. Puedes continuar con “Otro producto”.';
+        }
+
+        actualizarTodosLosSelectoresProducto();
+    }
 
     function addFila() {
         const id = Date.now() + Math.floor(Math.random() * 1000);
@@ -736,16 +882,27 @@
 
                 <div class="input-group" style="margin-bottom: 0;">
                     <label>Producto *</label>
-                    <input type="text" class="inp-prod" required minlength="2" maxlength="100" placeholder="Ej: Desayuno sabanero, mug corazón, detalle personalizado...">
+                    <select class="inp-prod-select" required aria-label="Producto">
+                        <option value="" selected disabled>Cargando productos…</option>
+                    </select>
+
+                    <div class="otro-producto-wrap" hidden>
+                        <label>Nombre del otro producto *</label>
+                        <input type="text" class="inp-prod-otro" minlength="2" maxlength="100" placeholder="Ej: Detalle personalizado" disabled>
+                    </div>
                 </div>
             </div>
         `;
 
         document.getElementById('contenedor-productos').appendChild(div);
+        const selector = div.querySelector('.inp-prod-select');
+        selector.addEventListener('change', () => actualizarCampoOtroProducto(div, true));
+        poblarSelectorProducto(div);
     }
 
     document.getElementById('btn-add-producto').addEventListener('click', addFila);
     addFila();
+    cargarProductosCatalogo();
 
     // =====================================================
     // RESPALDO POR WHATSAPP
@@ -892,10 +1049,15 @@
         let productosValidos = true;
 
         document.querySelectorAll('.producto-row').forEach(row => {
-            const cant = row.querySelector('.inp-cant').value;
-            const nombreProd = row.querySelector('.inp-prod').value.trim();
+            const cant = Number(row.querySelector('.inp-cant').value);
+            const selectorProducto = row.querySelector('.inp-prod-select');
+            const seleccion = selectorProducto.value;
+            const esOtroProducto = seleccion === VALOR_OTRO_PRODUCTO;
+            const nombreProd = esOtroProducto
+                ? row.querySelector('.inp-prod-otro').value.trim()
+                : String(selectorProducto.selectedOptions[0]?.dataset.nombre || '').trim();
 
-            if (!esTextoReal(nombreProd, 2)) {
+            if (!Number.isInteger(cant) || cant < 1 || !seleccion || !esTextoReal(nombreProd, 2)) {
                 productosValidos = false;
                 return;
             }
@@ -904,7 +1066,7 @@
         });
 
         if (!productosValidos || prodsList.length === 0) {
-            alert("Por favor escribe correctamente el nombre de cada producto. No uses datos de relleno.");
+            alert("Por favor selecciona cada producto. Si eliges “Otro producto”, escribe correctamente su nombre.");
             btn.disabled = false;
             btn.innerText = "Confirmar mi Pedido";
             return;
