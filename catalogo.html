@@ -3602,7 +3602,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const MA_PUBLIC_CATALOG_CACHE_KEY = 'ma_public_catalog_v3';
+        const MA_PUBLIC_CATALOG_CACHE_KEY = 'ma_public_catalog_v4';
         const MA_PUBLIC_CACHE_TTL_MS = 3 * 60 * 1000;
 
         function leerCacheCatalogo() {
@@ -3970,11 +3970,12 @@
 
             const cache = leerCacheCatalogo();
             if (cache?.productos?.length) {
-                productos = cache.productos.map((producto, indice) => ({ ...producto, _indiceCatalogo: Number(producto?._indiceCatalogo ?? indice) }));
+                productos = cache.productos
+                    .filter(producto => producto?.visible !== false)
+                    .map((producto, indice) => ({ ...producto, _indiceCatalogo: Number(producto?._indiceCatalogo ?? indice) }));
                 aplicarCategoriasCatalogo(null, cache.categorias);
                 renderizarProductos();
                 aplicarParametrosInicialesCatalogo();
-                return productos;
             }
 
             try {
@@ -3985,7 +3986,9 @@
                 productos = [];
                 let indiceCarga = 0;
                 querySnapshot.forEach((documento) => {
-                    productos.push({ id: documento.id, _indiceCatalogo: indiceCarga++, ...documento.data() });
+                    const datosProducto = documento.data();
+                    if (datosProducto.visible === false) return;
+                    productos.push({ id: documento.id, _indiceCatalogo: indiceCarga++, ...datosProducto });
                 });
                 aplicarCategoriasCatalogo(categoriasSnapshot);
                 guardarCacheCatalogo(productos, categoriasCatalogo);
@@ -3994,7 +3997,9 @@
                 return productos;
             } catch (error) {
                 console.error("Error cargando productos: ", error);
-                grid.innerHTML = '<div class="sin-resultados"><p>Hubo un problema al cargar el catálogo. Por favor, recarga la página.</p></div>';
+                if (!productos.length) {
+                    grid.innerHTML = '<div class="sin-resultados"><p>Hubo un problema al cargar el catálogo. Por favor, recarga la página.</p></div>';
+                }
                 return productos;
             }
         }
